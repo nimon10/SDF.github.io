@@ -1,0 +1,596 @@
+ñ* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+:root {
+    --nequi-purple: #210049;
+    --nequi-pink: #eb0057;
+    --nequi-light-pink: #ff6289;
+    --nequi-yellow: #ffb612;
+    --nequi-light-gray: #f5f5f7;
+    --nequi-dark-gray: #333333;
+    --nequi-white: #ffffff;
+    --nequi-gradient: linear-gradient(135deg, #210049 0%, #eb0057 100%);
+}
+
+body {
+    background-color: var(--nequi-light-gray);
+    color: var(--nequi-dark-gray);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: var(--nequi-purple);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-top: 2rem;
+}
+
+/* Navegación */
+nav {
+    background-color: var(--nequi-purple);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 2rem;
+}
+
+.logo {
+    color: var(--nequi-white);
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+}
+
+nav a {
+    color: var(--nequi-white);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 1.5rem 0.5rem;
+    display: block;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+nav a:hover {
+    color: var(--nequi-yellow);
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: var(--nequi-yellow);
+    transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* Estilo para el enlace activo en la navegación */
+nav a.activo {
+    color: var(--nequi-yellow);
+}
+
+nav a.activo::after {
+    width: 100%;
+    background-color: var(--nequi-yellow);
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--nequi-white);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Hero section */
+.hero {
+    background: var(--nequi-gradient);
+    color: var(--nequi-white);
+    padding: 4rem 0;
+    text-align: center;
+    border-radius: 0 0 30px 30px;
+    margin-bottom: 3rem;
+}
+
+.hero h1 {
+    color: var(--nequi-white);
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+}
+
+/* Cards */
+.card {
+    background-color: var(--nequi-white);
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card h2 {
+    color: var(--nequi-purple);
+    border-bottom: 2px solid var(--nequi-light-gray);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    text-align: center;
+    padding: 2rem;
+}
+
+.feature-card i {
+    font-size: 3rem;
+    color: var(--nequi-pink);
+    margin-bottom: 1rem;
+}
+
+/* Formularios */
+form {
+    background-color: var(--nequi-white);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--nequi-purple);
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 0.9rem;
+    border: 2px solid var(--nequi-light-gray);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: var(--nequi-light-gray);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--nequi-pink);
+    box-shadow: 0 0 0 3px rgba(235, 0, 87, 0.1);
+}
+
+/* Botones */
+button, .btn {
+    background: var(--nequi-gradient);
+    color: var(--nequi-white);
+    border: none;
+    padding: 0.9rem 1.8rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+button:hover, .btn:hover {
+    box-shadow: 0 6px 12px rgba(235, 0, 87, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--nequi-white);
+    color: var(--nequi-purple);
+    border: 2px solid var(--nequi-purple);
+}
+
+.btn-secondary:hover {
+    background-color: var(--nequi-purple);
+    color: var(--nequi-white);
+}
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    background-color: var(--nequi-white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 1.2rem;
+    text-align: left;
+}
+
+th {
+    background-color: var(--nequi-purple);
+    color: var(--nequi-white);
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: var(--nequi-light-gray);
+}
+
+tr:hover {
+    background-color: rgba(235, 0, 87, 0.05);
+}
+
+/* Mensajes */
+.mensaje {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+}
+
+.exito {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Estadísticas */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--nequi-white);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+    color: var(--nequi-purple);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--nequi-pink);
+}
+
+/* Footer */
+footer {
+    background-color: var(--nequi-purple);
+    color: var(--nequi-white);
+    padding: 3rem 0;
+    margin-top: 4rem;
+}
+
+footer .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+footer h3 {
+    color: var(--nequi-white);
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+footer ul {
+    list-style: none;
+}
+
+footer ul li {
+    margin-bottom: 0.8rem;
+}
+
+footer a {
+    color: var(--nequi-light-gray);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--nequi-yellow);
+}
+
+.copyright {
+    text-align: center;
+    padding-top: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Estilos específicos para abonos.html */
+#detalleVenta {
+    background-color: var(--nequi-white);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+#detalleVenta h2 {
+    color: var(--nequi-purple);
+    border-bottom: 2px solid var(--nequi-light-gray);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+#detalleVenta p {
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+}
+
+#detalleVenta h3 {
+    color: var(--nequi-purple);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+#montoAbono {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 1rem;
+}
+
+#listaAbonos {
+    list-style: none;
+    padding: 1rem;
+    background-color: var(--nequi-light-gray);
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+#listaAbonos li {
+    padding: 0.8rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#listaAbonos li:last-child {
+    border-bottom: none;
+}
+
+#buscarVenta {
+    width: 100%;
+    max-width: 400px;
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+}
+
+.estado-pendiente {
+    color: var(--nequi-yellow);
+    font-weight: 600;
+}
+
+.estado-pagado {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.saldo-pendiente {
+    font-weight: 700;
+    color: var(--nequi-pink);
+}
+
+/* Estilos para la página de abonos */
+.lista-abonos {
+    list-style: none;
+    padding: 1rem;
+    background-color: var(--nequi-light-gray);
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+.lista-abonos li {
+    padding: 0.8rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.lista-abonos li:last-child {
+    border-bottom: none;
+}
+
+.estado-pendiente {
+    color: var(--nequi-yellow);
+    font-weight: 600;
+}
+
+.estado-pagado {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.saldo-pendiente {
+    font-weight: 700;
+    color: var(--nequi-pink);
+}
+
+/* Estilo para el enlace activo en la navegación */
+nav a.activo {
+    color: var(--nequi-yellow);
+}
+
+nav a.activo::after {
+    width: 100%;
+    background-color: var(--nequi-yellow);
+}
+
+/* Botones pequeños para tablas */
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* Estilos para badges */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-warning {
+    background-color: var(--nequi-yellow);
+    color: var(--nequi-dark-gray);
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+/* Responsive */
+@media (max-width: 992px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .hero {
+        padding: 3rem 0;
+    }
+    
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    nav .container {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    nav ul {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+        display: none;
+    }
+    
+    nav ul.show {
+        display: flex;
+    }
+    
+    nav a {
+        padding: 1rem 0;
+    }
+    
+    .mobile-menu-btn {
+        display: block;
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+    
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    #buscarVenta {
+        width: 100%;
+        margin-right: 0;
+    }
+    
+    #montoAbono {
+        width: 100%;
+    }
+}

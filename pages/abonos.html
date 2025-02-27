@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abonos | Sistema de Gestión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">
+                <i class="fas fa-cash-register"></i> SistemaVentas
+            </a>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="menu">
+                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
+                <li><a href="venta_directa.html">Nueva Venta</a></li>
+                <li><a href="venta_descuento.html">Venta con Descuento</a></li>
+                <li><a href="abonos.html" class="activo">Abonos</a></li>
+                <li><a href="inventario.html">Inventario</a></li>
+                <li><a href="ajuste_inventarios.html">Ajuste de Inventario</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1>Gestión de Abonos</h1>
+        
+        <div class="card">
+            <h2>Buscar Ventas Pendientes</h2>
+            <div class="form-group">
+                <input type="text" id="buscarVenta" placeholder="Ingrese el nombre del cliente">
+                <button onclick="buscarVentaAbonos()">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+        
+        <!-- Lista de resultados de búsqueda -->
+        <div class="card" id="resultadosBusqueda" style="display: none;">
+            <h2>Ventas Pendientes</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Revista</th>
+                            <th>Valor Total</th>
+                            <th>Saldo Pendiente</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaVentasPendientes">
+                        <!-- Aquí se cargarán las ventas pendientes -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card" id="detalleVenta" style="display: none;">
+            <h2>Detalles de la Venta</h2>
+            <div class="form-group">
+                <p><strong>Cliente:</strong> <span id="cliente"></span></p>
+                <p><strong>Vendedor:</strong> <span id="vendedor"></span></p>
+                <p><strong>Fecha:</strong> <span id="fecha"></span></p>
+                <p><strong>Revista:</strong> <span id="revista"></span></p>
+                <p><strong>Estado:</strong> <span id="estado"></span></p>
+                <p><strong>Valor Total:</strong> $<span id="valorTotal"></span></p>
+                <p><strong>Saldo Pendiente:</strong> $<span id="saldoPendiente" class="saldo-pendiente"></span></p>
+            </div>
+            
+            <h3>Agregar Abono</h3>
+            <div class="form-group">
+                <input type="number" id="montoAbono" placeholder="Monto del abono">
+                <button onclick="agregarAbonoVenta()">
+                    <i class="fas fa-plus-circle"></i> Agregar Abono
+                </button>
+                <button onclick="marcarVentaPagada()" class="btn-secondary">
+                    <i class="fas fa-check-circle"></i> Marcar como Pagado
+                </button>
+            </div>
+            
+            <h3>Historial de Abonos</h3>
+            <ul id="listaAbonos" class="lista-abonos"></ul>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div>
+                <h3>Sistema de Gestión</h3>
+                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
+            </div>
+            <div>
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="../index.html">Inicio</a></li>
+                    <li><a href="ventas.html">Ventas</a></li>
+                    <li><a href="inventario.html">Inventario</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Contacto</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> nicolasmonroy@hotmail.com</li>
+                    <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <p>&copy; 2025 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../scripts/script.js"></script>
+    <script src="../scripts/ventas.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarLocalStorage();
+            
+            // Menú móvil
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const menu = document.getElementById('menu');
+            
+            menuBtn.addEventListener('click', function() {
+                menu.classList.toggle('show');
+            });
+        });
+        
+        // Función modificada para buscar ventas pendientes por cliente
+        function buscarVentaAbonos() {
+            const busqueda = document.getElementById("buscarVenta").value.trim();
+            if (!busqueda) {
+                alert("Por favor ingrese un nombre de cliente para buscar");
+                return;
+            }
+
+            const ventas = obtenerVentas();
+            
+            // Filtrar ventas pendientes que coincidan con el nombre del cliente
+            const ventasPendientes = ventas.filter(venta => 
+                venta.cliente.toLowerCase().includes(busqueda.toLowerCase()) && 
+                venta.estado === "Pendiente"
+            );
+
+            if (ventasPendientes.length > 0) {
+                mostrarVentasPendientes(ventasPendientes);
+            } else {
+                alert("No se encontraron ventas pendientes para este cliente");
+            }
+        }
+        
+        // Función para mostrar la lista de ventas pendientes
+        function mostrarVentasPendientes(ventas) {
+            const listaVentas = document.getElementById("listaVentasPendientes");
+            listaVentas.innerHTML = "";
+            
+            ventas.forEach(venta => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
+                    <td>${venta.cliente}</td>
+                    <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                    <td>${venta.revista || 'N/A'}</td>
+                    <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                    <td>$${parseFloat(venta.saldo || venta.valor).toLocaleString()}</td>
+                    <td>
+                        <button onclick="seleccionarVenta('${venta.id}')" class="btn-small">
+                            <i class="fas fa-edit"></i> Gestionar
+                        </button>
+                    </td>
+                `;
+                listaVentas.appendChild(fila);
+            });
+            
+            document.getElementById("resultadosBusqueda").style.display = "block";
+            document.getElementById("detalleVenta").style.display = "none";
+        }
+        
+        // Función para seleccionar una venta específica
+        function seleccionarVenta(idVenta) {
+            const venta = buscarVenta(idVenta);
+            if (venta) {
+                mostrarDetalleVenta(venta);
+                document.getElementById("resultadosBusqueda").style.display = "none";
+            } else {
+                alert("No se pudo encontrar la venta seleccionada");
+            }
+        }
+        
+        function mostrarDetalleVenta(venta) {
+            document.getElementById("detalleVenta").style.display = "block";
+            document.getElementById("cliente").textContent = venta.cliente;
+            document.getElementById("vendedor").textContent = venta.vendedor;
+            document.getElementById("fecha").textContent = new Date(venta.fecha).toLocaleDateString();
+            document.getElementById("revista").textContent = venta.revista || 'N/A';
+            
+            // Aplicar clase según el estado
+            const estadoElement = document.getElementById("estado");
+            estadoElement.textContent = venta.estado;
+            estadoElement.className = venta.estado === "Pendiente" ? "estado-pendiente" : "estado-pagado";
+            
+            document.getElementById("valorTotal").textContent = parseFloat(venta.valor).toLocaleString();
+            document.getElementById("saldoPendiente").textContent = parseFloat(venta.saldo || venta.valor).toLocaleString();
+            
+            // Guardar el ID de la venta actual en un atributo data para usarlo en otras funciones
+            document.getElementById("detalleVenta").setAttribute("data-venta-id", venta.id);
+            
+            // Mostrar historial de abonos
+            mostrarHistorialAbonos(venta);
+        }
+
+        function mostrarHistorialAbonos(venta) {
+            const listaAbonos = document.getElementById("listaAbonos");
+            listaAbonos.innerHTML = "";
+            
+            if (!venta.abonos || venta.abonos.length === 0) {
+                listaAbonos.innerHTML = "<li>No hay abonos registrados</li>";
+                return;
+            }
+            
+            venta.abonos.forEach(abono => {
+                const li = document.createElement("li");
+                li.innerHTML = `<strong>${new Date(abono.fecha).toLocaleDateString()}</strong>: $${parseFloat(abono.monto).toLocaleString()}`;
+                listaAbonos.appendChild(li);
+            });
+        }
+
+        function agregarAbonoVenta() {
+            const idVenta = document.getElementById("detalleVenta").getAttribute("data-venta-id");
+            const montoAbono = document.getElementById("montoAbono").value;
+            
+            if (!montoAbono || parseFloat(montoAbono) <= 0) {
+                alert("Por favor ingrese un monto válido para el abono");
+                return;
+            }
+            
+            if (agregarAbono(idVenta, montoAbono)) {
+                alert("Abono registrado correctamente");
+                document.getElementById("montoAbono").value = "";
+                
+                // Actualizar la información mostrada
+                const ventaActualizada = buscarVenta(idVenta);
+                mostrarDetalleVenta(ventaActualizada);
+            } else {
+                alert("Error al registrar el abono. Verifique que el monto no sea mayor al saldo pendiente.");
+            }
+        }
+
+        function marcarVentaPagada() {
+            const idVenta = document.getElementById("detalleVenta").getAttribute("data-venta-id");
+            
+            if (confirm("¿Está seguro de marcar esta venta como pagada? Esto registrará un abono por el saldo pendiente.")) {
+                if (marcarComoPagado(idVenta)) {
+                    alert("Venta marcada como pagada correctamente");
+                    
+                    // Actualizar la información mostrada
+                    const ventaActualizada = buscarVenta(idVenta);
+                    mostrarDetalleVenta(ventaActualizada);
+                } else {
+                    alert("Error al marcar la venta como pagada");
+                }
+            }
+        }
+    </script>
+</body>
+</html>

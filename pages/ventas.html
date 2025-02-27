@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas | Sistema de Gestión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-cash-register"></i> SistemaVentas
+            </a>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="menu">
+                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
+                <li><a href="venta_directa.html">Nueva Venta</a></li>
+                <li><a href="venta_descuento.html">Venta con Descuento</a></li>
+                <li><a href="abonos.html">Abonos</a></li>
+                <li><a href="inventario.html">Inventario</a></li>
+                <li><a href="ajuste_inventarios.html">Ajuste de Inventario</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1>Gestión de Ventas</h1>
+        
+        <div class="card">
+            <h2>Filtrar Ventas</h2>
+            <form id="filtro-ventas">
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label for="fecha-inicio">Fecha Inicio:</label>
+                        <input type="date" id="fecha-inicio" name="fecha-inicio">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="fecha-fin">Fecha Fin:</label>
+                        <input type="date" id="fecha-fin" name="fecha-fin">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="buscar-cliente">Buscar por Cliente:</label>
+                    <input type="text" id="buscar-cliente" name="buscar-cliente" placeholder="Nombre del cliente...">
+                </div>
+                <button type="submit">Filtrar</button>
+                <button type="button" id="exportar-csv" class="btn-secondary" style="margin-left: 1rem;">Exportar a CSV</button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2>Listado de Ventas</h2>
+            <div class="table-responsive">
+                <table id="tabla-ventas">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Contacto</th>
+                            <th>Vendedor</th>
+                            <th>Fecha</th>
+                            <th>Revista</th>
+                            <th>Estado</th>
+                            <th>Valor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ventas-body">
+                        <!-- Aquí se cargarán las ventas -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Estadísticas de Ventas</h2>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Total de Ventas</h3>
+                    <div class="value" id="total-ventas">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Valor Total</h3>
+                    <div class="value" id="valor-total">$0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Promedio por Venta</h3>
+                    <div class="value" id="promedio-venta">$0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div>
+                <h3>Sistema de Gestión</h3>
+                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
+            </div>
+            <div>
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="ventas.html">Ventas</a></li>
+                    <li><a href="inventario.html">Inventario</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Contacto</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> info@sistemaventas.com</li>
+                    <li><i class="fas fa-phone"></i> +57 300 123 4567</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <p>&copy; 2023 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../scripts/script.js"></script>
+    <script src="../scripts/ventas.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar todas las ventas
+            cargarVentas();
+            
+            // Mostrar estadísticas
+            actualizarEstadisticas();
+            
+            // Evento para filtrar ventas
+            document.getElementById('filtro-ventas').addEventListener('submit', function(e) {
+                e.preventDefault();
+                cargarVentas();
+            });
+            
+            // Evento para exportar a CSV
+            document.getElementById('exportar-csv').addEventListener('click', function() {
+                exportarVentasCSV();
+            });
+            
+            // Menú móvil
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const menu = document.getElementById('menu');
+            
+            menuBtn.addEventListener('click', function() {
+                menu.classList.toggle('show');
+            });
+        });
+        
+        function cargarVentas() {
+            const fechaInicio = document.getElementById('fecha-inicio').value;
+            const fechaFin = document.getElementById('fecha-fin').value;
+            const buscarCliente = document.getElementById('buscar-cliente').value;
+            
+            let ventas = obtenerVentas();
+            
+            // Filtrar por fecha si se especificó
+            if (fechaInicio && fechaFin) {
+                ventas = filtrarVentasPorFecha(fechaInicio, fechaFin);
+            }
+            
+            // Filtrar por cliente si se especificó
+            if (buscarCliente) {
+                ventas = ventas.filter(venta => 
+                    venta.cliente.toLowerCase().includes(buscarCliente.toLowerCase())
+                );
+            }
+            
+            // Mostrar ventas en la tabla
+            const ventasBody = document.getElementById('ventas-body');
+            ventasBody.innerHTML = '';
+            
+            if (ventas.length === 0) {
+                ventasBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron ventas</td></tr>';
+                return;
+            }
+            
+            ventas.forEach(venta => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${venta.cliente}</td>
+                    <td>${venta.contacto}</td>
+                    <td>${venta.vendedor}</td>
+                    <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                    <td>${venta.revista || '-'}</td>
+                    <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
+                    <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                    <td>
+                        <button class="btn-icon" onclick="eliminarVenta('${venta.id}'); cargarVentas();">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                ventasBody.appendChild(fila);
+            });
+            
+            // Actualizar estadísticas con los datos filtrados
+            actualizarEstadisticas(ventas);
+        }
+        
+        function actualizarEstadisticas(ventas) {
+            ventas = ventas || obtenerVentas();
+            
+            const totalVentas = ventas.length;
+            const valorTotal = ventas.reduce((total, venta) => total + parseFloat(venta.valor), 0);
+            const promedioVenta = totalVentas > 0 ? valorTotal / totalVentas : 0;
+            
+            document.getElementById('total-ventas').textContent = totalVentas;
+            document.getElementById('valor-total').textContent = '$' + valorTotal.toLocaleString();
+            document.getElementById('promedio-venta').textContent = '$' + promedioVenta.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        }
+    </script>
+</body>
+</html>

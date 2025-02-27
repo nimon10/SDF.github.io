@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste de Inventario | Sistema de Gestión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">
+                <i class="fas fa-cash-register"></i> SistemaVentas
+            </a>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="menu">
+                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
+                <li><a href="venta_directa.html">Nueva Venta</a></li>
+                <li><a href="venta_descuento.html">Venta con Descuento</a></li>
+                <li><a href="abonos.html">Abonos</a></li>
+                <li><a href="inventario.html">Inventario</a></li>
+                <li><a href="ajuste_inventarios.html">Ajuste de Inventario</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1>Ajuste de Inventario</h1>
+        
+        <div class="card">
+            <h2>Seleccionar Producto</h2>
+            <div class="form-group">
+                <label for="producto">Producto:</label>
+                <select id="producto" name="producto" required>
+                    <option value="">Seleccione un producto</option>
+                    <!-- Aquí se cargarán los productos -->
+                </select>
+            </div>
+            
+            <div id="info-producto" style="margin-top: 1.5rem; display: none;">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Stock Actual</h3>
+                        <div class="value" id="stock-actual">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Precio</h3>
+                        <div class="value" id="precio-actual">$0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Registrar Movimiento</h2>
+            <form id="formulario-ajuste">
+                <div class="form-group">
+                    <label for="tipo-movimiento">Tipo de Movimiento:</label>
+                    <select id="tipo-movimiento" name="tipo-movimiento" required>
+                        <option value="entrada">Entrada (Aumentar Stock)</option>
+                        <option value="salida">Salida (Disminuir Stock)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" id="cantidad" name="cantidad" min="1" step="1" placeholder="Cantidad a ajustar" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="motivo">Motivo:</label>
+                    <textarea id="motivo" name="motivo" placeholder="Motivo del ajuste" required></textarea>
+                </div>
+                
+                <button type="submit">
+                    <i class="fas fa-sync-alt"></i> Registrar Ajuste
+                </button>
+            </form>
+        </div>
+        
+        <div id="mensaje" class="mensaje"></div>
+        
+        <div class="card">
+            <h2>Historial de Movimientos</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Producto</th>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movimientos-body">
+                        <!-- Aquí se cargarán los movimientos -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div>
+                <h3>Sistema de Gestión</h3>
+                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
+            </div>
+            <div>
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="../index.html">Inicio</a></li>
+                    <li><a href="ventas.html">Ventas</a></li>
+                    <li><a href="inventario.html">Inventario</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Contacto</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> nicolasmonroy@hotmail.com</li>
+                    <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <p>&copy; 2025 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formulario = document.getElementById('formulario-ajuste');
+        const mensaje = document.getElementById('mensaje');
+        const selectProducto = document.getElementById('producto');
+        const infoProducto = document.getElementById('info-producto');
+        const stockActual = document.getElementById('stock-actual');
+        const precioActual = document.getElementById('precio-actual');
+        
+        // Cargar productos en el select
+        cargarProductosSelect();
+        
+        // Cargar historial de movimientos
+        cargarMovimientos();
+        
+        selectProducto.addEventListener('change', function() {
+            const productoId = this.value;
+            if (productoId) {
+                mostrarInfoProducto(productoId);
+            } else {
+                infoProducto.style.display = 'none';
+            }
+        });
+        
+        formulario.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const productoId = selectProducto.value;
+            const tipoMovimiento = document.getElementById('tipo-movimiento').value;
+            const cantidad = parseInt(document.getElementById('cantidad').value);
+            const motivo = document.getElementById('motivo').value;
+            
+            if (!productoId) {
+                mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Debe seleccionar un producto</div>';
+                return;
+            }
+            
+            if (registrarMovimientoInventario(productoId, tipoMovimiento, cantidad, motivo)) {
+                mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Ajuste registrado correctamente</div>';
+                formulario.reset();
+                
+                // Actualizar información del producto
+                mostrarInfoProducto(productoId);
+                
+                // Recargar movimientos
+                cargarMovimientos();
+                
+                // Limpiar mensaje después de 3 segundos
+                setTimeout(() => {
+                    mensaje.innerHTML = '';
+                }, 3000);
+            } else {
+                mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar el ajuste</div>';
+            }
+        });
+        
+        // Menú móvil
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        const menu = document.getElementById('menu');
+        
+        menuBtn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+        });
+        
+        function cargarProductosSelect() {
+            const inventario = obtenerInventario();
+            
+            selectProducto.innerHTML = '<option value="">Seleccione un producto</option>';
+            
+            inventario.forEach(producto => {
+                const option = document.createElement('option');
+                option.value = producto.id;
+                option.textContent = producto.nombre;
+                selectProducto.appendChild(option);
+            });
+        }
+        
+        function mostrarInfoProducto(productoId) {
+            const inventario = obtenerInventario();
+            const producto = inventario.find(p => p.id === productoId);
+            
+            if (producto) {
+                stockActual.textContent = producto.stock;
+                precioActual.textContent = `$${producto.precio.toLocaleString('es-CO')}`;
+                infoProducto.style.display = 'block';
+            }
+        }
+        
+        function cargarMovimientos() {
+            const movimientos = obtenerMovimientosInventario();
+            const tbody = document.getElementById('movimientos-body');
+            
+            tbody.innerHTML = '';
+            
+            if (movimientos.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="5" class="text-center">No hay movimientos registrados</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            // Ordenar movimientos por fecha (más recientes primero)
+            movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            movimientos.forEach(movimiento => {
+                const tr = document.createElement('tr');
+                
+                const fecha = new Date(movimiento.fecha);
+                const fechaFormateada = `${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()} ${fecha.getHours()}:${String(fecha.getMinutes()).padStart(2, '0')}`;
+                
+                tr.innerHTML = `
+                    <td>${fechaFormateada}</td>
+                    <td>${movimiento.nombreProducto}</td>
+                    <td>${movimiento.tipo === 'entrada' ? '<span class="badge success">Entrada</span>' : '<span class="badge danger">Salida</span>'}</td>
+                    <td>${movimiento.cantidad}</td>
+                    <td>${movimiento.motivo}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function registrarMovimientoInventario(productoId, tipo, cantidad, motivo) {
+            try {
+                // Obtener inventario actual
+                const inventario = obtenerInventario();
+                const producto = inventario.find(p => p.id === productoId);
+                
+                if (!producto) return false;
+                
+                // Validar que la cantidad sea válida
+                if (tipo === 'salida' && cantidad > producto.stock) {
+                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> No hay suficiente stock para realizar esta salida</div>';
+                    return false;
+                }
+                
+                // Actualizar stock
+                if (tipo === 'entrada') {
+                    producto.stock += cantidad;
+                } else {
+                    producto.stock -= cantidad;
+                }
+                
+                // Guardar cambios en el inventario
+                localStorage.setItem('inventario', JSON.stringify(inventario));
+                
+                // Registrar movimiento
+                const movimientos = obtenerMovimientosInventario();
+                
+                movimientos.push({
+                    id: Date.now().toString(),
+                    fecha: new Date().toISOString(),
+                    productoId: productoId,
+                    nombreProducto: producto.nombre,
+                    tipo: tipo,
+                    cantidad: cantidad,
+                    motivo: motivo
+                });
+                
+                localStorage.setItem('movimientosInventario', JSON.stringify(movimientos));
+                
+                return true;
+            } catch (error) {
+                console.error('Error al registrar movimiento:', error);
+                return false;
+            }
+        }
+        
+        function obtenerInventario() {
+            const inventarioJSON = localStorage.getItem('inventario');
+            return inventarioJSON ? JSON.parse(inventarioJSON) : [];
+        }
+        
+        function obtenerMovimientosInventario() {
+            const movimientosJSON = localStorage.getItem('movimientosInventario');
+            return movimientosJSON ? JSON.parse(movimientosJSON) : [];
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario | Sistema de Gestión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="../index.html" class="logo">
+                <i class="fas fa-cash-register"></i> SistemaVentas
+            </a>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="menu">
+                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="ventas.html">Ventas</a></li>
+                <li><a href="venta_directa.html">Nueva Venta</a></li>
+                <li><a href="venta_descuento.html">Venta con Descuento</a></li>
+                <li><a href="abonos.html">Abonos</a></li>
+                <li><a href="inventario.html">Inventario</a></li>
+                <li><a href="ajuste_inventarios.html">Ajuste de Inventario</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1>Gestión de Inventario</h1>
+        
+        <div class="card">
+            <h2>Agregar Nuevo Producto</h2>
+            <form id="formulario-producto">
+                <div class="form-group">
+                    <label for="nombre">Nombre del Producto:</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Nombre del producto" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion" placeholder="Descripción del producto"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="categoria">Categoría:</label>
+                    <select id="categoria" name="categoria" required>
+                        <option value="Esika">Esika</option>
+                        <option value="Carmel">Carmel</option>
+                        <option value="Leonisa">Leonisa</option>
+                        <option value="Cyzone">Cyzone</option>
+                        <option value="Pacifika">Pacifika</option>
+                        <option value="Yanbal">Yanbal</option>
+                        <option value="L'ebel">L'ebel</option>
+                        <option value="Novaventa">Novaventa/option>
+                        <option value="Natura">Natura</option>
+                        <option value="Login">Login</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="precio">Precio:</label>
+                    <input type="number" id="precio" name="precio" min="0" step="0.01" placeholder="Precio del producto" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cantidad">Cantidad en Stock:</label>
+                    <input type="number" id="cantidad" name="cantidad" min="0" step="1" placeholder="Cantidad disponible" required>
+                </div>
+                
+                <button type="submit">
+                    <i class="fas fa-plus-circle"></i> Agregar Producto
+                </button>
+            </form>
+        </div>
+        
+        <div id="mensaje" class="mensaje"></div>
+        
+        <div class="card">
+            <h2>Buscar Productos</h2>
+            <div class="form-group">
+                <input type="text" id="buscar-producto" placeholder="Buscar por nombre de producto...">
+                <button id="btn-buscar" style="margin-top: 1rem;">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Listado de Productos</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productos-body">
+                        <!-- Aquí se cargarán los productos -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Estadísticas de Inventario</h2>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Total de Productos</h3>
+                    <div class="value" id="total-productos">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Valor del Inventario</h3>
+                    <div class="value" id="valor-inventario">$0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Productos con Stock Bajo</h3>
+                    <div class="value" id="stock-bajo">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div>
+                <h3>Sistema de Gestión</h3>
+                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
+            </div>
+            <div>
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="ventas.html">Ventas</a></li>
+                    <li><a href="inventario.html">Inventario</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Contacto</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> info@sistemaventas.com</li>
+                    <li><i class="fas fa-phone"></i> +57 300 123 4567</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <p>&copy; 2023 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../scripts/script.js"></script>
+    <script src="../scripts/inventario.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formulario = document.getElementById('formulario-producto');
+            const mensaje = document.getElementById('mensaje');
+            const buscarInput = document.getElementById('buscar-producto');
+            const btnBuscar = document.getElementById('btn-buscar');
+            
+            // Cargar productos
+            cargarProductos();
+            actualizarEstadisticas();
+            
+            formulario.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const producto = {
+                    nombre: document.getElementById('nombre').value,
+                    descripcion: document.getElementById('descripcion').value,
+                    categoria: document.getElementById('categoria').value,
+                    precio: document.getElementById('precio').value,
+                    cantidad: document.getElementById('cantidad').value
+                };
+                
+                if (guardarProducto(producto)) {
+                    mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Producto agregado correctamente</div>';
+                    formulario.reset();
+                    
+                    // Recargar productos
+                    cargarProductos();
+                    actualizarEstadisticas();
+                    
+                    // Limpiar mensaje después de 3 segundos
+                    setTimeout(() => {
+                        mensaje.innerHTML = '';
+                    }, 3000);
+                } else {
+                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al agregar el producto</div>';
+                }
+            });
+            
+            btnBuscar.addEventListener('click', function() {
+                const termino = buscarInput.value.trim();
+                if (termino) {
+                    const resultados = buscarProductoPorNombre(termino);
+                    mostrarProductos(resultados);
+                } else {
+                    cargarProductos();
+                }
+            });
+            
+            // Menú móvil
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const menu = document.getElementById('menu');
+            
+            menuBtn.addEventListener('click', function() {
+                menu.classList.toggle('show');
+            });
+            
+            function cargarProductos(productos) {
+                productos = productos || obtenerInventario();
+                const productosBody = document.getElementById('productos-body');
+                
+                productosBody.innerHTML = '';
+                
+                if (productos.length === 0) {
+                    productosBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay productos en el inventario</td></tr>';
+                    return;
+                }
+                
+                productos.forEach(producto => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${producto.nombre}</td>
+                        <td>${producto.categoria}</td>
+                        <td>$${parseFloat(producto.precio).toLocaleString()}</td>
+                        <td>${producto.cantidad}</td>
+                        <td>
+                            <button class="btn-icon" onclick="eliminarProducto('${producto.id}'); cargarProductos(); actualizarEstadisticas();">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    productosBody.appendChild(fila);
+                });
+            }
+            
+            function mostrarProductos(productos) {
+                cargarProductos(productos);
+            }
+            
+            function actualizarEstadisticas() {
+                const inventario = obtenerInventario();
+                const totalProductos = inventario.length;
+                const valorInventario = calcularValorInventario();
+                const stockBajo = obtenerProductosStockBajo(10).length;
+                
+                document.getElementById('total-productos').textContent = totalProductos;
+                document.getElementById('valor-inventario').textContent = '$' + valorInventario.toLocaleString();
+                document.getElementById('stock-bajo').textContent = stockBajo;
+            }
+            
+            // Función para eliminar producto (añadir al script.js)
+            window.eliminarProducto = function(id) {
+                let inventario = obtenerInventario();
+                let nuevoInventario = inventario.filter(producto => producto.id !== id);
+                localStorage.setItem("inventario", JSON.stringify(nuevoInventario));
+                return nuevoInventario.length < inventario.length;
+            };
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Ventas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-cash-register"></i> SistemaVentas
+            </a>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="menu">
+                <li><a href="index.html" class="activo">Inicio</a></li>
+                <li><a href="pages/ventas.html">Ventas</a></li>
+                <li><a href="pages/venta_directa.html">Nueva Venta</a></li>
+                <li><a href="pages/venta_descuento.html">Venta con Descuento</a></li>
+                <li><a href="pages/abonos.html">Abonos</a></li>
+                <li><a href="pages/inventario.html">Inventario</a></li>
+                <li><a href="pages/ajuste_inventarios.html">Ajuste de Inventario</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="hero">
+        <div class="container">
+            <h1>Sistema de Gestión de Ventas</h1>
+            <p>Una solución completa para administrar tu negocio, controlar inventario y gestionar ventas de manera eficiente.</p>
+            <a href="pages/venta_directa.html" class="btn">
+                <i class="fas fa-plus-circle"></i> Nueva Venta
+            </a>
+            <a href="pages/inventario.html" class="btn-secondary">
+                <i class="fas fa-boxes"></i> Ver Inventario
+            </a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="card-grid">
+            <div class="card feature-card">
+                <i class="fas fa-shopping-cart"></i>
+                <h3>Ventas</h3>
+                <p>Registra ventas directas, con descuentos y gestiona abonos de manera sencilla.</p>
+                <a href="pages/ventas.html" class="btn-secondary">Ver Ventas</a>
+            </div>
+            
+            <div class="card feature-card">
+                <i class="fas fa-boxes"></i>
+                <h3>Inventario</h3>
+                <p>Controla tu stock, agrega productos y realiza ajustes de inventario.</p>
+                <a href="pages/inventario.html" class="btn-secondary">Ver Inventario</a>
+            </div>
+            
+            <div class="card feature-card">
+                <i class="fas fa-chart-line"></i>
+                <h3>Estadísticas</h3>
+                <p>Visualiza el rendimiento de tu negocio con estadísticas detalladas.</p>
+                <a href="pages/ventas.html" class="btn-secondary">Ver Estadísticas</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Resumen de Actividad</h2>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Ventas Totales</h3>
+                    <div class="value" id="total-ventas">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Productos en Inventario</h3>
+                    <div class="value" id="total-productos">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Ventas Pendientes</h3>
+                    <div class="value" id="ventas-pendientes">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div>
+                <h3>Sistema de Gestión</h3>
+                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
+            </div>
+            <div>
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="pages/ventas.html">Ventas</a></li>
+                    <li><a href="pages/inventario.html">Inventario</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Contacto</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> nicolasmonroy@hotmail.com</li>
+                    <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <p>&copy; 2025 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="scripts/script.js"></script>
+    <script src="scripts/inventario.js"></script>
+    <script src="scripts/ventas.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menú móvil
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const menu = document.getElementById('menu');
+            
+            menuBtn.addEventListener('click', function() {
+                menu.classList.toggle('show');
+            });
+            
+            // Cargar estadísticas
+            try {
+                const ventas = obtenerVentas();
+                const inventario = obtenerInventario();
+                const ventasPendientes = ventas.filter(venta => venta.estado === 'Pendiente').length;
+                
+                document.getElementById('total-ventas').textContent = ventas.length;
+                document.getElementById('total-productos').textContent = inventario.length;
+                document.getElementById('ventas-pendientes').textContent = ventasPendientes;
+            } catch (error) {
+                console.error("Error al cargar estadísticas:", error);
+            }
+        });
+    </script>
+</body>
+</html>
