@@ -70,7 +70,7 @@
                         <option value="Pacifika">Pacifika</option>
                         <option value="Yanbal">Yanbal</option>
                         <option value="L'ebel">L'ebel</option>
-                        <option value="Novaventa">Novaventa/option>
+                        <option value="Novaventa">Novaventa</option>
                         <option value="Natura">Natura</option>
                         <option value="Login">Login</option>
                     </select>
@@ -150,9 +150,9 @@
         </div>
     </footer>
     
-    <script src="../scripts/script.js"></script>
-    <script src="../scripts/ventas.js"></script>
-    <script>
+    <script type="module">
+        import { guardarVenta, obtenerVentas, escucharVentas } from '../scripts/script.js';
+        
         document.addEventListener('DOMContentLoaded', function() {
             const formulario = document.getElementById('formulario-venta');
             const mensaje = document.getElementById('mensaje');
@@ -161,10 +161,12 @@
             // Establecer fecha actual por defecto
             document.getElementById('fecha').valueAsDate = new Date();
             
-            // Cargar últimas ventas
-            cargarUltimasVentas();
+            // Escuchar cambios en ventas en tiempo real
+            const unsubscribe = escucharVentas(function(ventas) {
+                mostrarUltimasVentas(ventas);
+            });
             
-            formulario.addEventListener('submit', function(e) {
+            formulario.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 const venta = {
@@ -177,19 +179,23 @@
                     valor: document.getElementById('valor').value
                 };
                 
-                if (guardarVenta(venta)) {
-                    mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Venta registrada correctamente</div>';
-                    formulario.reset();
-                    document.getElementById('fecha').valueAsDate = new Date();
+                try {
+                    const resultado = await guardarVenta(venta);
                     
-                    // Recargar últimas ventas
-                    cargarUltimasVentas();
-                    
-                    // Limpiar mensaje después de 3 segundos
-                    setTimeout(() => {
-                        mensaje.innerHTML = '';
-                    }, 3000);
-                } else {
+                    if (resultado) {
+                        mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Venta registrada correctamente</div>';
+                        formulario.reset();
+                        document.getElementById('fecha').valueAsDate = new Date();
+                        
+                        // Limpiar mensaje después de 3 segundos
+                        setTimeout(() => {
+                            mensaje.innerHTML = '';
+                        }, 3000);
+                    } else {
+                        mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar la venta</div>';
+                    }
+                } catch (error) {
+                    console.error("Error al guardar venta:", error);
                     mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar la venta</div>';
                 }
             });
@@ -201,30 +207,30 @@
             menuBtn.addEventListener('click', function() {
                 menu.classList.toggle('show');
             });
-            
-            function cargarUltimasVentas() {
-                const ventas = obtenerVentas();
-                const ultimasVentas = ventas.slice(-5).reverse(); // Últimas 5 ventas
-                
-                ultimasVentasTabla.innerHTML = '';
-                
-                if (ultimasVentas.length === 0) {
-                    ultimasVentasTabla.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay ventas registradas</td></tr>';
-                    return;
-                }
-                
-                ultimasVentas.forEach(venta => {
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${venta.cliente}</td>
-                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
-                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
-                        <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
-                    `;
-                    ultimasVentasTabla.appendChild(fila);
-                });
-            }
         });
+        
+        function mostrarUltimasVentas(ventas) {
+            const ultimasVentas = ventas.slice(0, 5); // Últimas 5 ventas
+            const ultimasVentasTabla = document.getElementById('ultimas-ventas');
+            
+            ultimasVentasTabla.innerHTML = '';
+            
+            if (ultimasVentas.length === 0) {
+                ultimasVentasTabla.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay ventas registradas</td></tr>';
+                return;
+            }
+            
+            ultimasVentas.forEach(venta => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${venta.cliente}</td>
+                    <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                    <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                    <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
+                `;
+                ultimasVentasTabla.appendChild(fila);
+            });
+        }
     </script>
 </body>
 </html>

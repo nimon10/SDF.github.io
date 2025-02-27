@@ -1,19 +1,9 @@
-// Funciones específicas para ventas
-
-// Filtrar ventas por fecha
-function filtrarVentasPorFecha(fechaInicio, fechaFin) {
-    const ventas = obtenerVentas();
-    return ventas.filter(venta => {
-        const fechaVenta = new Date(venta.fecha);
-        const inicio = new Date(fechaInicio);
-        const fin = new Date(fechaFin);
-        return fechaVenta >= inicio && fechaVenta <= fin;
-    });
-}
+// scripts/ventas.js
+import { obtenerVentas, filtrarVentasPorFecha } from "./script.js";
 
 // Exportar ventas a CSV
-function exportarVentasCSV() {
-    const ventas = obtenerVentas();
+async function exportarVentasCSV() {
+    const ventas = await obtenerVentas();
     if (ventas.length === 0) {
         alert("No hay ventas para exportar");
         return;
@@ -38,3 +28,5 @@ function exportarVentasCSV() {
     link.click();
     document.body.removeChild(link);
 }
+
+export { exportarVentasCSV };

@@ -76,77 +76,32 @@
                 </table>
             </div>
         </div>
-        
-        <div class="card">
-            <h2>Estadísticas de Ventas</h2>
-            <div class="stats-container">
-                <div class="stat-card">
-                    <h3>Total de Ventas</h3>
-                    <div class="value" id="total-ventas">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Valor Total</h3>
-                    <div class="value" id="valor-total">$0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Promedio por Venta</h3>
-                    <div class="value" id="promedio-venta">$0</div>
-                </div>
-            </div>
-        </div>
     </div>
     
-    <footer>
-        <div class="container">
-            <div>
-                <h3>Sistema de Gestión</h3>
-                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
-            </div>
-            <div>
-                <h3>Enlaces Rápidos</h3>
-                <ul>
-                    <li><a href="index.html">Inicio</a></li>
-                    <li><a href="ventas.html">Ventas</a></li>
-                    <li><a href="inventario.html">Inventario</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3>Contacto</h3>
-                <ul>
-                    <li><i class="fas fa-envelope"></i> info@sistemaventas.com</li>
-                    <li><i class="fas fa-phone"></i> +57 300 123 4567</li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            <div class="container">
-                <p>&copy; 2023 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
-    
-    <script src="../scripts/script.js"></script>
-    <script src="../scripts/ventas.js"></script>
-    <script>
+    <script type="module">
+        import { 
+            obtenerVentas, 
+            escucharVentas, 
+            filtrarVentasPorFecha, 
+            eliminarVenta 
+        } from '../scripts/script.js';
+        import { exportarVentasCSV } from '../scripts/ventas.js';
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Cargar todas las ventas
-            cargarVentas();
+            const unsubscribe = escucharVentas(function(ventas) {
+                cargarVentas(ventas);
+                actualizarEstadisticas(ventas);
+            });
             
-            // Mostrar estadísticas
-            actualizarEstadisticas();
-            
-            // Evento para filtrar ventas
             document.getElementById('filtro-ventas').addEventListener('submit', function(e) {
                 e.preventDefault();
                 cargarVentas();
             });
             
-            // Evento para exportar a CSV
             document.getElementById('exportar-csv').addEventListener('click', function() {
                 exportarVentasCSV();
             });
             
-            // Menú móvil
             const menuBtn = document.querySelector('.mobile-menu-btn');
             const menu = document.getElementById('menu');
             
@@ -155,67 +110,37 @@
             });
         });
         
-        function cargarVentas() {
+        async function cargarVentas(ventasPrecargadas) {
+            let ventas = ventasPrecargadas || await obtenerVentas();
             const fechaInicio = document.getElementById('fecha-inicio').value;
             const fechaFin = document.getElementById('fecha-fin').value;
             const buscarCliente = document.getElementById('buscar-cliente').value;
             
-            let ventas = obtenerVentas();
-            
-            // Filtrar por fecha si se especificó
             if (fechaInicio && fechaFin) {
-                ventas = filtrarVentasPorFecha(fechaInicio, fechaFin);
+                ventas = filtrarVentasPorFecha(ventas, fechaInicio, fechaFin);
             }
             
-            // Filtrar por cliente si se especificó
             if (buscarCliente) {
                 ventas = ventas.filter(venta => 
                     venta.cliente.toLowerCase().includes(buscarCliente.toLowerCase())
                 );
             }
             
-            // Mostrar ventas en la tabla
             const ventasBody = document.getElementById('ventas-body');
-            ventasBody.innerHTML = '';
-            
-            if (ventas.length === 0) {
-                ventasBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron ventas</td></tr>';
-                return;
-            }
-            
-            ventas.forEach(venta => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td>${venta.cliente}</td>
-                    <td>${venta.contacto}</td>
-                    <td>${venta.vendedor}</td>
-                    <td>${new Date(venta.fecha).toLocaleDateString()}</td>
-                    <td>${venta.revista || '-'}</td>
-                    <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
-                    <td>$${parseFloat(venta.valor).toLocaleString()}</td>
-                    <td>
-                        <button class="btn-icon" onclick="eliminarVenta('${venta.id}'); cargarVentas();">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                ventasBody.appendChild(fila);
-            });
-            
-            // Actualizar estadísticas con los datos filtrados
-            actualizarEstadisticas(ventas);
-        }
-        
-        function actualizarEstadisticas(ventas) {
-            ventas = ventas || obtenerVentas();
-            
-            const totalVentas = ventas.length;
-            const valorTotal = ventas.reduce((total, venta) => total + parseFloat(venta.valor), 0);
-            const promedioVenta = totalVentas > 0 ? valorTotal / totalVentas : 0;
-            
-            document.getElementById('total-ventas').textContent = totalVentas;
-            document.getElementById('valor-total').textContent = '$' + valorTotal.toLocaleString();
-            document.getElementById('promedio-venta').textContent = '$' + promedioVenta.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            ventasBody.innerHTML = ventas.length === 0 
+                ? '<tr><td colspan="8" style="text-align: center;">No se encontraron ventas</td></tr>'
+                : ventas.map(venta => `
+                    <tr>
+                        <td>${venta.cliente}</td>
+                        <td>${venta.contacto}</td>
+                        <td>${venta.vendedor}</td>
+                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                        <td>${venta.revista || '-'}</td>
+                        <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
+                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                        <td><button class="btn-icon" onclick="eliminarVentaUI('${venta.id}')"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `).join('');
         }
     </script>
 </body>

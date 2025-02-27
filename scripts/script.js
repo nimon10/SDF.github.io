@@ -1,9 +1,17 @@
-// ✅ Verificar si LocalStorage está disponible
-function verificarLocalStorage() {
-    if (typeof(Storage) !== "undefined") {
-        console.log("LocalStorage está disponible");
+// scripts/script.js
+import { db } from "./firebase-config.js";
+import { 
+    collection, addDoc, getDocs, doc, getDoc,
+    updateDoc, deleteDoc, query, where, 
+    orderBy, onSnapshot 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ✅ Verificar si Firebase está disponible
+function verificarFirebase() {
+    if (db) {
+        console.log("Firebase está disponible");
     } else {
-        console.error("Este navegador no soporta LocalStorage");
+        console.error("Error al conectar con Firebase");
     }
 }
 
@@ -12,335 +20,365 @@ function validarDatosVenta(venta) {
     return venta.cliente && venta.contacto && venta.vendedor && venta.fecha && venta.valor;
 }
 
-// ✅ Guardar venta en LocalStorage con ID único
-function guardarVenta(venta) {
+// ✅ Guardar venta en Firebase
+async function guardarVenta(venta) {
     if (!validarDatosVenta(venta)) {
         console.error("Datos de venta incompletos");
         return false;
     }
 
-    venta.id = Date.now().toString();
-    venta.timestamp = new Date().toISOString();
-    venta.abonos = [];
-    venta.saldo = parseFloat(venta.valor);
-    venta.estado = venta.estado || "Pendiente";
+    try {
+        venta.timestamp = new Date().toISOString();
+        venta.abonos = [];
+        venta.saldo = parseFloat(venta.valor);
+        venta.estado = venta.estado || "Pendiente";
 
-    let ventas = obtenerVentas();
-    ventas.push(venta);
-    localStorage.setItem("ventas", JSON.stringify(ventas));
-    return true;
+        const docRef = await addDoc(collection(db, "ventas"), venta);
+        console.log("Venta guardada con ID: ", docRef.id);
+        return true;
+    } catch (error) {
+        console.error("Error al guardar venta: ", error);
+        return false;
+    }
 }
 
 // ✅ Obtener todas las ventas
-function obtenerVentas() {
-    return JSON.parse(localStorage.getItem("ventas")) || [];
+async function obtenerVentas() {
+    try {
+        const ventasSnapshot = await getDocs(collection(db, "ventas"));
+        const ventas = [];
+        ventasSnapshot.forEach((doc) => {
+            ventas.push({ id: doc.id, ...doc.data() });
+        });
+        return ventas;
+    } catch (error) {
+        console.error("Error al obtener ventas: ", error);
+        return [];
+    }
+}
+
+// ✅ Escuchar cambios en ventas (tiempo real)
+function escucharVentas(callback) {
+    const q = query(collection(db, "ventas"), orderBy("timestamp", "desc"));
+    return onSnapshot(q, (querySnapshot) => {
+        const ventas = [];
+        querySnapshot.forEach((doc) => {
+            ventas.push({ id: doc.id, ...doc.data() });
+        });
+        callback(ventas);
+    });
 }
 
 // ✅ Buscar ventas por cliente
-function buscarVentasPorCliente(nombreCliente) {
-    let ventas = obtenerVentas();
-    return ventas.filter(venta => venta.cliente.toLowerCase().includes(nombreCliente.toLowerCase()));
+async function buscarVentasPorCliente(nombreCliente) {
+    try {
+        const q = query(
+            collection(db, "ventas"), 
+            where("cliente", ">=", nombreCliente),
+            where("cliente", "<=", nombreCliente + '\uf8ff')
+        );
+        const querySnapshot = await getDocs(q);
+        const ventas = [];
+        querySnapshot.forEach((doc) => {
+            ventas.push({ id: doc.id, ...doc.data() });
+        });
+        return ventas;
+    } catch (error) {
+        console.error("Error al buscar ventas: ", error);
+        return [];
+    }
 }
 
 // ✅ Buscar una venta por ID
-function buscarVenta(idVenta) {
-    let ventas = obtenerVentas();
-    return ventas.find(venta => venta.id === idVenta) || null;
+async function buscarVenta(idVenta) {
+    try {
+        const docRef = doc(db, "ventas", idVenta);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        } else {
+            console.log("No se encontró la venta");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error al buscar venta: ", error);
+        return null;
+    }
 }
 
 // ✅ Agregar un abono a una venta específica
-function agregarAbono(idVenta, montoAbono) {
-    let ventas = obtenerVentas();
-    let ventaIndex = ventas.findIndex(venta => venta.id === idVenta);
-
-    if (ventaIndex === -1) {
-        console.error("Venta no encontrada");
+async function agregarAbono(idVenta, montoAbono) {
+    try {
+        // Obtener la venta actual
+        const docRef = doc(db, "ventas", idVenta);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+            console.error("Venta no encontrada");
+            return false;
+        }
+        
+        const venta = docSnap.data();
+        
+        // Validar que el monto del abono sea válido
+        montoAbono = parseFloat(montoAbono);
+        if (isNaN(montoAbono) || montoAbono <= 0) {
+            console.error("Monto de abono inválido");
+            return false;
+        }
+        
+        // Validar que el abono no sea mayor que el saldo pendiente
+        if (montoAbono > venta.saldo) {
+            console.error("El abono no puede ser mayor que el saldo pendiente");
+            return false;
+        }
+        
+        // Crear el nuevo abono
+        const nuevoAbono = {
+            monto: montoAbono,
+            fecha: new Date().toISOString().split("T")[0]
+        };
+        
+        // Actualizar los abonos y el saldo
+        const abonos = [...(venta.abonos || []), nuevoAbono];
+        const totalAbonado = abonos.reduce((total, abono) => total + abono.monto, 0);
+        const saldoRestante = parseFloat(venta.valor) - totalAbonado;
+        const estado = saldoRestante <= 0 ? "Pagado" : "Pendiente";
+        
+        // Actualizar la venta en Firestore
+        await updateDoc(docRef, {
+            abonos: abonos,
+            saldo: saldoRestante,
+            estado: estado
+        });
+        
+        console.log("Abono agregado:", nuevoAbono);
+        return true;
+    } catch (error) {
+        console.error("Error al agregar abono: ", error);
         return false;
     }
-
-    let venta = ventas[ventaIndex];
-    let abonos = venta.abonos || [];
-    
-    // Validar que el monto del abono sea válido
-    montoAbono = parseFloat(montoAbono);
-    if (isNaN(montoAbono) || montoAbono <= 0) {
-        console.error("Monto de abono inválido");
-        return false;
-    }
-    
-    // Validar que el abono no sea mayor que el saldo pendiente
-    if (montoAbono > venta.saldo) {
-        console.error("El abono no puede ser mayor que el saldo pendiente");
-        return false;
-    }
-
-    abonos.push({
-        monto: montoAbono,
-        fecha: new Date().toISOString().split("T")[0]
-    });
-
-    let totalAbonado = abonos.reduce((total, abono) => total + abono.monto, 0);
-    let saldoRestante = parseFloat(venta.valor) - totalAbonado;
-
-    venta.abonos = abonos;
-    venta.saldo = saldoRestante;
-    venta.estado = saldoRestante <= 0 ? "Pagado" : "Pendiente";
-
-    ventas[ventaIndex] = venta;
-    localStorage.setItem("ventas", JSON.stringify(ventas));
-
-    console.log("Abono agregado:", venta);
-    return true;
 }
 
 // ✅ Marcar una venta como pagada
-function marcarComoPagado(idVenta) {
-    let ventas = obtenerVentas();
-    let ventaIndex = ventas.findIndex(venta => venta.id === idVenta);
-
-    if (ventaIndex === -1) {
-        console.error("Venta no encontrada");
+async function marcarComoPagado(idVenta) {
+    try {
+        // Obtener la venta actual
+        const docRef = doc(db, "ventas", idVenta);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+            console.error("Venta no encontrada");
+            return false;
+        }
+        
+        const venta = docSnap.data();
+        
+        // Si ya está pagada, no hacer nada
+        if (venta.estado === "Pagado" && venta.saldo === 0) {
+            return true;
+        }
+        
+        // Preparar los datos actualizados
+        const datosActualizados = {
+            estado: "Pagado",
+            saldo: 0
+        };
+        
+        // Agregar un abono por el saldo restante si es necesario
+        if (venta.saldo > 0) {
+            const nuevoAbono = {
+                monto: venta.saldo,
+                fecha: new Date().toISOString().split("T")[0]
+            };
+            
+            datosActualizados.abonos = [...(venta.abonos || []), nuevoAbono];
+        }
+        
+        // Actualizar la venta en Firestore
+        await updateDoc(docRef, datosActualizados);
+        
+        console.log("Venta marcada como pagada");
+        return true;
+    } catch (error) {
+        console.error("Error al marcar como pagado: ", error);
         return false;
     }
-
-    let venta = ventas[ventaIndex];
-    
-    // Si ya está pagada, no hacer nada
-    if (venta.estado === "Pagado" && venta.saldo === 0) {
-        return true;
-    }
-    
-    // Agregar un abono por el saldo restante
-    if (venta.saldo > 0) {
-        venta.abonos.push({
-            monto: venta.saldo,
-            fecha: new Date().toISOString().split("T")[0]
-        });
-    }
-    
-    venta.estado = "Pagado";
-    venta.saldo = 0;
-
-    ventas[ventaIndex] = venta;
-    localStorage.setItem("ventas", JSON.stringify(ventas));
-    console.log("Venta marcada como pagada:", venta);
-    return true;
 }
 
 // ✅ Eliminar una venta por ID
-function eliminarVenta(idVenta) {
-    let ventas = obtenerVentas();
-    let nuevasVentas = ventas.filter(venta => venta.id !== idVenta);
-    localStorage.setItem("ventas", JSON.stringify(nuevasVentas));
-    return nuevasVentas.length < ventas.length;
+async function eliminarVenta(idVenta) {
+    try {
+        await deleteDoc(doc(db, "ventas", idVenta));
+        console.log("Venta eliminada");
+        return true;
+    } catch (error) {
+        console.error("Error al eliminar venta: ", error);
+        return false;
+    }
 }
 
 // ✅ Guardar producto en inventario
-function guardarProducto(producto) {
+async function guardarProducto(producto) {
     if (!producto.nombre || !producto.precio || !producto.cantidad) {
         console.error("Datos de producto incompletos");
         return false;
     }
 
-    producto.id = Date.now().toString();
-
-    let inventario = obtenerInventario();
-    inventario.push(producto);
-    localStorage.setItem("inventario", JSON.stringify(inventario));
-    return true;
+    try {
+        const docRef = await addDoc(collection(db, "inventario"), producto);
+        console.log("Producto guardado con ID: ", docRef.id);
+        return true;
+    } catch (error) {
+        console.error("Error al guardar producto: ", error);
+        return false;
+    }
 }
 
 // ✅ Obtener inventario
-function obtenerInventario() {
-    return JSON.parse(localStorage.getItem("inventario")) || [];
-}
-
-// ✅ Buscar producto en inventario
-function buscarProducto() {
-    let input = document.getElementById("busquedaProducto").value.toLowerCase();
-    let inventario = obtenerInventario();
-    let resultado = inventario.find(item => item.producto.toLowerCase() === input);
-
-    let resultadoDiv = document.getElementById("resultadoBusqueda");
-    if (resultado) {
-        resultadoDiv.innerHTML = `
-            <p><strong>Revista:</strong> ${resultado.revista}</p>
-            <p><strong>Cantidad:</strong> ${resultado.cantidad}</p>
-            <p><strong>Precio de compra:</strong> $${resultado.precio_compra}</p>
-            <button onclick="realizarVenta('${resultado.producto}', ${resultado.precio_compra})">Realizar Venta</button>
-        `;
-    } else {
-        resultadoDiv.innerHTML = "<p>Producto no encontrado.</p>";
-    }
-}
-
-// ✅ Actualizar stock en inventario
-function actualizarStock(productoId, cantidad) {
-    let inventario = obtenerInventario();
-    let productoIndex = inventario.findIndex(p => p.id === productoId);
-
-    if (productoIndex === -1) {
-        return false;
-    }
-
-    inventario[productoIndex].cantidad = Math.max(0, parseInt(inventario[productoIndex].cantidad) + parseInt(cantidad));
-    localStorage.setItem("inventario", JSON.stringify(inventario));
-    return true;
-}
-
-// ✅ Mostrar inventario en tabla
-function mostrarInventario() {
-    let inventario = obtenerInventario();
-    let tabla = document.getElementById("tablaInventario");
-    if (tabla) {
-        tabla.innerHTML = "";
-
-        inventario.forEach(item => {
-            let fila = `<tr>
-                <td>${item.revista}</td>
-                <td>${item.producto}</td>
-                <td>${item.cantidad}</td>
-                <td>${item.precio_compra}</td>
-            </tr>`;
-            tabla.innerHTML += fila;
+async function obtenerInventario() {
+    try {
+        const inventarioSnapshot = await getDocs(collection(db, "inventario"));
+        const inventario = [];
+        inventarioSnapshot.forEach((doc) => {
+            inventario.push({ id: doc.id, ...doc.data() });
         });
+        return inventario;
+    } catch (error) {
+        console.error("Error al obtener inventario: ", error);
+        return [];
     }
 }
 
-// ✅ Mostrar ventas en tabla
-function mostrarVentas() {
-    let ventas = obtenerVentas();
-    let tabla = document.getElementById("tablaVentas");
-    if (tabla) {
-        tabla.innerHTML = "";
-
-        ventas.forEach(venta => {
-            let fila = `<tr>
-                <td>${venta.cliente}</td>
-                <td>${venta.contacto}</td>
-                <td>${venta.vendedor}</td>
-                <td>${venta.fecha}</td>
-                <td>${venta.revista}</td>
-                <td>${venta.estado}</td>
-                <td>${venta.valor}</td>
-            </tr>`;
-            tabla.innerHTML += fila;
+// ✅ Escuchar cambios en inventario (tiempo real)
+function escucharInventario(callback) {
+    const q = query(collection(db, "inventario"));
+    return onSnapshot(q, (querySnapshot) => {
+        const inventario = [];
+        querySnapshot.forEach((doc) => {
+            inventario.push({ id: doc.id, ...doc.data() });
         });
-    }
-}
-
-// ✅ Funciones específicas para la página de abonos
-function buscarVentaAbonos() {
-    const busqueda = document.getElementById("buscarVenta").value.trim();
-    if (!busqueda) {
-        alert("Por favor ingrese un ID o nombre de cliente para buscar");
-        return;
-    }
-
-    const ventas = obtenerVentas();
-    let ventaEncontrada = null;
-
-    // Primero buscar por ID exacto
-    ventaEncontrada = ventas.find(venta => venta.id === busqueda);
-
-    // Si no se encuentra por ID, buscar por nombre de cliente
-    if (!ventaEncontrada) {
-        const ventasPorCliente = ventas.filter(venta => 
-            venta.cliente.toLowerCase().includes(busqueda.toLowerCase())
-        );
-
-        if (ventasPorCliente.length > 0) {
-            // Si hay múltiples coincidencias, mostrar la más reciente
-            ventaEncontrada = ventasPorCliente[ventasPorCliente.length - 1];
-        }
-    }
-
-    if (ventaEncontrada) {
-        mostrarDetalleVenta(ventaEncontrada);
-    } else {
-        alert("No se encontró ninguna venta con ese ID o nombre de cliente");
-    }
-}
-
-function mostrarDetalleVenta(venta) {
-    document.getElementById("detalleVenta").style.display = "block";
-    document.getElementById("cliente").textContent = venta.cliente;
-    document.getElementById("vendedor").textContent = venta.vendedor;
-    document.getElementById("fecha").textContent = new Date(venta.fecha).toLocaleDateString();
-    document.getElementById("estado").textContent = venta.estado;
-    document.getElementById("valorTotal").textContent = parseFloat(venta.valor).toLocaleString();
-    document.getElementById("saldoPendiente").textContent = parseFloat(venta.saldo || venta.valor).toLocaleString();
-    
-    // Guardar el ID de la venta actual en un atributo data para usarlo en otras funciones
-    document.getElementById("detalleVenta").setAttribute("data-venta-id", venta.id);
-    
-    // Mostrar historial de abonos
-    mostrarHistorialAbonos(venta);
-}
-
-function mostrarHistorialAbonos(venta) {
-    const listaAbonos = document.getElementById("listaAbonos");
-    listaAbonos.innerHTML = "";
-    
-    if (!venta.abonos || venta.abonos.length === 0) {
-        listaAbonos.innerHTML = "<li>No hay abonos registrados</li>";
-        return;
-    }
-    
-    venta.abonos.forEach(abono => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${new Date(abono.fecha).toLocaleDateString()}</strong>: $${parseFloat(abono.monto).toLocaleString()}`;
-        listaAbonos.appendChild(li);
+        callback(inventario);
     });
 }
 
-function agregarAbonoVenta() {
-    const idVenta = document.getElementById("detalleVenta").getAttribute("data-venta-id");
-    const montoAbono = document.getElementById("montoAbono").value;
-    
-    if (!montoAbono || parseFloat(montoAbono) <= 0) {
-        alert("Por favor ingrese un monto válido para el abono");
-        return;
-    }
-    
-    if (agregarAbono(idVenta, montoAbono)) {
-        alert("Abono registrado correctamente");
-        document.getElementById("montoAbono").value = "";
+// ✅ Actualizar stock en inventario
+async function actualizarStock(productoId, cantidad) {
+    try {
+        const docRef = doc(db, "inventario", productoId);
+        const docSnap = await getDoc(docRef);
         
-        // Actualizar la información mostrada
-        const ventaActualizada = buscarVenta(idVenta);
-        mostrarDetalleVenta(ventaActualizada);
-    } else {
-        alert("Error al registrar el abono. Verifique que el monto no sea mayor al saldo pendiente.");
-    }
-}
-
-function marcarVentaPagada() {
-    const idVenta = document.getElementById("detalleVenta").getAttribute("data-venta-id");
-    
-    if (confirm("¿Está seguro de marcar esta venta como pagada? Esto registrará un abono por el saldo pendiente.")) {
-        if (marcarComoPagado(idVenta)) {
-            alert("Venta marcada como pagada correctamente");
-            
-            // Actualizar la información mostrada
-            const ventaActualizada = buscarVenta(idVenta);
-            mostrarDetalleVenta(ventaActualizada);
-        } else {
-            alert("Error al marcar la venta como pagada");
+        if (!docSnap.exists()) {
+            console.error("Producto no encontrado");
+            return false;
         }
+        
+        const producto = docSnap.data();
+        const nuevoStock = Math.max(0, parseInt(producto.cantidad) + parseInt(cantidad));
+        
+        await updateDoc(docRef, {
+            cantidad: nuevoStock
+        });
+        
+        return true;
+    } catch (error) {
+        console.error("Error al actualizar stock: ", error);
+        return false;
     }
 }
 
-// ✅ Inicialización
-document.addEventListener("DOMContentLoaded", function() {
-    verificarLocalStorage();
-    
-    // Inicializar componentes según la página actual
-    if (document.getElementById("tablaInventario")) {
-        mostrarInventario();
+// ✅ Eliminar producto
+async function eliminarProducto(idProducto) {
+    try {
+        await deleteDoc(doc(db, "inventario", idProducto));
+        console.log("Producto eliminado");
+        return true;
+    } catch (error) {
+        console.error("Error al eliminar producto: ", error);
+        return false;
     }
-    
-    if (document.getElementById("tablaVentas")) {
-        mostrarVentas();
+}
+
+// ✅ Buscar producto por nombre
+async function buscarProductoPorNombre(nombre) {
+    try {
+        const q = query(
+            collection(db, "inventario"), 
+            where("nombre", ">=", nombre),
+            where("nombre", "<=", nombre + '\uf8ff')
+        );
+        const querySnapshot = await getDocs(q);
+        const productos = [];
+        querySnapshot.forEach((doc) => {
+            productos.push({ id: doc.id, ...doc.data() });
+        });
+        return productos;
+    } catch (error) {
+        console.error("Error al buscar productos: ", error);
+        return [];
     }
-});
+}
+
+// ✅ Obtener productos con stock bajo
+async function obtenerProductosStockBajo(limite = 10) {
+    try {
+        const inventario = await obtenerInventario();
+        return inventario.filter(producto => parseInt(producto.cantidad) < limite);
+    } catch (error) {
+        console.error("Error al obtener productos con stock bajo: ", error);
+        return [];
+    }
+}
+
+// ✅ Calcular valor total del inventario
+async function calcularValorInventario() {
+    try {
+        const inventario = await obtenerInventario();
+        return inventario.reduce((total, producto) => {
+            return total + (parseFloat(producto.precio) * parseInt(producto.cantidad));
+        }, 0);
+    } catch (error) {
+        console.error("Error al calcular valor del inventario: ", error);
+        return 0;
+    }
+}
+
+// ✅ Filtrar ventas por fecha
+async function filtrarVentasPorFecha(fechaInicio, fechaFin) {
+    try {
+        const ventas = await obtenerVentas();
+        return ventas.filter(venta => {
+            const fechaVenta = new Date(venta.fecha);
+            const inicio = new Date(fechaInicio);
+            const fin = new Date(fechaFin);
+            fin.setHours(23, 59, 59); // Incluir todo el día final
+            return fechaVenta >= inicio && fechaVenta <= fin;
+        });
+    } catch (error) {
+        console.error("Error al filtrar ventas por fecha: ", error);
+        return [];
+    }
+}
+
+// Exportar las funciones
+export {
+    verificarFirebase,
+    guardarVenta,
+    obtenerVentas,
+    escucharVentas,
+    buscarVentasPorCliente,
+    buscarVenta,
+    agregarAbono,
+    marcarComoPagado,
+    eliminarVenta,
+    guardarProducto,
+    obtenerInventario,
+    escucharInventario,
+    actualizarStock,
+    eliminarProducto,
+    buscarProductoPorNombre,
+    obtenerProductosStockBajo,
+    calcularValorInventario,
+    filtrarVentasPorFecha
+};
