@@ -2,7 +2,7 @@
 
 Este es un sistema de facturación basado en HTML, CSS y JavaScript, diseñado para gestionar ventas y productos de inventario.
 
-🔗 **Accede a la página aquí:** [https://nimon10.github.io/](https://nimon10.github.io/)
+🔗 **Accede a la página aquí:** [https://nimon10.github.io/](https://SDF.github.io/)
 
 ## 🚀 Funcionalidades
 - 📦 **Inventario:** Agrega y gestiona productos.
