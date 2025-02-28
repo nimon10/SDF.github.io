@@ -18,7 +18,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <ul id="menu">
-                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="../index.html">Inicio</a></li>
                 <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="venta_directa.html">Nueva Venta</a></li>
                 <li><a href="venta_descuento.html">Venta con Descuento</a></li>
@@ -35,117 +35,359 @@
         <div class="card">
             <h2>Buscar Ventas Pendientes</h2>
             <div class="form-group">
-                <input type="text" id="buscarVenta" placeholder="Ingrese el nombre del cliente">
-                <button id="buscar-btn">
+                <label for="buscar-cliente">Buscar por Cliente:</label>
+                <input type="text" id="buscar-cliente" placeholder="Nombre del cliente...">
+                <button id="btn-buscar" style="margin-top: 1rem;">
                     <i class="fas fa-search"></i> Buscar
                 </button>
             </div>
         </div>
         
-        <div class="card" id="detalleVenta" style="display: none;">
-            <h2>Detalles de la Venta</h2>
-            <p><strong>Cliente:</strong> <span id="cliente"></span></p>
-            <p><strong>Vendedor:</strong> <span id="vendedor"></span></p>
-            <p><strong>Fecha:</strong> <span id="fecha"></span></p>
-            <p><strong>Estado:</strong> <span id="estado"></span></p>
-            <p><strong>Valor Total:</strong> $<span id="valorTotal"></span></p>
-            <p><strong>Saldo Pendiente:</strong> $<span id="saldoPendiente"></span></p>
-            
-            <h3>Agregar Abono</h3>
-            <div class="form-group">
-                <input type="number" id="montoAbono" placeholder="Monto del abono">
-                <button id="agregar-abono-btn">
-                    <i class="fas fa-plus-circle"></i> Agregar Abono
-                </button>
-                <button id="marcar-pagado-btn" class="btn-secondary">
-                    <i class="fas fa-check-circle"></i> Marcar como Pagado
-                </button>
+        <div id="mensaje" class="mensaje"></div>
+        
+        <div class="card">
+            <h2>Ventas Pendientes</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Contacto</th>
+                            <th>Fecha</th>
+                            <th>Valor Total</th>
+                            <th>Saldo Pendiente</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ventas-pendientes-body">
+                        <!-- Aquí se cargarán las ventas pendientes -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card" id="detalle-venta" style="display: none;">
+            <h2>Detalle de Venta</h2>
+            <div id="info-venta">
+                <!-- Aquí se cargará la información de la venta seleccionada -->
             </div>
             
+            <h3>Registrar Nuevo Abono</h3>
+            <form id="form-abono">
+                <div class="form-group">
+                    <label for="monto-abono">Monto del Abono:</label>
+                    <input type="number" id="monto-abono" min="0" step="0.01" placeholder="Ingrese el monto a abonar" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fecha-abono">Fecha del Abono:</label>
+                    <input type="date" id="fecha-abono" required>
+                </div>
+                
+                <button type="submit" id="btn-registrar-abono">
+                    <i class="fas fa-plus-circle"></i> Registrar Abono
+                </button>
+                
+                <button type="button" id="btn-pagar-total" class="btn-secondary">
+                    <i class="fas fa-check-circle"></i> Pagar Total
+                </button>
+            </form>
+            
             <h3>Historial de Abonos</h3>
-            <ul id="listaAbonos"></ul>
+            <div id="historial-abonos">
+                <!-- Aquí se cargará el historial de abonos -->
+            </div>
         </div>
     </div>
     
+    <footer>
+        <div class="container">
+            <div>
+                <h3>Sistema de Gestión</h3>
+                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
+            </div>
+            <div>
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="../index.html">Inicio</a></li>
+                    <li><a href="ventas.html">Ventas</a></li>
+                    <li><a href="inventario.html">Inventario</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Contacto</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> info@sistemaventas.com</li>
+                    <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <p>&copy; 2023 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
     <script type="module">
-        import { buscarVenta, agregarAbono, marcarComoPagado } from '../scripts/script.js';
+        import { 
+            obtenerVentas, 
+            escucharVentas, 
+            buscarVentasPorCliente, 
+            buscarVenta,
+            agregarAbono,
+            marcarComoPagado
+        } from '../scripts/script.js';
         
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('buscar-btn').addEventListener('click', buscarVentaAbonos);
-            document.getElementById('agregar-abono-btn').addEventListener('click', agregarAbonoVenta);
-            document.getElementById('marcar-pagado-btn').addEventListener('click', marcarVentaPagada);
-        });
-        
-        async function buscarVentaAbonos() {
-            const busqueda = document.getElementById("buscarVenta").value.trim();
-            if (!busqueda) {
-                alert("Por favor ingrese un ID o nombre de cliente para buscar");
-                return;
-            }
+            const mensaje = document.getElementById('mensaje');
+            const buscarClienteInput = document.getElementById('buscar-cliente');
+            const btnBuscar = document.getElementById('btn-buscar');
+            const detalleVenta = document.getElementById('detalle-venta');
+            const formAbono = document.getElementById('form-abono');
+            const btnPagarTotal = document.getElementById('btn-pagar-total');
             
-            try {
-                let ventaEncontrada = await buscarVenta(busqueda);
-                if (ventaEncontrada) {
-                    mostrarDetalleVenta(ventaEncontrada);
-                } else {
-                    alert("No se encontró ninguna venta");
-                }
-            } catch (error) {
-                console.error("Error al buscar venta:", error);
-                alert("Error al buscar la venta");
-            }
-        }
-        
-        function mostrarDetalleVenta(venta) {
-            document.getElementById("detalleVenta").style.display = "block";
-            document.getElementById("cliente").textContent = venta.cliente;
-            document.getElementById("vendedor").textContent = venta.vendedor;
-            document.getElementById("fecha").textContent = new Date(venta.fecha).toLocaleDateString();
-            document.getElementById("estado").textContent = venta.estado;
-            document.getElementById("valorTotal").textContent = parseFloat(venta.valor).toLocaleString();
-            document.getElementById("saldoPendiente").textContent = parseFloat(venta.saldo || venta.valor).toLocaleString();
-            document.getElementById("detalleVenta").setAttribute("data-venta-id", venta.id);
-        }
-        
-        async function agregarAbonoVenta() {
-            const idVenta = document.getElementById("detalleVenta").getAttribute("data-venta-id");
-            const montoAbono = document.getElementById("montoAbono").value;
+            // Establecer la fecha actual por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha-abono').value = hoy;
             
-            if (!montoAbono || parseFloat(montoAbono) <= 0) {
-                alert("Ingrese un monto válido");
-                return;
-            }
+            // Variable para almacenar la venta seleccionada actualmente
+            let ventaSeleccionada = null;
             
-            try {
-                const resultado = await agregarAbono(idVenta, montoAbono);
-                if (resultado) {
-                    alert("Abono registrado correctamente");
-                } else {
-                    alert("Error al registrar el abono");
-                }
-            } catch (error) {
-                console.error("Error al agregar abono:", error);
-                alert("Error al registrar el abono");
-            }
-        }
-        
-        async function marcarVentaPagada() {
-            const idVenta = document.getElementById("detalleVenta").getAttribute("data-venta-id");
-            
-            if (confirm("¿Marcar como pagada?")) {
-                try {
-                    const resultado = await marcarComoPagado(idVenta);
-                    if (resultado) {
-                        alert("Venta marcada como pagada");
+            // Escuchar cambios en ventas para actualizar la lista
+            const unsubscribe = escucharVentas(function(ventas) {
+                // Filtrar solo ventas pendientes
+                const ventasPendientes = ventas.filter(venta => 
+                    venta.estado === 'Pendiente' && venta.saldo > 0
+                );
+                mostrarVentasPendientes(ventasPendientes);
+                
+                // Si hay una venta seleccionada, actualizar su información
+                if (ventaSeleccionada) {
+                    const ventaActualizada = ventas.find(v => v.id === ventaSeleccionada.id);
+                    if (ventaActualizada) {
+                        ventaSeleccionada = ventaActualizada;
+                        mostrarDetalleVenta(ventaActualizada);
                     } else {
-                        alert("Error al marcar la venta");
+                        // Si la venta ya no existe (fue eliminada o pagada completamente)
+                        detalleVenta.style.display = 'none';
+                        ventaSeleccionada = null;
+                    }
+                }
+            });
+            
+            // Buscar ventas pendientes por cliente
+            btnBuscar.addEventListener('click', async function() {
+                const nombreCliente = buscarClienteInput.value.trim();
+                
+                if (nombreCliente) {
+                    try {
+                        const ventas = await buscarVentasPorCliente(nombreCliente);
+                        const ventasPendientes = ventas.filter(venta => 
+                            venta.estado === 'Pendiente' && venta.saldo > 0
+                        );
+                        
+                        mostrarVentasPendientes(ventasPendientes);
+                        
+                        if (ventasPendientes.length === 0) {
+                            mostrarMensaje(`No se encontraron ventas pendientes para "${nombreCliente}"`, 'info');
+                        }
+                    } catch (error) {
+                        console.error('Error al buscar ventas:', error);
+                        mostrarMensaje('Error al buscar ventas pendientes', 'error');
+                    }
+                } else {
+                    // Si no hay término de búsqueda, mostrar todas las ventas pendientes
+                    const ventas = await obtenerVentas();
+                    const ventasPendientes = ventas.filter(venta => 
+                        venta.estado === 'Pendiente' && venta.saldo > 0
+                    );
+                    mostrarVentasPendientes(ventasPendientes);
+                }
+            });
+            
+            // Registrar abono
+            formAbono.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!ventaSeleccionada) {
+                    mostrarMensaje('No hay venta seleccionada', 'error');
+                    return;
+                }
+                
+                const montoAbono = parseFloat(document.getElementById('monto-abono').value);
+                
+                if (isNaN(montoAbono) || montoAbono <= 0) {
+                    mostrarMensaje('Ingrese un monto válido', 'error');
+                    return;
+                }
+                
+                if (montoAbono > ventaSeleccionada.saldo) {
+                    mostrarMensaje('El abono no puede ser mayor que el saldo pendiente', 'error');
+                    return;
+                }
+                
+                try {
+                    const resultado = await agregarAbono(ventaSeleccionada.id, montoAbono);
+                    
+                    if (resultado) {
+                        mostrarMensaje('Abono registrado con éxito', 'exito');
+                        document.getElementById('monto-abono').value = '';
+                    } else {
+                        mostrarMensaje('Error al registrar el abono', 'error');
                     }
                 } catch (error) {
-                    console.error("Error:", error);
-                    alert("Error al marcar la venta");
+                    console.error('Error al registrar abono:', error);
+                    mostrarMensaje('Error al registrar el abono', 'error');
+                }
+            });
+            
+            // Pagar total
+            btnPagarTotal.addEventListener('click', async function() {
+                if (!ventaSeleccionada) {
+                    mostrarMensaje('No hay venta seleccionada', 'error');
+                    return;
+                }
+                
+                if (confirm(`¿Está seguro de marcar como pagada la venta de ${ventaSeleccionada.cliente}?`)) {
+                    try {
+                        const resultado = await marcarComoPagado(ventaSeleccionada.id);
+                        
+                        if (resultado) {
+                            mostrarMensaje('Venta marcada como pagada con éxito', 'exito');
+                            detalleVenta.style.display = 'none';
+                            ventaSeleccionada = null;
+                        } else {
+                            mostrarMensaje('Error al marcar la venta como pagada', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error al marcar como pagado:', error);
+                        mostrarMensaje('Error al marcar la venta como pagada', 'error');
+                    }
+                }
+            });
+            
+            // Menú móvil
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const menu = document.getElementById('menu');
+            
+            menuBtn.addEventListener('click', function() {
+                menu.classList.toggle('show');
+            });
+            
+            // Función para mostrar ventas pendientes
+            function mostrarVentasPendientes(ventas) {
+                const ventasPendientesBody = document.getElementById('ventas-pendientes-body');
+                
+                ventasPendientesBody.innerHTML = '';
+                
+                if (ventas.length === 0) {
+                    ventasPendientesBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay ventas pendientes</td></tr>';
+                    return;
+                }
+                
+                ventas.forEach(venta => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${venta.cliente}</td>
+                        <td>${venta.contacto}</td>
+                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                        <td class="saldo-pendiente">$${parseFloat(venta.saldo).toLocaleString()}</td>
+                        <td><span class="badge badge-warning">${venta.estado}</span></td>
+                        <td>
+                            <button class="btn-icon" onclick="verDetalleVenta('${venta.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    `;
+                    ventasPendientesBody.appendChild(fila);
+                });
+            }
+            
+            // Función para mostrar detalle de venta
+            async function mostrarDetalleVenta(venta) {
+                const infoVenta = document.getElementById('info-venta');
+                const historialAbonos = document.getElementById('historial-abonos');
+                
+                // Mostrar información de la venta
+                infoVenta.innerHTML = `
+                    <p><strong>Cliente:</strong> ${venta.cliente}</p>
+                    <p><strong>Contacto:</strong> ${venta.contacto}</p>
+                    <p><strong>Fecha:</strong> ${new Date(venta.fecha).toLocaleDateString()}</p>
+                    <p><strong>Vendedor:</strong> ${venta.vendedor}</p>
+                    <p><strong>Revista:</strong> ${venta.revista || '-'}</p>
+                    <p><strong>Valor Total:</strong> $${parseFloat(venta.valor).toLocaleString()}</p>
+                    <p><strong>Saldo Pendiente:</strong> <span class="saldo-pendiente">$${parseFloat(venta.saldo).toLocaleString()}</span></p>
+                `;
+                
+                // Mostrar historial de abonos
+                if (venta.abonos && venta.abonos.length > 0) {
+                    let abonosHTML = '<ul class="lista-abonos">';
+                    
+                    venta.abonos.forEach((abono, index) => {
+                        abonosHTML += `
+                            <li>
+                                <strong>Abono ${index + 1}:</strong> $${parseFloat(abono.monto).toLocaleString()} 
+                                <span style="color: #666;">(${new Date(abono.fecha).toLocaleDateString()})</span>
+                            </li>
+                        `;
+                    });
+                    
+                    abonosHTML += '</ul>';
+                    historialAbonos.innerHTML = abonosHTML;
+                } else {
+                    historialAbonos.innerHTML = '<p>No hay abonos registrados</p>';
+                }
+                
+                // Mostrar el panel de detalle
+                detalleVenta.style.display = 'block';
+            }
+            
+            // Función para mostrar mensajes
+            function mostrarMensaje(texto, tipo) {
+                mensaje.innerHTML = `<div class="mensaje ${tipo}"><i class="fas fa-${tipo === 'exito' ? 'check' : tipo === 'info' ? 'info' : 'exclamation'}-circle"></i> ${texto}</div>`;
+                
+                setTimeout(() => {
+                    mensaje.innerHTML = '';
+                }, 3000);
+            }
+            
+            // Función para ver detalle de venta (disponible globalmente)
+            window.verDetalleVenta = async function(id) {
+                try {
+                    const venta = await buscarVenta(id);
+                    
+                    if (venta) {
+                        ventaSeleccionada = venta;
+                        mostrarDetalleVenta(venta);
+                    } else {
+                        mostrarMensaje('No se encontró la venta', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error al obtener detalle de venta:', error);
+                    mostrarMensaje('Error al obtener detalle de venta', 'error');
+                }
+            };
+            
+            // Cargar ventas pendientes al inicio
+            async function cargarVentasPendientes() {
+                try {
+                    const ventas = await obtenerVentas();
+                    const ventasPendientes = ventas.filter(venta => 
+                        venta.estado === 'Pendiente' && venta.saldo > 0
+                    );
+                    mostrarVentasPendientes(ventasPendientes);
+                } catch (error) {
+                    console.error('Error al cargar ventas pendientes:', error);
+                    mostrarMensaje('Error al cargar ventas pendientes', 'error');
                 }
             }
-        }
+            
+            // Cargar ventas pendientes al iniciar
+            cargarVentasPendientes();
+        });
     </script>
 </body>
 </html>

@@ -11,15 +11,15 @@
 <body>
     <nav>
         <div class="container">
-            <a href="index.html" class="logo">
+            <a href="../index.html" class="logo">
                 <i class="fas fa-cash-register"></i> SistemaVentas
             </a>
             <button class="mobile-menu-btn">
                 <i class="fas fa-bars"></i>
             </button>
             <ul id="menu">
-                <li><a href="../index.html" class="activo">Inicio</a></li>
-                <li><a href="ventas.html">Ventas</a></li>
+                <li><a href="../index.html">Inicio</a></li>
+                <li><a href="ventas.html" class="activo">Ventas</a></li>
                 <li><a href="venta_directa.html">Nueva Venta</a></li>
                 <li><a href="venta_descuento.html">Venta con Descuento</a></li>
                 <li><a href="abonos.html">Abonos</a></li>
@@ -78,19 +78,48 @@
         </div>
     </div>
     
+    <footer>
+        <div class="container">
+            <div>
+                <h3>Sistema de Gestión</h3>
+                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
+            </div>
+            <div>
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="../index.html">Inicio</a></li>
+                    <li><a href="ventas.html">Ventas</a></li>
+                    <li><a href="inventario.html">Inventario</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Contacto</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> info@sistemaventas.com</li>
+                    <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <p>&copy; 2023 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
     <script type="module">
         import { 
             obtenerVentas, 
             escucharVentas, 
             filtrarVentasPorFecha, 
-            eliminarVenta 
+            eliminarVenta,
+            buscarVenta
         } from '../scripts/script.js';
         import { exportarVentasCSV } from '../scripts/ventas.js';
         
         document.addEventListener('DOMContentLoaded', function() {
             const unsubscribe = escucharVentas(function(ventas) {
                 cargarVentas(ventas);
-                actualizarEstadisticas(ventas);
             });
             
             document.getElementById('filtro-ventas').addEventListener('submit', function(e) {
@@ -108,29 +137,85 @@
             menuBtn.addEventListener('click', function() {
                 menu.classList.toggle('show');
             });
+            
+            // Hacer disponible la función eliminarVenta para los botones de la tabla
+            window.eliminarVentaUI = async function(id) {
+                if (confirm('¿Estás seguro de eliminar esta venta? Esta acción no se puede deshacer.')) {
+                    try {
+                        const resultado = await eliminarVenta(id);
+                        
+                        if (resultado) {
+                            alert('Venta eliminada con éxito');
+                        } else {
+                            alert('Error al eliminar la venta');
+                        }
+                    } catch (error) {
+                        console.error('Error al eliminar venta:', error);
+                        alert('Error al eliminar la venta');
+                    }
+                }
+            };
+            
+            // Función para editar una venta
+            window.editarVentaUI = async function(id) {
+                try {
+                    // Obtener los datos de la venta
+                    const venta = await buscarVenta(id);
+                    
+                    if (!venta) {
+                        alert('No se encontró la venta');
+                        return;
+                    }
+                    
+                    // Redirigir a la página correspondiente según el tipo de venta
+                    if (venta.tipoVenta === 'directa') {
+                        window.location.href = `venta_directa.html?id=${id}`;
+                    } else if (venta.tipoVenta === 'descuento') {
+                        window.location.href = `venta_descuento.html?id=${id}`;
+                    } else {
+                        alert('Tipo de venta no reconocido');
+                    }
+                } catch (error) {
+                    console.error('Error al editar venta:', error);
+                    alert('Error al editar la venta');
+                }
+            };
         });
         
         async function cargarVentas(ventasPrecargadas) {
-            let ventas = ventasPrecargadas || await obtenerVentas();
-            const fechaInicio = document.getElementById('fecha-inicio').value;
-            const fechaFin = document.getElementById('fecha-fin').value;
-            const buscarCliente = document.getElementById('buscar-cliente').value;
-            
-            if (fechaInicio && fechaFin) {
-                ventas = filtrarVentasPorFecha(ventas, fechaInicio, fechaFin);
-            }
-            
-            if (buscarCliente) {
-                ventas = ventas.filter(venta => 
-                    venta.cliente.toLowerCase().includes(buscarCliente.toLowerCase())
-                );
-            }
-            
-            const ventasBody = document.getElementById('ventas-body');
-            ventasBody.innerHTML = ventas.length === 0 
-                ? '<tr><td colspan="8" style="text-align: center;">No se encontraron ventas</td></tr>'
-                : ventas.map(venta => `
-                    <tr>
+            try {
+                let ventas = ventasPrecargadas;
+                
+                if (!ventas) {
+                    ventas = await obtenerVentas();
+                }
+                
+                const fechaInicio = document.getElementById('fecha-inicio').value;
+                const fechaFin = document.getElementById('fecha-fin').value;
+                const buscarCliente = document.getElementById('buscar-cliente').value;
+                
+                if (fechaInicio && fechaFin) {
+                    ventas = await filtrarVentasPorFecha(fechaInicio, fechaFin);
+                }
+                
+                if (buscarCliente) {
+                    ventas = ventas.filter(venta => 
+                        venta.cliente.toLowerCase().includes(buscarCliente.toLowerCase())
+                    );
+                }
+                
+                const ventasBody = document.getElementById('ventas-body');
+                
+                if (ventas.length === 0) {
+                    ventasBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron ventas</td></tr>';
+                    return;
+                }
+                
+                ventasBody.innerHTML = '';
+                
+                ventas.forEach(venta => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
                         <td>${venta.cliente}</td>
                         <td>${venta.contacto}</td>
                         <td>${venta.vendedor}</td>
@@ -138,9 +223,21 @@
                         <td>${venta.revista || '-'}</td>
                         <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
                         <td>$${parseFloat(venta.valor).toLocaleString()}</td>
-                        <td><button class="btn-icon" onclick="eliminarVentaUI('${venta.id}')"><i class="fas fa-trash"></i></button></td>
-                    </tr>
-                `).join('');
+                        <td>
+                            <button class="btn-icon" onclick="editarVentaUI('${venta.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon" onclick="eliminarVentaUI('${venta.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    ventasBody.appendChild(fila);
+                });
+            } catch (error) {
+                console.error('Error al cargar ventas:', error);
+                document.getElementById('ventas-body').innerHTML = '<tr><td colspan="8" style="text-align: center;">Error al cargar las ventas</td></tr>';
+            }
         }
     </script>
 </body>

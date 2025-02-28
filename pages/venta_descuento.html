@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario | Sistema de Gestión</title>
+    <title>Venta con Descuento | Sistema de Gestión</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
@@ -15,13 +15,13 @@
                 <i class="fas fa-cash-register"></i> SistemaVentas
             </a>
             <button class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
+                <i class="fas fa-bars"></i> 
             </button>
             <ul id="menu">
-                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="../index.html">Inicio</a></li>
                 <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="venta_directa.html">Nueva Venta</a></li>
-                <li><a href="venta_descuento.html">Venta con Descuento</a></li>
+                <li><a href="venta_descuento.html" class="activo">Venta con Descuento</a></li>
                 <li><a href="abonos.html">Abonos</a></li>
                 <li><a href="inventario.html">Inventario</a></li>
                 <li><a href="ajuste_inventarios.html">Ajuste de Inventario</a></li>
@@ -30,24 +30,34 @@
     </nav>
     
     <div class="container">
-        <h1>Gestión de Inventario</h1>
+        <h1>Venta con Descuento</h1>
         
         <div class="card">
-            <h2>Agregar Nuevo Producto</h2>
-            <form id="formulario-producto">
+            <h2>Datos del Cliente</h2>
+            <form id="formulario-venta">
                 <div class="form-group">
-                    <label for="nombre">Nombre del Producto:</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Nombre del producto" required>
+                    <label for="cliente">Nombre del Cliente:</label>
+                    <input type="text" id="cliente" name="cliente" placeholder="Nombre completo del cliente" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Descripción del producto"></textarea>
+                    <label for="contacto">Número de Contacto:</label>
+                    <input type="text" id="contacto" name="contacto" placeholder="Número de teléfono" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="categoria">Categoría:</label>
-                    <select id="categoria" name="categoria" required>
+                    <label for="vendedor">Vendedor:</label>
+                    <select id="vendedor" name="vendedor" required>
+                        <option value="">Seleccione un vendedor</option>
+                        <option value="Gladys">Gladys</option>
+                        <option value="David">David</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="revista">Revista:</label>
+                    <select id="revista" name="revista" required>
+                        <option value="">Seleccione una revista</option>
                         <option value="Esika">Esika</option>
                         <option value="Carmel">Carmel</option>
                         <option value="Leonisa">Leonisa</option>
@@ -55,42 +65,25 @@
                         <option value="Pacifika">Pacifika</option>
                         <option value="Yanbal">Yanbal</option>
                         <option value="L'ebel">L'ebel</option>
-                        <option value="Novaventa">Novaventa/option>
+                        <option value="Novaventa">Novaventa</option>
                         <option value="Natura">Natura</option>
                         <option value="Login">Login</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="precio">Precio:</label>
-                    <input type="number" id="precio" name="precio" min="0" step="0.01" placeholder="Precio del producto" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cantidad">Cantidad en Stock:</label>
-                    <input type="number" id="cantidad" name="cantidad" min="0" step="1" placeholder="Cantidad disponible" required>
-                </div>
-                
-                <button type="submit">
-                    <i class="fas fa-plus-circle"></i> Agregar Producto
-                </button>
             </form>
         </div>
         
         <div id="mensaje" class="mensaje"></div>
         
-        <div class="card">
-            <h2>Buscar Productos</h2>
+        <div class="card" id="productos-container">
+            <h2>Productos Disponibles</h2>
             <div class="form-group">
-                <input type="text" id="buscar-producto" placeholder="Buscar por nombre de producto...">
+                <input type="text" id="buscar-producto" placeholder="Buscar producto...">
                 <button id="btn-buscar" style="margin-top: 1rem;">
                     <i class="fas fa-search"></i> Buscar
                 </button>
             </div>
-        </div>
-        
-        <div class="card">
-            <h2>Listado de Productos</h2>
+            
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -109,21 +102,103 @@
             </div>
         </div>
         
+        <div class="card" id="producto-seleccionado" style="display: none;">
+            <h2>Aplicar Descuento</h2>
+            <div class="form-group">
+                <label for="nombre-producto">Producto:</label>
+                <input type="text" id="nombre-producto" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="precio-original">Precio Original:</label>
+                <input type="text" id="precio-original" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="porcentaje-descuento">Porcentaje de Descuento (%):</label>
+                <input type="number" id="porcentaje-descuento" min="0" max="100" value="0" step="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="precio-final">Precio con Descuento:</label>
+                <input type="text" id="precio-final" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" id="cantidad" min="1" value="1" step="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="estado-venta">Estado de la Venta:</label>
+                <select id="estado-venta">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Completado">Completado</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            </div>
+            
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button id="btn-agregar-carrito" class="btn">
+                    <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                </button>
+            </div>
+        </div>
+        
+        <div class="card" id="carrito-container" style="display: none;">
+            <h2>Productos Seleccionados</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Precio Original</th>
+                            <th>Descuento</th>
+                            <th>Precio Final</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="carrito-body">
+                        <!-- Aquí se cargarán los productos seleccionados -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" style="text-align: right;"><strong>Total:</strong></td>
+                            <td id="total-venta">$0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button id="btn-completar-venta" class="btn">
+                    <i class="fas fa-check-circle"></i> Completar Venta
+                </button>
+            </div>
+        </div>
+        
         <div class="card">
-            <h2>Estadísticas de Inventario</h2>
-            <div class="stats-container">
-                <div class="stat-card">
-                    <h3>Total de Productos</h3>
-                    <div class="value" id="total-productos">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Valor del Inventario</h3>
-                    <div class="value" id="valor-inventario">$0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Productos con Stock Bajo</h3>
-                    <div class="value" id="stock-bajo">0</div>
-                </div>
+            <h2>Historial de Ventas con Descuento</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Vendedor</th>
+                            <th>Revista</th>
+                            <th>Valor</th>
+                            <th>Descuento</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historial-body">
+                        <!-- Aquí se cargará el historial de ventas -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -137,7 +212,7 @@
             <div>
                 <h3>Enlaces Rápidos</h3>
                 <ul>
-                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="../index.html">Inicio</a></li>
                     <li><a href="ventas.html">Ventas</a></li>
                     <li><a href="inventario.html">Inventario</a></li>
                 </ul>
@@ -146,7 +221,7 @@
                 <h3>Contacto</h3>
                 <ul>
                     <li><i class="fas fa-envelope"></i> info@sistemaventas.com</li>
-                    <li><i class="fas fa-phone"></i> +57 300 123 4567</li>
+                    <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
                 </ul>
             </div>
         </div>
@@ -157,143 +232,430 @@
         </div>
     </footer>
     
-    <script src="../scripts/script.js"></script>
-    <script src="../scripts/inventario.js"></script>
-   <script type="module">
-    import { 
-        guardarProducto, 
-        obtenerInventario, 
-        escucharInventario, 
-        buscarProductoPorNombre, 
-        obtenerProductosStockBajo, 
-        calcularValorInventario,
-        eliminarProducto
-    } from '../scripts/script.js';
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const formulario = document.getElementById('formulario-producto');
-        const mensaje = document.getElementById('mensaje');
-        const buscarInput = document.getElementById('buscar-producto');
-        const btnBuscar = document.getElementById('btn-buscar');
+    <script type="module">
+        import { db } from '../scripts/firebase-config.js';
         
-        // Escuchar cambios en inventario en tiempo real
-        const unsubscribe = escucharInventario(function(inventario) {
-            mostrarProductos(inventario);
-            actualizarEstadisticas(inventario);
-        });
+        import { 
+            obtenerInventario, 
+            escucharInventario,
+            actualizarStock,
+            guardarVenta,
+            escucharVentas,
+            buscarProductoPorNombre
+        } from '../scripts/script.js';
         
-        formulario.addEventListener('submit', async function(e) {
-            e.preventDefault();
+        document.addEventListener('DOMContentLoaded', function() {
+            const mensaje = document.getElementById('mensaje');
+            const revistaSelect = document.getElementById('revista');
+            const productosContainer = document.getElementById('productos-container');
+            const productoSeleccionado = document.getElementById('producto-seleccionado');
+            const carritoContainer = document.getElementById('carrito-container');
+            const buscarInput = document.getElementById('buscar-producto');
+            const btnBuscar = document.getElementById('btn-buscar');
+            const btnAgregarCarrito = document.getElementById('btn-agregar-carrito');
+            const btnCompletarVenta = document.getElementById('btn-completar-venta');
             
-            const producto = {
-                nombre: document.getElementById('nombre').value,
-                descripcion: document.getElementById('descripcion').value,
-                categoria: document.getElementById('categoria').value,
-                precio: document.getElementById('precio').value,
-                cantidad: document.getElementById('cantidad').value
-            };
+            // Elementos del producto seleccionado
+            const nombreProducto = document.getElementById('nombre-producto');
+            const precioOriginal = document.getElementById('precio-original');
+            const porcentajeDescuento = document.getElementById('porcentaje-descuento');
+            const precioFinal = document.getElementById('precio-final');
+            const cantidad = document.getElementById('cantidad');
+            const estadoVenta = document.getElementById('estado-venta');
             
-            try {
-                const resultado = await guardarProducto(producto);
-                
-                if (resultado) {
-                    mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Producto agregado correctamente</div>';
-                    formulario.reset();
-                    
-                    // Limpiar mensaje después de 3 segundos
-                    setTimeout(() => {
-                        mensaje.innerHTML = '';
-                    }, 3000);
+            // Carrito de compras
+            let carrito = [];
+            
+            // Producto actualmente seleccionado
+            let productoActual = null;
+            
+            // Ocultar inicialmente el contenedor de productos
+            productosContainer.style.display = 'none';
+            
+            // Cargar inventario inicial
+            cargarInventarioCompleto();
+            
+            // Escuchar cambios en inventario en tiempo real
+            const unsubscribeInventario = escucharInventario(function(inventario) {
+                if (revistaSelect.value) {
+                    mostrarProductosPorRevista(revistaSelect.value, inventario);
                 } else {
-                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al agregar el producto</div>';
+                    mostrarProductos(inventario);
                 }
-            } catch (error) {
-                console.error("Error al guardar producto:", error);
-                mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al agregar el producto</div>';
-            }
-        });
-        
-        btnBuscar.addEventListener('click', async function() {
-            const termino = buscarInput.value.trim();
-            if (termino) {
-                const resultados = await buscarProductoPorNombre(termino);
-                mostrarProductos(resultados);
-            } else {
-                const inventario = await obtenerInventario();
-                mostrarProductos(inventario);
-            }
-        });
-        
-        // Menú móvil
-        const menuBtn = document.querySelector('.mobile-menu-btn');
-        const menu = document.getElementById('menu');
-        
-        menuBtn.addEventListener('click', function() {
-            menu.classList.toggle('show');
-        });
-        
-        // Hacer disponible la función eliminarProducto para los botones de la tabla
-        window.eliminarProductoUI = async function(id) {
-            if (confirm('¿Estás seguro de eliminar este producto?')) {
-                try {
-                    const resultado = await eliminarProducto(id);
-                    if (resultado) {
-                        mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Producto eliminado correctamente</div>';
-                        setTimeout(() => {
-                            mensaje.innerHTML = '';
-                        }, 3000);
+            });
+            
+            // Escuchar cambios en ventas para actualizar historial
+            const unsubscribeVentas = escucharVentas(function(ventas) {
+                // Filtrar solo ventas con descuento
+                const ventasConDescuento = ventas.filter(venta => venta.tipoVenta === 'descuento');
+                mostrarHistorial(ventasConDescuento);
+            });
+            
+            // Cuando se selecciona una revista
+            revistaSelect.addEventListener('change', async function() {
+                const revistaSeleccionada = this.value;
+                
+                if (revistaSeleccionada) {
+                    productosContainer.style.display = 'block';
+                    const inventario = await obtenerInventario();
+                    mostrarProductosPorRevista(revistaSeleccionada, inventario);
+                } else {
+                    // Si no hay revista seleccionada, mostrar todo el inventario
+                    const inventario = await obtenerInventario();
+                    mostrarProductos(inventario);
+                    productosContainer.style.display = 'block';
+                }
+            });
+            
+            // Buscar productos
+            btnBuscar.addEventListener('click', async function() {
+                const termino = buscarInput.value.trim();
+                
+                if (termino) {
+                    const resultados = await buscarProductoPorNombre(termino);
+                    mostrarProductos(resultados);
+                } else {
+                    // Si no hay término de búsqueda, mostrar productos según la revista seleccionada
+                    const inventario = await obtenerInventario();
+                    if (revistaSelect.value) {
+                        mostrarProductosPorRevista(revistaSelect.value, inventario);
                     } else {
-                        mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al eliminar el producto</div>';
+                        mostrarProductos(inventario);
+                    }
+                }
+            });
+            
+            // Calcular precio con descuento cuando cambia el porcentaje
+            porcentajeDescuento.addEventListener('input', function() {
+                if (!productoActual) return;
+                
+                const descuento = parseFloat(this.value) || 0;
+                const precio = parseFloat(productoActual.precio);
+                const descuentoAplicado = precio * (descuento / 100);
+                const precioConDescuento = precio - descuentoAplicado;
+                
+                precioFinal.value = `$${precioConDescuento.toLocaleString()}`;
+            });
+            
+            // Agregar al carrito
+            btnAgregarCarrito.addEventListener('click', function() {
+                if (!productoActual) {
+                    mostrarMensaje('No hay producto seleccionado', 'error');
+                    return;
+                }
+                
+                const cantidadSeleccionada = parseInt(cantidad.value) || 1;
+                const descuento = parseFloat(porcentajeDescuento.value) || 0;
+                const precioOriginalValue = parseFloat(productoActual.precio);
+                const descuentoAplicado = precioOriginalValue * (descuento / 100);
+                const precioConDescuento = precioOriginalValue - descuentoAplicado;
+                
+                // Verificar si hay suficiente stock
+                if (cantidadSeleccionada > parseInt(productoActual.cantidad)) {
+                    mostrarMensaje('No hay suficiente stock disponible', 'error');
+                    return;
+                }
+                
+                // Agregar al carrito
+                carrito.push({
+                    id: productoActual.id,
+                    nombre: productoActual.nombre,
+                    precioOriginal: precioOriginalValue,
+                    descuento: descuento,
+                    precioFinal: precioConDescuento,
+                    cantidad: cantidadSeleccionada,
+                    subtotal: precioConDescuento * cantidadSeleccionada,
+                    estado: estadoVenta.value
+                });
+                
+                actualizarCarrito();
+                mostrarMensaje('Producto agregado al carrito', 'exito');
+                
+                // Ocultar panel de producto seleccionado
+                productoSeleccionado.style.display = 'none';
+            });
+            
+            // Completar venta
+            btnCompletarVenta.addEventListener('click', async function() {
+                if (carrito.length === 0) {
+                    mostrarMensaje('No hay productos en el carrito', 'error');
+                    return;
+                }
+                
+                const cliente = document.getElementById('cliente').value;
+                const contacto = document.getElementById('contacto').value;
+                const vendedor = document.getElementById('vendedor').value;
+                const revista = document.getElementById('revista').value;
+                
+                if (!cliente || !contacto || !vendedor) {
+                    mostrarMensaje('Complete todos los datos del cliente', 'error');
+                    return;
+                }
+                
+                // Calcular total y descuento total
+                let total = 0;
+                let totalOriginal = 0;
+                let descuentoTotal = 0;
+                
+                carrito.forEach(item => {
+                    total += item.subtotal;
+                    totalOriginal += (item.precioOriginal * item.cantidad);
+                });
+                
+                descuentoTotal = totalOriginal - total;
+                
+                // Crear objeto de venta
+                const venta = {
+                    cliente,
+                    contacto,
+                    vendedor,
+                    revista,
+                    fecha: new Date().toISOString().split('T')[0],
+                    valor: total,
+                    valorOriginal: totalOriginal,
+                    descuento: descuentoTotal,
+                    estado: estadoVenta.value,
+                    tipoVenta: 'descuento',
+                    productos: carrito.map(item => ({
+                        id: item.id,
+                        nombre: item.nombre,
+                        precioOriginal: item.precioOriginal,
+                        descuento: item.descuento,
+                        precioFinal: item.precioFinal,
+                        cantidad: item.cantidad
+                    }))
+                };
+                
+                try {
+                    // Guardar venta
+                    const resultado = await guardarVenta(venta);
+                    
+                    if (resultado) {
+                        // Actualizar stock solo si la venta está completada
+                        if (estadoVenta.value === 'Completado') {
+                            for (const item of carrito) {
+                                await actualizarStock(item.id, -item.cantidad);
+                            }
+                        }
+                        
+                        mostrarMensaje('Venta con descuento registrada con éxito', 'exito');
+                        
+                        // Limpiar formulario y carrito
+                        document.getElementById('formulario-venta').reset();
+                        carrito = [];
+                        actualizarCarrito();
+                        productoSeleccionado.style.display = 'none';
+                        
+                        // Recargar inventario
+                        cargarInventarioCompleto();
+                    } else {
+                        mostrarMensaje('Error al registrar la venta', 'error');
                     }
                 } catch (error) {
-                    console.error("Error al eliminar producto:", error);
-                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al eliminar el producto</div>';
+                    console.error('Error al procesar la venta:', error);
+                    mostrarMensaje('Error al procesar la venta', 'error');
+                }
+            });
+            
+            // Menú móvil
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const menu = document.getElementById('menu');
+            
+            menuBtn.addEventListener('click', function() {
+                menu.classList.toggle('show');
+            });
+            
+            // Función para cargar todo el inventario
+            async function cargarInventarioCompleto() {
+                try {
+                    const inventario = await obtenerInventario();
+                    mostrarProductos(inventario);
+                } catch (error) {
+                    console.error('Error al cargar inventario:', error);
+                    mostrarMensaje('Error al cargar el inventario', 'error');
                 }
             }
-        };
-    });
-    
-    function mostrarProductos(productos) {
-        const productosBody = document.getElementById('productos-body');
-        
-        productosBody.innerHTML = '';
-        
-        if (productos.length === 0) {
-            productosBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay productos en el inventario</td></tr>';
-            return;
-        }
-        
-        productos.forEach(producto => {
-            const fila = document.createElement('tr');
-            fila.innerHTML = `
-                <td>${producto.nombre}</td>
-                <td>${producto.categoria}</td>
-                <td>$${parseFloat(producto.precio).toLocaleString()}</td>
-                <td>${producto.cantidad}</td>
-                <td>
-                    <button class="btn-icon" onclick="eliminarProductoUI('${producto.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
-            productosBody.appendChild(fila);
+            
+                        // Función para mostrar productos por revista
+            async function mostrarProductosPorRevista(revista, inventario) {
+                if (!inventario) {
+                    inventario = await obtenerInventario();
+                }
+                
+                const productosFiltrados = inventario.filter(producto => 
+                    producto.categoria === revista && parseInt(producto.cantidad) > 0
+                );
+                
+                mostrarProductos(productosFiltrados);
+            }
+            
+            // Función para mostrar productos en la tabla
+            function mostrarProductos(productos) {
+                const productosBody = document.getElementById('productos-body');
+                
+                productosBody.innerHTML = '';
+                
+                if (productos.length === 0) {
+                    productosBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay productos disponibles en esta revista</td></tr>';
+                    return;
+                }
+                
+                productos.forEach(producto => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${producto.nombre}</td>
+                        <td>${producto.categoria}</td>
+                        <td>$${parseFloat(producto.precio).toLocaleString()}</td>
+                        <td>${producto.cantidad}</td>
+                        <td>
+                            <button class="btn-icon" onclick="seleccionarProducto('${producto.id}', '${producto.nombre}', ${producto.precio}, ${producto.cantidad})">
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </td>
+                    `;
+                    productosBody.appendChild(fila);
+                });
+            }
+            
+            // Función para mostrar historial de ventas con descuento
+            function mostrarHistorial(ventas) {
+                const historialBody = document.getElementById('historial-body');
+                
+                // Ordenar ventas por fecha (más recientes primero)
+                ventas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                
+                // Mostrar solo las últimas 10 ventas
+                const ventasRecientes = ventas.slice(0, 10);
+                
+                historialBody.innerHTML = '';
+                
+                if (ventasRecientes.length === 0) {
+                    historialBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay ventas con descuento registradas</td></tr>';
+                    return;
+                }
+                
+                ventasRecientes.forEach(venta => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                        <td>${venta.cliente}</td>
+                        <td>${venta.vendedor}</td>
+                        <td>${venta.revista || '-'}</td>
+                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                        <td>$${parseFloat(venta.descuento || 0).toLocaleString()}</td>
+                        <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
+                    `;
+                    historialBody.appendChild(fila);
+                });
+            }
+            
+            // Función para actualizar el carrito
+            function actualizarCarrito() {
+                const carritoBody = document.getElementById('carrito-body');
+                const totalVenta = document.getElementById('total-venta');
+                
+                if (carrito.length > 0) {
+                    carritoContainer.style.display = 'block';
+                } else {
+                    carritoContainer.style.display = 'none';
+                }
+                
+                carritoBody.innerHTML = '';
+                
+                let total = 0;
+                
+                carrito.forEach((item, index) => {
+                    const subtotal = item.precioFinal * item.cantidad;
+                    total += subtotal;
+                    
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${item.nombre}</td>
+                        <td>$${parseFloat(item.precioOriginal).toLocaleString()}</td>
+                        <td>${item.descuento}%</td>
+                        <td>$${parseFloat(item.precioFinal).toLocaleString()}</td>
+                        <td>
+                            <button class="btn-icon" onclick="decrementarCantidad(${index})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            ${item.cantidad}
+                            <button class="btn-icon" onclick="incrementarCantidad(${index})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </td>
+                        <td>$${parseFloat(subtotal).toLocaleString()}</td>
+                        <td>
+                            <button class="btn-icon" onclick="eliminarDelCarrito(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    carritoBody.appendChild(fila);
+                });
+                
+                totalVenta.textContent = `$${parseFloat(total).toLocaleString()}`;
+            }
+            
+            // Función para mostrar mensajes
+            function mostrarMensaje(texto, tipo) {
+                mensaje.innerHTML = `<div class="mensaje ${tipo}"><i class="fas fa-${tipo === 'exito' ? 'check' : 'exclamation'}-circle"></i> ${texto}</div>`;
+                
+                setTimeout(() => {
+                    mensaje.innerHTML = '';
+                }, 3000);
+            }
+            
+            // Funciones para manipular el carrito (disponibles globalmente)
+            window.seleccionarProducto = function(id, nombre, precio, stockDisponible) {
+                // Buscar el producto completo en el inventario
+                obtenerInventario().then(inventario => {
+                    const producto = inventario.find(p => p.id === id);
+                    if (producto) {
+                        productoActual = producto;
+                        
+                        // Mostrar panel de descuento
+                        nombreProducto.value = nombre;
+                        precioOriginal.value = `$${parseFloat(precio).toLocaleString()}`;
+                        porcentajeDescuento.value = 0;
+                        precioFinal.value = `$${parseFloat(precio).toLocaleString()}`;
+                        cantidad.value = 1;
+                        cantidad.max = stockDisponible;
+                        
+                        productoSeleccionado.style.display = 'block';
+                    }
+                });
+            };
+            
+            window.eliminarDelCarrito = function(index) {
+                carrito.splice(index, 1);
+                actualizarCarrito();
+            };
+            
+            window.incrementarCantidad = function(index) {
+                const item = carrito[index];
+                // Verificar stock disponible
+                obtenerInventario().then(inventario => {
+                    const producto = inventario.find(p => p.id === item.id);
+                    if (producto && item.cantidad < parseInt(producto.cantidad)) {
+                        item.cantidad++;
+                        item.subtotal = item.precioFinal * item.cantidad;
+                        actualizarCarrito();
+                    } else {
+                        mostrarMensaje('No hay suficiente stock disponible', 'error');
+                    }
+                });
+            };
+            
+            window.decrementarCantidad = function(index) {
+                if (carrito[index].cantidad > 1) {
+                    carrito[index].cantidad--;
+                    carrito[index].subtotal = carrito[index].precioFinal * carrito[index].cantidad;
+                } else {
+                    carrito.splice(index, 1);
+                }
+                actualizarCarrito();
+            };
         });
-    }
-    
-    async function actualizarEstadisticas(inventario) {
-        if (!inventario) {
-            inventario = await obtenerInventario();
-        }
-        
-        const totalProductos = inventario.length;
-        const valorInventario = await calcularValorInventario();
-        const stockBajo = (await obtenerProductosStockBajo(10)).length;
-        
-        document.getElementById('total-productos').textContent = totalProductos;
-        document.getElementById('valor-inventario').textContent = '$' + valorInventario.toLocaleString();
-        document.getElementById('stock-bajo').textContent = stockBajo;
-    }
-</script>
-
+    </script>
 </body>
 </html>

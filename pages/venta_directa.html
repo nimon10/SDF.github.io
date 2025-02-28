@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Venta | Sistema de Gestión</title>
+    <title>Venta Directa | Sistema de Gestión</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
@@ -11,16 +11,16 @@
 <body>
     <nav>
         <div class="container">
-            <a href="index.html" class="logo">
+            <a href="../index.html" class="logo">
                 <i class="fas fa-cash-register"></i> SistemaVentas
             </a>
             <button class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
+                <i class="fas fa-bars"></i> 
             </button>
             <ul id="menu">
-                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="../index.html">Inicio</a></li>
                 <li><a href="ventas.html">Ventas</a></li>
-                <li><a href="venta_directa.html">Nueva Venta</a></li>
+                <li><a href="venta_directa.html" class="activo">Nueva Venta</a></li>
                 <li><a href="venta_descuento.html">Venta con Descuento</a></li>
                 <li><a href="abonos.html">Abonos</a></li>
                 <li><a href="inventario.html">Inventario</a></li>
@@ -30,18 +30,18 @@
     </nav>
     
     <div class="container">
-        <h1>Registrar Nueva Venta</h1>
+        <h1>Venta Directa</h1>
         
         <div class="card">
-            <h2>Información de la Venta</h2>
+            <h2>Datos de la Venta</h2>
             <form id="formulario-venta">
                 <div class="form-group">
-                    <label for="cliente">Cliente:</label>
-                    <input type="text" id="cliente" name="cliente" placeholder="Nombre del cliente" required>
+                    <label for="cliente">Nombre del Cliente:</label>
+                    <input type="text" id="cliente" name="cliente" placeholder="Nombre completo del cliente" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="contacto">Contacto:</label>
+                    <label for="contacto">Número de Contacto:</label>
                     <input type="text" id="contacto" name="contacto" placeholder="Número de teléfono" required>
                 </div>
                 
@@ -49,14 +49,9 @@
                     <label for="vendedor">Vendedor:</label>
                     <select id="vendedor" name="vendedor" required>
                         <option value="">Seleccione un vendedor</option>
-                        <option value="David">David</option>
                         <option value="Gladys">Gladys</option>
+                        <option value="David">David</option>
                     </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="fecha">Fecha:</label>
-                    <input type="date" id="fecha" name="fecha" required>
                 </div>
                 
                 <div class="form-group">
@@ -77,21 +72,31 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="estado">Estado:</label>
-                    <select id="estado" name="estado" required>
-                        <option value="Pendiente">Pendiente</option>
+                    <label for="fecha-venta">Fecha de Venta:</label>
+                    <input type="date" id="fecha-venta" name="fecha-venta" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="valor-venta">Valor de la Venta:</label>
+                    <input type="number" id="valor-venta" name="valor-venta" min="0" step="0.01" placeholder="Valor total de la venta" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descripcion-venta">Descripción (opcional):</label>
+                    <textarea id="descripcion-venta" name="descripcion-venta" placeholder="Detalles adicionales de la venta"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="estado-venta">Estado de la Venta:</label>
+                    <select id="estado-venta" name="estado-venta" required>
                         <option value="Completado">Completado</option>
+                        <option value="Pendiente">Pendiente</option>
                         <option value="Cancelado">Cancelado</option>
                     </select>
                 </div>
                 
-                <div class="form-group">
-                    <label for="valor">Valor:</label>
-                    <input type="number" id="valor" name="valor" min="0" step="0.01" placeholder="Valor de la venta" required>
-                </div>
-                
-                <button type="submit">
-                    <i class="fas fa-save"></i> Registrar Venta
+                <button type="submit" id="btn-registrar-venta">
+                    <i class="fas fa-check-circle"></i> Registrar Venta
                 </button>
             </form>
         </div>
@@ -99,24 +104,24 @@
         <div id="mensaje" class="mensaje"></div>
         
         <div class="card">
-            <h2>Últimas Ventas Registradas</h2>
+            <h2>Historial de Ventas Recientes</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>Cliente</th>
                             <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Vendedor</th>
+                            <th>Revista</th>
                             <th>Valor</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="ultimas-ventas">
-                        <!-- Aquí se cargarán las últimas ventas -->
+                    <tbody id="historial-body">
+                        <!-- Aquí se cargará el historial de ventas -->
                     </tbody>
                 </table>
-            </div>
-            <div style="text-align: center; margin-top: 1.5rem;">
-                <a href="ventas.html" class="btn-secondary">Ver todas las ventas</a>
             </div>
         </div>
     </div>
@@ -130,7 +135,7 @@
             <div>
                 <h3>Enlaces Rápidos</h3>
                 <ul>
-                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="../index.html">Inicio</a></li>
                     <li><a href="ventas.html">Ventas</a></li>
                     <li><a href="inventario.html">Inventario</a></li>
                 </ul>
@@ -139,7 +144,7 @@
                 <h3>Contacto</h3>
                 <ul>
                     <li><i class="fas fa-envelope"></i> info@sistemaventas.com</li>
-                    <li><i class="fas fa-phone"></i> +57 300 123 4567</li>
+                    <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
                 </ul>
             </div>
         </div>
@@ -151,52 +156,69 @@
     </footer>
     
     <script type="module">
-        import { guardarVenta, obtenerVentas, escucharVentas } from '../scripts/script.js';
+        import { db } from '../scripts/firebase-config.js';
+        
+        import { 
+            guardarVenta,
+            escucharVentas,
+            eliminarVenta
+        } from '../scripts/script.js';
         
         document.addEventListener('DOMContentLoaded', function() {
-            const formulario = document.getElementById('formulario-venta');
+            const formularioVenta = document.getElementById('formulario-venta');
             const mensaje = document.getElementById('mensaje');
-            const ultimasVentasTabla = document.getElementById('ultimas-ventas');
             
-            // Establecer fecha actual por defecto
-            document.getElementById('fecha').valueAsDate = new Date();
+            // Establecer la fecha actual por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha-venta').value = hoy;
             
-            // Escuchar cambios en ventas en tiempo real
-            const unsubscribe = escucharVentas(function(ventas) {
-                mostrarUltimasVentas(ventas);
+            // Escuchar cambios en ventas para actualizar historial
+            const unsubscribeVentas = escucharVentas(function(ventas) {
+                // Filtrar solo ventas directas
+                const ventasDirectas = ventas.filter(venta => venta.tipoVenta === 'directa');
+                mostrarHistorial(ventasDirectas);
             });
             
-            formulario.addEventListener('submit', async function(e) {
+            // Registrar nueva venta
+            formularioVenta.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
+                const cliente = document.getElementById('cliente').value;
+                const contacto = document.getElementById('contacto').value;
+                const vendedor = document.getElementById('vendedor').value;
+                const revista = document.getElementById('revista').value;
+                const fecha = document.getElementById('fecha-venta').value;
+                const valor = parseFloat(document.getElementById('valor-venta').value);
+                const descripcion = document.getElementById('descripcion-venta').value;
+                const estado = document.getElementById('estado-venta').value;
+                
+                // Crear objeto de venta
                 const venta = {
-                    cliente: document.getElementById('cliente').value,
-                    contacto: document.getElementById('contacto').value,
-                    vendedor: document.getElementById('vendedor').value,
-                    fecha: document.getElementById('fecha').value,
-                    revista: document.getElementById('revista').value,
-                    estado: document.getElementById('estado').value,
-                    valor: document.getElementById('valor').value
+                    cliente,
+                    contacto,
+                    vendedor,
+                    revista,
+                    fecha,
+                    valor,
+                    descripcion,
+                    estado,
+                    tipoVenta: 'directa'
                 };
                 
                 try {
+                    // Guardar venta
                     const resultado = await guardarVenta(venta);
                     
                     if (resultado) {
-                        mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Venta registrada correctamente</div>';
-                        formulario.reset();
-                        document.getElementById('fecha').valueAsDate = new Date();
-                        
-                        // Limpiar mensaje después de 3 segundos
-                        setTimeout(() => {
-                            mensaje.innerHTML = '';
-                        }, 3000);
+                        mostrarMensaje('Venta registrada con éxito', 'exito');
+                        formularioVenta.reset();
+                        document.getElementById('fecha-venta').value = hoy; // Restablecer la fecha a hoy
                     } else {
-                        mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar la venta</div>';
+                        mostrarMensaje('Error al registrar la venta', 'error');
                     }
                 } catch (error) {
-                    console.error("Error al guardar venta:", error);
-                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar la venta</div>';
+                    console.error('Error al procesar la venta:', error);
+                    mostrarMensaje('Error al procesar la venta', 'error');
                 }
             });
             
@@ -207,30 +229,70 @@
             menuBtn.addEventListener('click', function() {
                 menu.classList.toggle('show');
             });
-        });
-        
-        function mostrarUltimasVentas(ventas) {
-            const ultimasVentas = ventas.slice(0, 5); // Últimas 5 ventas
-            const ultimasVentasTabla = document.getElementById('ultimas-ventas');
             
-            ultimasVentasTabla.innerHTML = '';
-            
-            if (ultimasVentas.length === 0) {
-                ultimasVentasTabla.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay ventas registradas</td></tr>';
-                return;
+            // Función para mostrar historial de ventas
+            function mostrarHistorial(ventas) {
+                const historialBody = document.getElementById('historial-body');
+                
+                // Ordenar ventas por fecha (más recientes primero)
+                ventas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                
+                // Mostrar solo las últimas 10 ventas
+                const ventasRecientes = ventas.slice(0, 10);
+                
+                historialBody.innerHTML = '';
+                
+                if (ventasRecientes.length === 0) {
+                    historialBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay ventas registradas</td></tr>';
+                    return;
+                }
+                
+                ventasRecientes.forEach(venta => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                        <td>${venta.cliente}</td>
+                        <td>${venta.vendedor}</td>
+                        <td>${venta.revista || '-'}</td>
+                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                        <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
+                        <td>
+                            <button class="btn-icon" onclick="eliminarVentaUI('${venta.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    historialBody.appendChild(fila);
+                });
             }
             
-            ultimasVentas.forEach(venta => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td>${venta.cliente}</td>
-                    <td>${new Date(venta.fecha).toLocaleDateString()}</td>
-                    <td>$${parseFloat(venta.valor).toLocaleString()}</td>
-                    <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
-                `;
-                ultimasVentasTabla.appendChild(fila);
-            });
-        }
+            // Función para mostrar mensajes
+            function mostrarMensaje(texto, tipo) {
+                mensaje.innerHTML = `<div class="mensaje ${tipo}"><i class="fas fa-${tipo === 'exito' ? 'check' : 'exclamation'}-circle"></i> ${texto}</div>`;
+                
+                setTimeout(() => {
+                    mensaje.innerHTML = '';
+                }, 3000);
+            }
+            
+            // Función para eliminar una venta (disponible globalmente)
+            window.eliminarVentaUI = async function(id) {
+                if (confirm('¿Estás seguro de eliminar esta venta? Esta acción no se puede deshacer.')) {
+                    try {
+                        const resultado = await eliminarVenta(id);
+                        
+                        if (resultado) {
+                            mostrarMensaje('Venta eliminada con éxito', 'exito');
+                        } else {
+                            mostrarMensaje('Error al eliminar la venta', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error al eliminar venta:', error);
+                        mostrarMensaje('Error al eliminar la venta', 'error');
+                    }
+                }
+            };
+        });
     </script>
 </body>
 </html>
