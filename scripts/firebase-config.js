@@ -3,12 +3,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-// Tu configuración de Firebase
+// Tu configuración de Firebase (corregida)
 const firebaseConfig = {
   apiKey: "AIzaSyCrGcoLW3tEtrFGlNnX7NIbd1RfOOhaVwY",
   authDomain: "sdf1-34631.firebaseapp.com",
   projectId: "sdf1-34631",
-  storageBucket: "sdf1-34631.firebasestorage.app",
+  storageBucket: "sdf1-34631.appspot.com", // 🔹 Corregido
   messagingSenderId: "122107622167",
   appId: "1:122107622167:web:ad96d0f60b14b80de17d52",
   measurementId: "G-VFP8YSFFC1"
