@@ -18,13 +18,13 @@
                 <i class="fas fa-bars"></i>
             </button>
             <ul id="menu">
-                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="../index.html">Inicio</a></li>
                 <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="venta_directa.html">Nueva Venta</a></li>
                 <li><a href="venta_descuento.html">Venta con Descuento</a></li>
                 <li><a href="abonos.html">Abonos</a></li>
                 <li><a href="inventario.html">Inventario</a></li>
-                <li><a href="ajuste_inventarios.html">Ajuste de Inventario</a></li>
+                <li><a href="ajuste_inventarios.html" class="activo">Ajuste de Inventario</a></li>
             </ul>
         </div>
     </nav>
@@ -34,6 +34,12 @@
         
         <div class="card">
             <h2>Seleccionar Producto</h2>
+            <div class="form-group sugerencias-container">
+                <label for="buscar-producto">Buscar Producto:</label>
+                <input type="text" id="buscar-producto" placeholder="Nombre del producto...">
+                <div class="sugerencias-lista" id="sugerencias-productos"></div>
+            </div>
+            
             <div class="form-group">
                 <label for="producto">Producto:</label>
                 <select id="producto" name="producto" required>
@@ -135,154 +141,241 @@
         </div>
     </footer>
     
-   <script type="module">
-    import { 
-        obtenerInventario, 
-        escucharInventario, 
-        actualizarStock, 
-        registrarMovimientoInventario, 
-        obtenerMovimientosInventario 
-    } from '../scripts/script.js';
-    
-    document.addEventListener('DOMContentLoaded', async function() {
-        const formulario = document.getElementById('formulario-ajuste');
-        const mensaje = document.getElementById('mensaje');
-        const selectProducto = document.getElementById('producto');
-        const infoProducto = document.getElementById('info-producto');
-        const stockActual = document.getElementById('stock-actual');
-        const precioActual = document.getElementById('precio-actual');
+    <script type="module">
+        import { 
+            obtenerInventario, 
+            escucharInventario, 
+            registrarMovimientoInventario,
+            obtenerMovimientosInventario,
+            buscarProductoPorNombre
+        } from '../scripts/script.js';
         
-        // Cargar productos en el select
-        await cargarProductosSelect();
-        
-        // Escuchar cambios en inventario
-        const unsubscribeInventario = escucharInventario(async function(inventario) {
-            await cargarProductosSelect(inventario);
+        document.addEventListener('DOMContentLoaded', async function() {
+            const formulario = document.getElementById('formulario-ajuste');
+            const mensaje = document.getElementById('mensaje');
+            const selectProducto = document.getElementById('producto');
+            const infoProducto = document.getElementById('info-producto');
+            const stockActual = document.getElementById('stock-actual');
+            const precioActual = document.getElementById('precio-actual');
+            const buscarInput = document.getElementById('buscar-producto');
+            const sugerenciasLista = document.getElementById('sugerencias-productos');
             
-            // Si hay un producto seleccionado, actualizar su información
-            const productoId = selectProducto.value;
-            if (productoId) {
-                mostrarInfoProducto(productoId, inventario);
+            // Cargar productos en el select
+            await cargarProductosSelect();
+            
+            // Cargar historial de movimientos
+            await actualizarHistorialMovimientos();
+            
+            // Escuchar cambios en inventario
+            const unsubscribeInventario = escucharInventario(async function(inventario) {
+                // Si hay un producto seleccionado, actualizar su información
+                const productoId = selectProducto.value;
+                if (productoId) {
+                    mostrarInfoProducto(productoId, inventario);
+                }
+            });
+            
+            // Implementar autocompletado al escribir el nombre del producto
+            let timeoutId;
+            buscarInput.addEventListener('input', function() {
+                // Limpiar el timeout anterior para evitar múltiples búsquedas
+                clearTimeout(timeoutId);
+                
+                // Esperar a que el usuario termine de escribir
+                timeoutId = setTimeout(async function() {
+                    const nombreProducto = buscarInput.value.trim();
+                    if (nombreProducto.length >= 2) { // Buscar solo si hay al menos 2 caracteres
+                        const productos = await buscarProductoPorNombre(nombreProducto);
+                        
+                        // Mostrar sugerencias
+                        if (productos.length > 0) {
+                            mostrarSugerencias(productos);
+                        } else {
+                            ocultarSugerencias();
+                        }
+                    } else {
+                        ocultarSugerencias();
+                    }
+                }, 300); // Esperar 300ms después de que el usuario deje de escribir
+            });
+            
+            // Ocultar sugerencias al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                if (!buscarInput.contains(e.target) && !sugerenciasLista.contains(e.target)) {
+                    ocultarSugerencias();
+                }
+            });
+            
+            // Función para mostrar sugerencias
+            function mostrarSugerencias(productos) {
+                sugerenciasLista.innerHTML = '';
+                
+                productos.forEach(producto => {
+                    const item = document.createElement('div');
+                    item.className = 'sugerencia-item';
+                    item.innerHTML = `
+                        <div class="sugerencia-nombre">${producto.nombre}</div>
+                        <div class="sugerencia-contacto">Stock: ${producto.cantidad} | Precio: $${parseFloat(producto.precio).toLocaleString()}</div>
+                    `;
+                    
+                    item.addEventListener('click', function() {
+                        buscarInput.value = producto.nombre;
+                        selectProducto.value = producto.id;
+                        mostrarInfoProducto(producto.id, [producto]);
+                        ocultarSugerencias();
+                    });
+                    
+                    sugerenciasLista.appendChild(item);
+                });
+                
+                sugerenciasLista.classList.add('mostrar');
+            }
+            
+            // Función para ocultar sugerencias
+            function ocultarSugerencias() {
+                sugerenciasLista.classList.remove('mostrar');
+            }
+            
+            selectProducto.addEventListener('change', async function() {
+                const productoId = this.value;
+                if (productoId) {
+                    const inventario = await obtenerInventario();
+                    mostrarInfoProducto(productoId, inventario);
+                    
+                    // Actualizar el campo de búsqueda con el nombre del producto seleccionado
+                    const producto = inventario.find(p => p.id === productoId);
+                    if (producto) {
+                        buscarInput.value = producto.nombre;
+                    }
+                } else {
+                    infoProducto.style.display = 'none';
+                }
+            });
+            
+            formulario.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const productoId = selectProducto.value;
+                const tipoMovimiento = document.getElementById('tipo-movimiento').value;
+                const cantidad = parseInt(document.getElementById('cantidad').value);
+                const motivo = document.getElementById('motivo').value;
+                
+                if (!productoId) {
+                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Debe seleccionar un producto</div>';
+                    return;
+                }
+                
+                try {
+                    // Registrar el movimiento
+                    const resultado = await registrarMovimientoInventario(productoId, tipoMovimiento, cantidad, motivo);
+                    
+                    if (resultado) {
+                        mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Ajuste registrado correctamente</div>';
+                        formulario.reset();
+                        buscarInput.value = '';
+                        infoProducto.style.display = 'none';
+                        
+                        // Actualizar historial de movimientos
+                        await actualizarHistorialMovimientos();
+                        
+                        // Limpiar mensaje después de 3 segundos
+                        setTimeout(() => {
+                            mensaje.innerHTML = '';
+                        }, 3000);
+                    } else {
+                        mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar el ajuste</div>';
+                    }
+                } catch (error) {
+                    console.error("Error al registrar ajuste:", error);
+                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar el ajuste</div>';
+                }
+            });
+            
+            // Menú móvil
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const menu = document.getElementById('menu');
+            
+            menuBtn.addEventListener('click', function() {
+                menu.classList.toggle('show');
+            });
+            
+            // Función para actualizar el historial de movimientos
+            async function actualizarHistorialMovimientos() {
+                try {
+                    const movimientos = await obtenerMovimientosInventario();
+                    mostrarMovimientos(movimientos);
+                } catch (error) {
+                    console.error("Error al obtener movimientos:", error);
+                }
             }
         });
         
-        // Cargar historial de movimientos
-        const movimientos = await obtenerMovimientosInventario();
-        mostrarMovimientos(movimientos);
+        async function cargarProductosSelect(inventarioPrecargado) {
+            const selectProducto = document.getElementById('producto');
+            const inventario = inventarioPrecargado || await obtenerInventario();
+            
+            selectProducto.innerHTML = '<option value="">Seleccione un producto</option>';
+            
+            // Ordenar productos alfabéticamente por nombre
+            inventario.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            
+            inventario.forEach(producto => {
+                const option = document.createElement('option');
+                option.value = producto.id;
+                option.textContent = `${producto.nombre} (${producto.categoria || 'Sin categoría'}) - Stock: ${producto.cantidad}`;
+                selectProducto.appendChild(option);
+            });
+        }
         
-        selectProducto.addEventListener('change', async function() {
-            const productoId = this.value;
-            if (productoId) {
-                const inventario = await obtenerInventario();
-                mostrarInfoProducto(productoId, inventario);
-            } else {
-                infoProducto.style.display = 'none';
+        function mostrarInfoProducto(productoId, inventario) {
+            const infoProducto = document.getElementById('info-producto');
+            const stockActual = document.getElementById('stock-actual');
+            const precioActual = document.getElementById('precio-actual');
+            
+            const producto = inventario.find(p => p.id === productoId);
+            
+            if (producto) {
+                stockActual.textContent = producto.cantidad;
+                precioActual.textContent = `$${parseFloat(producto.precio).toLocaleString()}`;
+                infoProducto.style.display = 'block';
             }
-        });
+        }
         
-        formulario.addEventListener('submit', async function(e) {
-            e.preventDefault();
+        function mostrarMovimientos(movimientos) {
+            const tbody = document.getElementById('movimientos-body');
             
-            const productoId = selectProducto.value;
-            const tipoMovimiento = document.getElementById('tipo-movimiento').value;
-            const cantidad = parseInt(document.getElementById('cantidad').value);
-            const motivo = document.getElementById('motivo').value;
+            tbody.innerHTML = '';
             
-            if (!productoId) {
-                mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Debe seleccionar un producto</div>';
+            if (!movimientos || movimientos.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="5" style="text-align: center;">No hay movimientos registrados</td>';
+                tbody.appendChild(tr);
                 return;
             }
             
-            try {
-                const resultado = await registrarMovimientoInventario(productoId, tipoMovimiento, cantidad, motivo);
+            // Ordenar movimientos por fecha (más recientes primero)
+            movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            // Mostrar solo los últimos 20 movimientos
+            const movimientosRecientes = movimientos.slice(0, 20);
+            
+            movimientosRecientes.forEach(movimiento => {
+                const tr = document.createElement('tr');
                 
-                if (resultado) {
-                    mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Ajuste registrado correctamente</div>';
-                    formulario.reset();
-                    
-                    // Limpiar mensaje después de 3 segundos
-                    setTimeout(() => {
-                        mensaje.innerHTML = '';
-                    }, 3000);
-                } else {
-                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar el ajuste</div>';
-                }
-            } catch (error) {
-                console.error("Error al registrar ajuste:", error);
-                mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al registrar el ajuste</div>';
-            }
-        });
-        
-        // Menú móvil
-        const menuBtn = document.querySelector('.mobile-menu-btn');
-        const menu = document.getElementById('menu');
-        
-        menuBtn.addEventListener('click', function() {
-            menu.classList.toggle('show');
-        });
-    });
-    
-    async function cargarProductosSelect(inventarioPrecargado) {
-        const selectProducto = document.getElementById('producto');
-        const inventario = inventarioPrecargado || await obtenerInventario();
-        
-        selectProducto.innerHTML = '<option value="">Seleccione un producto</option>';
-        
-        inventario.forEach(producto => {
-            const option = document.createElement('option');
-            option.value = producto.id;
-            option.textContent = producto.nombre;
-            selectProducto.appendChild(option);
-        });
-    }
-    
-    function mostrarInfoProducto(productoId, inventario) {
-        const infoProducto = document.getElementById('info-producto');
-        const stockActual = document.getElementById('stock-actual');
-        const precioActual = document.getElementById('precio-actual');
-        
-        const producto = inventario.find(p => p.id === productoId);
-        
-        if (producto) {
-            stockActual.textContent = producto.cantidad;
-            precioActual.textContent = `$${parseFloat(producto.precio).toLocaleString()}`;
-            infoProducto.style.display = 'block';
+                const fecha = new Date(movimiento.fecha);
+                const fechaFormateada = `${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()} ${fecha.getHours()}:${String(fecha.getMinutes()).padStart(2, '0')}`;
+                
+                tr.innerHTML = `
+                    <td>${fechaFormateada}</td>
+                    <td>${movimiento.nombreProducto}</td>
+                    <td>${movimiento.tipo === 'entrada' ? '<span class="badge badge-success">Entrada</span>' : '<span class="badge badge-danger">Salida</span>'}</td>
+                    <td>${movimiento.cantidad}</td>
+                    <td>${movimiento.motivo}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
         }
-    }
-    
-    function mostrarMovimientos(movimientos) {
-        const tbody = document.getElementById('movimientos-body');
-        
-        tbody.innerHTML = '';
-        
-        if (!movimientos || movimientos.length === 0) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = '<td colspan="5" style="text-align: center;">No hay movimientos registrados</td>';
-            tbody.appendChild(tr);
-            return;
-        }
-        
-        // Ordenar movimientos por fecha (más recientes primero)
-        movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-        
-        movimientos.forEach(movimiento => {
-            const tr = document.createElement('tr');
-            
-            const fecha = new Date(movimiento.fecha);
-            const fechaFormateada = `${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()} ${fecha.getHours()}:${String(fecha.getMinutes()).padStart(2, '0')}`;
-            
-            tr.innerHTML = `
-                <td>${fechaFormateada}</td>
-                <td>${movimiento.nombreProducto}</td>
-                <td>${movimiento.tipo === 'entrada' ? '<span class="badge badge-success">Entrada</span>' : '<span class="badge badge-danger">Salida</span>'}</td>
-                <td>${movimiento.cantidad}</td>
-                <td>${movimiento.motivo}</td>
-            `;
-            
-            tbody.appendChild(tr);
-        });
-    }
-</script>
-
+    </script>
 </body>
 </html>

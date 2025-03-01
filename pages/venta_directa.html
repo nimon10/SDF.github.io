@@ -35,10 +35,11 @@
         <div class="card">
             <h2>Datos de la Venta</h2>
             <form id="formulario-venta">
-                <div class="form-group">
+                <div class="form-group sugerencias-container">
                     <label for="cliente">Nombre del Cliente:</label>
-                    <input type="text" id="cliente" name="cliente" placeholder="Nombre completo del cliente" required>
-                </div>
+                   <input type="text" id="cliente" name="cliente" placeholder="Nombre completo del cliente" required>
+                    <div class="sugerencias-lista" id="sugerencias-cliente"></div>
+               </div>
                 
                 <div class="form-group">
                     <label for="contacto">Número de Contacto:</label>
@@ -75,7 +76,8 @@
                     <label for="fecha-venta">Fecha de Venta:</label>
                     <input type="date" id="fecha-venta" name="fecha-venta" required>
                 </div>
-                
+
+
                 <div class="form-group">
                     <label for="valor-venta">Valor de la Venta:</label>
                     <input type="number" id="valor-venta" name="valor-venta" min="0" step="0.01" placeholder="Valor total de la venta" required>
@@ -155,144 +157,215 @@
         </div>
     </footer>
     
-    <script type="module">
-        import { db } from '../scripts/firebase-config.js';
+   <script type="module">
+    import { db } from '../scripts/firebase-config.js';
+    
+    import { 
+        guardarVenta,
+        escucharVentas,
+        eliminarVenta,
+        buscarClientesPorNombre
+    } from '../scripts/script.js';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const formularioVenta = document.getElementById('formulario-venta');
+        const mensaje = document.getElementById('mensaje');
+        const clienteInput = document.getElementById('cliente');
+        const contactoInput = document.getElementById('contacto');
+        const sugerenciasLista = document.getElementById('sugerencias-cliente');
         
-        import { 
-            guardarVenta,
-            escucharVentas,
-            eliminarVenta
-        } from '../scripts/script.js';
+        // Establecer la fecha actual por defecto
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha-venta').value = hoy;
         
-        document.addEventListener('DOMContentLoaded', function() {
-            const formularioVenta = document.getElementById('formulario-venta');
-            const mensaje = document.getElementById('mensaje');
+        // Escuchar cambios en ventas para actualizar historial
+        const unsubscribeVentas = escucharVentas(function(ventas) {
+            // Filtrar solo ventas directas
+            const ventasDirectas = ventas.filter(venta => venta.tipoVenta === 'directa');
+            mostrarHistorial(ventasDirectas);
+        });
+        
+        // Implementar autocompletado de contacto al escribir el nombre del cliente
+        let timeoutId;
+        clienteInput.addEventListener('input', function() {
+            // Limpiar el timeout anterior para evitar múltiples búsquedas
+            clearTimeout(timeoutId);
             
-            // Establecer la fecha actual por defecto
-            const hoy = new Date().toISOString().split('T')[0];
-            document.getElementById('fecha-venta').value = hoy;
+            // Esperar a que el usuario termine de escribir
+            timeoutId = setTimeout(async function() {
+                const nombreCliente = clienteInput.value.trim();
+                if (nombreCliente.length >= 3) { // Buscar solo si hay al menos 3 caracteres
+                    const clientes = await buscarClientesPorNombre(nombreCliente);
+                    
+                    // Mostrar sugerencias
+                    if (clientes.length > 0) {
+                        mostrarSugerencias(clientes);
+                    } else {
+                        ocultarSugerencias();
+                    }
+                    
+                    // Si encontramos una coincidencia exacta, autocompletar el contacto
+                    const clienteExacto = clientes.find(c => c.nombre.toLowerCase() === nombreCliente.toLowerCase());
+                    if (clienteExacto) {
+                        contactoInput.value = clienteExacto.contacto;
+                    }
+                } else {
+                    ocultarSugerencias();
+                }
+            }, 300); // Esperar 300ms después de que el usuario deje de escribir
+        });
+        
+        // Ocultar sugerencias al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!clienteInput.contains(e.target) && !sugerenciasLista.contains(e.target)) {
+                ocultarSugerencias();
+            }
+        });
+        
+        // Registrar nueva venta
+        formularioVenta.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // Escuchar cambios en ventas para actualizar historial
-            const unsubscribeVentas = escucharVentas(function(ventas) {
-                // Filtrar solo ventas directas
-                const ventasDirectas = ventas.filter(venta => venta.tipoVenta === 'directa');
-                mostrarHistorial(ventasDirectas);
+            const cliente = document.getElementById('cliente').value;
+            const contacto = document.getElementById('contacto').value;
+            const vendedor = document.getElementById('vendedor').value;
+            const revista = document.getElementById('revista').value;
+            const fecha = document.getElementById('fecha-venta').value;
+            const valor = parseFloat(document.getElementById('valor-venta').value);
+            const descripcion = document.getElementById('descripcion-venta').value;
+            const estado = document.getElementById('estado-venta').value;
+            
+            // Crear objeto de venta
+            const venta = {
+                cliente,
+                contacto,
+                vendedor,
+                revista,
+                fecha,
+                valor,
+                descripcion,
+                estado,
+                tipoVenta: 'directa'
+            };
+            
+            try {
+                // Guardar venta
+                const resultado = await guardarVenta(venta);
+                
+                if (resultado) {
+                    mostrarMensaje('Venta registrada con éxito', 'exito');
+                    formularioVenta.reset();
+                    document.getElementById('fecha-venta').value = hoy; // Restablecer la fecha a hoy
+                } else {
+                    mostrarMensaje('Error al registrar la venta', 'error');
+                }
+            } catch (error) {
+                console.error('Error al procesar la venta:', error);
+                mostrarMensaje('Error al procesar la venta', 'error');
+            }
+        });
+        
+        // Menú móvil
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        const menu = document.getElementById('menu');
+        
+        menuBtn.addEventListener('click', function() {
+            menu.classList.toggle('show');
+        });
+        
+        // Función para mostrar sugerencias
+        function mostrarSugerencias(clientes) {
+            sugerenciasLista.innerHTML = '';
+            
+            clientes.forEach(cliente => {
+                const item = document.createElement('div');
+                item.className = 'sugerencia-item';
+                item.innerHTML = `
+                    <div class="sugerencia-nombre">${cliente.nombre}</div>
+                    <div class="sugerencia-contacto">${cliente.contacto}</div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    clienteInput.value = cliente.nombre;
+                    contactoInput.value = cliente.contacto;
+                    ocultarSugerencias();
+                });
+                
+                sugerenciasLista.appendChild(item);
             });
             
-            // Registrar nueva venta
-            formularioVenta.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const cliente = document.getElementById('cliente').value;
-                const contacto = document.getElementById('contacto').value;
-                const vendedor = document.getElementById('vendedor').value;
-                const revista = document.getElementById('revista').value;
-                const fecha = document.getElementById('fecha-venta').value;
-                const valor = parseFloat(document.getElementById('valor-venta').value);
-                const descripcion = document.getElementById('descripcion-venta').value;
-                const estado = document.getElementById('estado-venta').value;
-                
-                // Crear objeto de venta
-                const venta = {
-                    cliente,
-                    contacto,
-                    vendedor,
-                    revista,
-                    fecha,
-                    valor,
-                    descripcion,
-                    estado,
-                    tipoVenta: 'directa'
-                };
-                
+            sugerenciasLista.classList.add('mostrar');
+        }
+        
+        // Función para ocultar sugerencias
+        function ocultarSugerencias() {
+            sugerenciasLista.classList.remove('mostrar');
+        }
+        
+        // Función para mostrar historial de ventas
+        function mostrarHistorial(ventas) {
+            const historialBody = document.getElementById('historial-body');
+            
+            // Ordenar ventas por fecha (más recientes primero)
+            ventas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            // Mostrar solo las últimas 10 ventas
+            const ventasRecientes = ventas.slice(0, 10);
+            
+            historialBody.innerHTML = '';
+            
+            if (ventasRecientes.length === 0) {
+                historialBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay ventas registradas</td></tr>';
+                return;
+            }
+            
+            ventasRecientes.forEach(venta => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                    <td>${venta.cliente}</td>
+                    <td>${venta.vendedor}</td>
+                    <td>${venta.revista || '-'}</td>
+                    <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                    <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
+                    <td>
+                        <button class="btn-icon" onclick="eliminarVentaUI('${venta.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                historialBody.appendChild(fila);
+            });
+        }
+        
+        // Función para mostrar mensajes
+        function mostrarMensaje(texto, tipo) {
+            mensaje.innerHTML = `<div class="mensaje ${tipo}"><i class="fas fa-${tipo === 'exito' ? 'check' : 'exclamation'}-circle"></i> ${texto}</div>`;
+            
+            setTimeout(() => {
+                mensaje.innerHTML = '';
+            }, 3000);
+        }
+        
+        // Función para eliminar una venta (disponible globalmente)
+        window.eliminarVentaUI = async function(id) {
+            if (confirm('¿Estás seguro de eliminar esta venta? Esta acción no se puede deshacer.')) {
                 try {
-                    // Guardar venta
-                    const resultado = await guardarVenta(venta);
+                    const resultado = await eliminarVenta(id);
                     
                     if (resultado) {
-                        mostrarMensaje('Venta registrada con éxito', 'exito');
-                        formularioVenta.reset();
-                        document.getElementById('fecha-venta').value = hoy; // Restablecer la fecha a hoy
+                        mostrarMensaje('Venta eliminada con éxito', 'exito');
                     } else {
-                        mostrarMensaje('Error al registrar la venta', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error al procesar la venta:', error);
-                    mostrarMensaje('Error al procesar la venta', 'error');
-                }
-            });
-            
-            // Menú móvil
-            const menuBtn = document.querySelector('.mobile-menu-btn');
-            const menu = document.getElementById('menu');
-            
-            menuBtn.addEventListener('click', function() {
-                menu.classList.toggle('show');
-            });
-            
-            // Función para mostrar historial de ventas
-            function mostrarHistorial(ventas) {
-                const historialBody = document.getElementById('historial-body');
-                
-                // Ordenar ventas por fecha (más recientes primero)
-                ventas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-                
-                // Mostrar solo las últimas 10 ventas
-                const ventasRecientes = ventas.slice(0, 10);
-                
-                historialBody.innerHTML = '';
-                
-                if (ventasRecientes.length === 0) {
-                    historialBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay ventas registradas</td></tr>';
-                    return;
-                }
-                
-                ventasRecientes.forEach(venta => {
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
-                        <td>${venta.cliente}</td>
-                        <td>${venta.vendedor}</td>
-                        <td>${venta.revista || '-'}</td>
-                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
-                        <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
-                        <td>
-                            <button class="btn-icon" onclick="eliminarVentaUI('${venta.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    historialBody.appendChild(fila);
-                });
-            }
-            
-            // Función para mostrar mensajes
-            function mostrarMensaje(texto, tipo) {
-                mensaje.innerHTML = `<div class="mensaje ${tipo}"><i class="fas fa-${tipo === 'exito' ? 'check' : 'exclamation'}-circle"></i> ${texto}</div>`;
-                
-                setTimeout(() => {
-                    mensaje.innerHTML = '';
-                }, 3000);
-            }
-            
-            // Función para eliminar una venta (disponible globalmente)
-            window.eliminarVentaUI = async function(id) {
-                if (confirm('¿Estás seguro de eliminar esta venta? Esta acción no se puede deshacer.')) {
-                    try {
-                        const resultado = await eliminarVenta(id);
-                        
-                        if (resultado) {
-                            mostrarMensaje('Venta eliminada con éxito', 'exito');
-                        } else {
-                            mostrarMensaje('Error al eliminar la venta', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error al eliminar venta:', error);
                         mostrarMensaje('Error al eliminar la venta', 'error');
                     }
+                } catch (error) {
+                    console.error('Error al eliminar venta:', error);
+                    mostrarMensaje('Error al eliminar la venta', 'error');
                 }
-            };
-        });
-    </script>
+            }
+        };
+    });
+</script>
+
 </body>
 </html>

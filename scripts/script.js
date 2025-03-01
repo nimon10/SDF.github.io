@@ -89,6 +89,41 @@ async function buscarVentasPorCliente(nombreCliente) {
     }
 }
 
+// ✅ Buscar clientes por nombre
+async function buscarClientesPorNombre(nombreCliente) {
+    try {
+        const q = query(
+            collection(db, "ventas"), 
+            where("cliente", ">=", nombreCliente),
+            where("cliente", "<=", nombreCliente + '\uf8ff')
+        );
+        const querySnapshot = await getDocs(q);
+        const clientes = [];
+        
+        // Usar un Set para evitar duplicados
+        const clientesUnicos = new Set();
+        
+        querySnapshot.forEach((doc) => {
+            const venta = doc.data();
+            // Crear un identificador único para cada combinación cliente-contacto
+            const clienteId = `${venta.cliente}|${venta.contacto}`;
+            
+            if (!clientesUnicos.has(clienteId)) {
+                clientesUnicos.add(clienteId);
+                clientes.push({
+                    nombre: venta.cliente,
+                    contacto: venta.contacto
+                });
+            }
+        });
+        
+        return clientes;
+    } catch (error) {
+        console.error("Error al buscar clientes:", error);
+        return [];
+    }
+}
+
 // ✅ Buscar una venta por ID
 async function buscarVenta(idVenta) {
     try {
@@ -158,6 +193,78 @@ async function agregarAbono(idVenta, montoAbono) {
     } catch (error) {
         console.error("Error al agregar abono: ", error);
         return false;
+    }
+}
+
+// ✅ Registrar movimiento de inventario
+async function registrarMovimientoInventario(productoId, tipo, cantidad, motivo) {
+    try {
+        // Obtener información del producto
+        const docRef = doc(db, "inventario", productoId);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+            console.error("Producto no encontrado");
+            return false;
+        }
+        
+        const producto = docSnap.data();
+        
+        // Calcular la cantidad ajustada (positiva para entrada, negativa para salida)
+        const cantidadAjustada = tipo === 'entrada' ? parseInt(cantidad) : -parseInt(cantidad);
+        
+        // Verificar que no se intente retirar más de lo disponible
+        if (tipo === 'salida' && parseInt(cantidad) > parseInt(producto.cantidad)) {
+            console.error("No hay suficiente stock para realizar esta salida");
+            return false;
+        }
+        
+        // Actualizar el stock
+        const nuevoStock = Math.max(0, parseInt(producto.cantidad) + cantidadAjustada);
+        
+        await updateDoc(docRef, {
+            cantidad: nuevoStock
+        });
+        
+        // Registrar el movimiento en una colección separada
+        const movimiento = {
+            productoId: productoId,
+            nombreProducto: producto.nombre,
+            tipo: tipo,
+            cantidad: parseInt(cantidad),
+            motivo: motivo,
+            fecha: new Date().toISOString(),
+            usuario: "sistema" // Esto podría ser dinámico si implementas autenticación
+        };
+        
+        await addDoc(collection(db, "movimientos_inventario"), movimiento);
+        
+        console.log(`Movimiento registrado: ${tipo} de ${cantidad} unidades`);
+        return true;
+    } catch (error) {
+        console.error("Error al registrar movimiento: ", error);
+        return false;
+    }
+}
+
+// ✅ Obtener movimientos de inventario
+async function obtenerMovimientosInventario() {
+    try {
+        const q = query(
+            collection(db, "movimientos_inventario"),
+            orderBy("fecha", "desc")
+        );
+        const querySnapshot = await getDocs(q);
+        const movimientos = [];
+        
+        querySnapshot.forEach((doc) => {
+            movimientos.push({ id: doc.id, ...doc.data() });
+        });
+        
+        return movimientos;
+    } catch (error) {
+        console.error("Error al obtener movimientos de inventario: ", error);
+        return [];
     }
 }
 
@@ -368,6 +475,7 @@ export {
     obtenerVentas,
     escucharVentas,
     buscarVentasPorCliente,
+    buscarClientesPorNombre,
     buscarVenta,
     agregarAbono,
     marcarComoPagado,
@@ -380,5 +488,8 @@ export {
     buscarProductoPorNombre,
     obtenerProductosStockBajo,
     calcularValorInventario,
-    filtrarVentasPorFecha
+    filtrarVentasPorFecha,
+    registrarMovimientoInventario,
+    obtenerMovimientosInventario
 };
+
