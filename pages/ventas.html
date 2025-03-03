@@ -7,6 +7,151 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
+    <style>
+        /* Estilos mejorados para el segmentador */
+        .segmentador {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eaeaea;
+            background-color: var(--nequi-white);
+        }
+        
+        .segmentador-item {
+            flex: 1;
+            padding: 1rem 1.2rem;
+            text-align: center;
+            background-color: var(--nequi-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: none;
+            color: var(--nequi-dark-gray);
+            position: relative;
+            overflow: hidden;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .segmentador-item i {
+            font-size: 1rem;
+        }
+        
+        .segmentador-item.activo {
+            background-color: var(--nequi-purple);
+            color: var(--nequi-white);
+        }
+        
+        .segmentador-item:not(:last-child) {
+            border-right: 1px solid #eaeaea;
+        }
+        
+        .segmentador-item:hover:not(.activo) {
+            background-color: #f8f8f8;
+        }
+        
+        .segmentador-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--nequi-purple);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .segmentador-item.activo::after {
+            transform: scaleX(1);
+        }
+        
+        /* Estilos mejorados para las tarjetas de resumen */
+        .resumen-ventas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .resumen-card {
+            background-color: var(--nequi-white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .resumen-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .resumen-card h3 {
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            color: var(--nequi-dark-gray);
+            font-weight: 600;
+        }
+        
+        .resumen-card .valor {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--nequi-purple);
+            margin-bottom: 0.5rem;
+        }
+        
+        .resumen-card .icono {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background-color: rgba(33, 0, 73, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--nequi-purple);
+        }
+        
+        .resumen-card.pagado .icono {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+        
+        .resumen-card.pagado .valor {
+            color: #28a745;
+        }
+        
+        .resumen-card.pendiente .icono {
+            background-color: rgba(255, 182, 18, 0.1);
+            color: var(--nequi-yellow);
+        }
+        
+        .resumen-card.pendiente .valor {
+            color: var(--nequi-yellow);
+        }
+        
+        .resumen-card.cancelado .icono {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .resumen-card.cancelado .valor {
+            color: #dc3545;
+        }
+    </style>
 </head>
 <body>
     <nav>
@@ -32,8 +177,57 @@
     <div class="container">
         <h1>Gestión de Ventas</h1>
         
+        <!-- Resumen de ventas mejorado con iconos -->
+        <div class="resumen-ventas">
+            <div class="resumen-card">
+                <div class="icono">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Total Ventas</h3>
+                <div class="valor" id="total-ventas">0</div>
+            </div>
+            <div class="resumen-card pagado">
+                <div class="icono">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Pagadas</h3>
+                <div class="valor" id="total-pagadas">0</div>
+            </div>
+            <div class="resumen-card pendiente">
+                <div class="icono">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Pendientes</h3>
+                <div class="valor" id="total-pendientes">0</div>
+            </div>
+            <div class="resumen-card cancelado">
+                <div class="icono">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h3>Canceladas</h3>
+                <div class="valor" id="total-canceladas">0</div>
+            </div>
+        </div>
+        
         <div class="card">
             <h2>Filtrar Ventas</h2>
+            
+            <!-- Segmentador de estados mejorado con iconos -->
+            <div class="segmentador">
+                <button class="segmentador-item activo" data-estado="todos">
+                    <i class="fas fa-list"></i> Todas
+                </button>
+                <button class="segmentador-item" data-estado="Pagado">
+                    <i class="fas fa-check-circle"></i> Pagadas
+                </button>
+                <button class="segmentador-item" data-estado="Pendiente">
+                    <i class="fas fa-clock"></i> Pendientes
+                </button>
+                <button class="segmentador-item" data-estado="Cancelado">
+                    <i class="fas fa-times-circle"></i> Canceladas
+                </button>
+            </div>
+            
             <form id="filtro-ventas">
                 <div class="form-group" style="display: flex; gap: 1rem;">
                     <div style="flex: 1;">
@@ -49,8 +243,12 @@
                     <label for="buscar-cliente">Buscar por Cliente:</label>
                     <input type="text" id="buscar-cliente" name="buscar-cliente" placeholder="Nombre del cliente...">
                 </div>
-                <button type="submit">Filtrar</button>
-                <button type="button" id="exportar-csv" class="btn-secondary" style="margin-left: 1rem;">Exportar a CSV</button>
+                <button type="submit">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+                <button type="button" id="exportar-csv" class="btn-secondary" style="margin-left: 1rem;">
+                    <i class="fas fa-file-export"></i> Exportar a CSV
+                </button>
             </form>
         </div>
         
@@ -118,25 +316,154 @@
         import { exportarVentasCSV } from '../scripts/ventas.js';
         
         document.addEventListener('DOMContentLoaded', function() {
+            // Variables para almacenar las ventas y el estado seleccionado
+            let todasLasVentas = [];
+            let estadoSeleccionado = 'todos';
+            
+            // Escuchar cambios en ventas en tiempo real
             const unsubscribe = escucharVentas(function(ventas) {
-                cargarVentas(ventas);
+                todasLasVentas = ventas;
+                actualizarResumenVentas(ventas);
+                filtrarYMostrarVentas();
             });
             
+            // Configurar segmentador de estados
+            const segmentadorItems = document.querySelectorAll('.segmentador-item');
+            segmentadorItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Quitar clase activo de todos los items
+                    segmentadorItems.forEach(i => i.classList.remove('activo'));
+                    
+                    // Agregar clase activo al item seleccionado
+                    this.classList.add('activo');
+                    
+                    // Actualizar estado seleccionado
+                    estadoSeleccionado = this.dataset.estado;
+                    
+                    // Filtrar y mostrar ventas
+                    filtrarYMostrarVentas();
+                });
+            });
+            
+            // Filtrar ventas por fecha y cliente
             document.getElementById('filtro-ventas').addEventListener('submit', function(e) {
                 e.preventDefault();
-                cargarVentas();
+                filtrarYMostrarVentas();
             });
             
+            // Exportar ventas a CSV
             document.getElementById('exportar-csv').addEventListener('click', function() {
                 exportarVentasCSV();
             });
             
+            // Menú móvil
             const menuBtn = document.querySelector('.mobile-menu-btn');
             const menu = document.getElementById('menu');
             
             menuBtn.addEventListener('click', function() {
                 menu.classList.toggle('show');
             });
+            
+            // Función para filtrar y mostrar ventas según los criterios seleccionados
+            async function filtrarYMostrarVentas() {
+                try {
+                    // Obtener valores de los filtros
+                    const fechaInicio = document.getElementById('fecha-inicio').value;
+                    const fechaFin = document.getElementById('fecha-fin').value;
+                    const buscarCliente = document.getElementById('buscar-cliente').value;
+                    
+                    // Aplicar filtros
+                    let ventasFiltradas = [...todasLasVentas];
+                    
+                    // Filtrar por estado si no es "todos"
+                    if (estadoSeleccionado !== 'todos') {
+                        ventasFiltradas = ventasFiltradas.filter(venta => venta.estado === estadoSeleccionado);
+                    }
+                    
+                    // Filtrar por fecha si se especificaron fechas
+                    if (fechaInicio && fechaFin) {
+                        const inicio = new Date(fechaInicio);
+                        const fin = new Date(fechaFin);
+                        fin.setHours(23, 59, 59); // Incluir todo el día final
+                        
+                        ventasFiltradas = ventasFiltradas.filter(venta => {
+                            const fechaVenta = new Date(venta.fecha);
+                            return fechaVenta >= inicio && fechaVenta <= fin;
+                        });
+                    }
+                    
+                    // Filtrar por cliente si se especificó un nombre
+                    if (buscarCliente) {
+                        ventasFiltradas = ventasFiltradas.filter(venta => 
+                            venta.cliente.toLowerCase().includes(buscarCliente.toLowerCase())
+                        );
+                    }
+                    
+                    // Mostrar ventas filtradas
+                    mostrarVentas(ventasFiltradas);
+                    
+                } catch (error) {
+                    console.error('Error al filtrar ventas:', error);
+                    document.getElementById('ventas-body').innerHTML = '<tr><td colspan="8" style="text-align: center;">Error al filtrar las ventas</td></tr>';
+                }
+            }
+            
+            // Función para actualizar el resumen de ventas
+            function actualizarResumenVentas(ventas) {
+                const totalVentas = ventas.length;
+                const pagadas = ventas.filter(v => v.estado === 'Pagado').length;
+                const pendientes = ventas.filter(v => v.estado === 'Pendiente').length;
+                const canceladas = ventas.filter(v => v.estado === 'Cancelado').length;
+                
+                document.getElementById('total-ventas').textContent = totalVentas;
+                document.getElementById('total-pagadas').textContent = pagadas;
+                document.getElementById('total-pendientes').textContent = pendientes;
+                document.getElementById('total-canceladas').textContent = canceladas;
+                
+                console.log("Resumen actualizado:", {
+                    total: totalVentas,
+                    pagadas: pagadas,
+                    pendientes: pendientes,
+                    canceladas: canceladas
+                });
+            }
+            
+            // Función para mostrar ventas en la tabla
+            function mostrarVentas(ventas) {
+                const ventasBody = document.getElementById('ventas-body');
+                
+                if (ventas.length === 0) {
+                    ventasBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron ventas</td></tr>';
+                    return;
+                }
+                
+                ventasBody.innerHTML = '';
+                
+                // Ordenar ventas por fecha (más recientes primero)
+                ventas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                
+                ventas.forEach(venta => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${venta.cliente}</td>
+                        <td>${venta.contacto}</td>
+                        <td>${venta.vendedor}</td>
+                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
+                        <td>${venta.revista || '-'}</td>
+                        <td><span class="badge ${venta.estado === 'Pagado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
+                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
+                        <td>
+                            <button class="btn-icon" onclick="editarVentaUI('${venta.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon" onclick="eliminarVentaUI('${venta.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    ventasBody.appendChild(fila);
+                });
+            }
             
             // Hacer disponible la función eliminarVenta para los botones de la tabla
             window.eliminarVentaUI = async function(id) {
@@ -181,64 +508,6 @@
                 }
             };
         });
-        
-        async function cargarVentas(ventasPrecargadas) {
-            try {
-                let ventas = ventasPrecargadas;
-                
-                if (!ventas) {
-                    ventas = await obtenerVentas();
-                }
-                
-                const fechaInicio = document.getElementById('fecha-inicio').value;
-                const fechaFin = document.getElementById('fecha-fin').value;
-                const buscarCliente = document.getElementById('buscar-cliente').value;
-                
-                if (fechaInicio && fechaFin) {
-                    ventas = await filtrarVentasPorFecha(fechaInicio, fechaFin);
-                }
-                
-                if (buscarCliente) {
-                    ventas = ventas.filter(venta => 
-                        venta.cliente.toLowerCase().includes(buscarCliente.toLowerCase())
-                    );
-                }
-                
-                const ventasBody = document.getElementById('ventas-body');
-                
-                if (ventas.length === 0) {
-                    ventasBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron ventas</td></tr>';
-                    return;
-                }
-                
-                ventasBody.innerHTML = '';
-                
-                ventas.forEach(venta => {
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${venta.cliente}</td>
-                        <td>${venta.contacto}</td>
-                        <td>${venta.vendedor}</td>
-                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
-                        <td>${venta.revista || '-'}</td>
-                        <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
-                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
-                        <td>
-                            <button class="btn-icon" onclick="editarVentaUI('${venta.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-icon" onclick="eliminarVentaUI('${venta.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    ventasBody.appendChild(fila);
-                });
-            } catch (error) {
-                console.error('Error al cargar ventas:', error);
-                document.getElementById('ventas-body').innerHTML = '<tr><td colspan="8" style="text-align: center;">Error al cargar las ventas</td></tr>';
-            }
-        }
     </script>
 </body>
 </html>

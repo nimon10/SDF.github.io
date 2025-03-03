@@ -1,121 +1,1003 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión de Ventas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Sistema de Gestión | Dashboard</title>
+   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   <link rel="stylesheet" href="style.css">
+   <style>
+       /* Estilos para el dashboard */
+       .dashboard-stats {
+           display: grid;
+           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+           gap: 1.5rem;
+           margin-bottom: 2rem;
+       }
+       
+       .stat-card {
+           background-color: var(--nequi-white);
+           border-radius: 16px;
+           padding: 1.5rem;
+           box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+           text-align: center;
+           transition: transform 0.3s ease, box-shadow 0.3s ease;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           justify-content: center;
+       }
+       
+       .stat-card:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+       }
+       
+       .stat-card .icon {
+           font-size: 2rem;
+           margin-bottom: 1rem;
+           background-color: rgba(33, 0, 73, 0.1);
+           width: 60px;
+           height: 60px;
+           border-radius: 50%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           color: var(--nequi-purple);
+       }
+       
+       .stat-card h3 {
+           margin-bottom: 0.5rem;
+           font-size: 1.1rem;
+           color: var(--nequi-dark-gray);
+       }
+       
+       .stat-card .value {
+           font-size: 2rem;
+           font-weight: 700;
+           color: var(--nequi-purple);
+           margin-bottom: 0.5rem;
+       }
+       
+       .stat-card .trend {
+           font-size: 0.9rem;
+           display: flex;
+           align-items: center;
+           gap: 0.3rem;
+       }
+       
+       .trend.up {
+           color: #28a745;
+       }
+       
+       .trend.down {
+           color: #dc3545;
+       }
+       
+       /* Estilos para gráficos */
+       .chart-container {
+           background-color: var(--nequi-white);
+           border-radius: 16px;
+           padding: 1.5rem;
+           box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+           margin-bottom: 2rem;
+       }
+       
+       .chart-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 1.5rem;
+       }
+       
+       .chart-header h2 {
+           margin: 0;
+           font-size: 1.3rem;
+       }
+       
+       .chart-filters {
+           display: flex;
+           gap: 1rem;
+       }
+       
+       .chart-filters button {
+           background: none;
+           border: none;
+           padding: 0.5rem 1rem;
+           border-radius: 50px;
+           cursor: pointer;
+           font-weight: 500;
+           color: var(--nequi-dark-gray);
+           transition: all 0.3s ease;
+       }
+       
+       .chart-filters button.active {
+           background-color: var(--nequi-purple);
+           color: var(--nequi-white);
+       }
+       
+       /* Estilos para actividad reciente */
+       .activity-list {
+           list-style: none;
+           padding: 0;
+       }
+       
+       .activity-item {
+           display: flex;
+           align-items: center;
+           padding: 1rem 0;
+           border-bottom: 1px solid var(--nequi-light-gray);
+       }
+       
+       .activity-item:last-child {
+           border-bottom: none;
+       }
+       
+       .activity-icon {
+           width: 40px;
+           height: 40px;
+           border-radius: 50%;
+           background-color: rgba(33, 0, 73, 0.1);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           margin-right: 1rem;
+           color: var(--nequi-purple);
+       }
+       
+       .activity-details {
+           flex: 1;
+       }
+       
+       .activity-details h4 {
+           margin: 0;
+           font-size: 1rem;
+           font-weight: 600;
+       }
+       
+       .activity-details p {
+           margin: 0.3rem 0 0;
+           font-size: 0.9rem;
+           color: var(--nequi-dark-gray);
+       }
+       
+       .activity-time {
+           font-size: 0.8rem;
+           color: var(--nequi-dark-gray);
+       }
+       
+       /* Estilos para productos con stock bajo */
+       .stock-alert {
+           display: flex;
+           align-items: center;
+           padding: 0.8rem 0;
+           border-bottom: 1px solid var(--nequi-light-gray);
+       }
+       
+       .stock-alert:last-child {
+           border-bottom: none;
+       }
+       
+       .stock-alert-icon {
+           width: 36px;
+           height: 36px;
+           border-radius: 50%;
+           background-color: rgba(255, 182, 18, 0.1);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           margin-right: 1rem;
+           color: var(--nequi-yellow);
+       }
+       
+       .stock-alert-details {
+           flex: 1;
+       }
+       
+       .stock-alert-details h4 {
+           margin: 0;
+           font-size: 0.95rem;
+           font-weight: 600;
+       }
+       
+       .stock-alert-details p {
+           margin: 0.2rem 0 0;
+           font-size: 0.85rem;
+           color: var(--nequi-dark-gray);
+       }
+       
+       .stock-count {
+           font-weight: 700;
+           color: var(--nequi-yellow);
+       }
+       
+       /* Estilos para el calendario */
+       .calendar-container {
+           margin-top: 1rem;
+       }
+       
+       .calendar-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 1rem;
+       }
+       
+       .calendar-month {
+           font-weight: 600;
+           font-size: 1.1rem;
+       }
+       
+       .calendar-nav {
+           display: flex;
+           gap: 0.5rem;
+       }
+       
+       .calendar-nav button {
+           background: none;
+           border: none;
+           width: 30px;
+           height: 30px;
+           border-radius: 50%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           cursor: pointer;
+           transition: all 0.3s ease;
+       }
+       
+       .calendar-nav button:hover {
+           background-color: var(--nequi-light-gray);
+       }
+       
+       .calendar-grid {
+           display: grid;
+           grid-template-columns: repeat(7, 1fr);
+           gap: 0.5rem;
+       }
+       
+       .calendar-day-header {
+           text-align: center;
+           font-weight: 600;
+           font-size: 0.8rem;
+           color: var(--nequi-dark-gray);
+           padding: 0.5rem 0;
+       }
+       
+       .calendar-day {
+           text-align: center;
+           padding: 0.5rem;
+           border-radius: 8px;
+           cursor: pointer;
+           transition: all 0.3s ease;
+       }
+       
+       .calendar-day:hover {
+           background-color: var(--nequi-light-gray);
+       }
+       
+       .calendar-day.today {
+           background-color: var(--nequi-purple);
+           color: var(--nequi-white);
+       }
+       
+       .calendar-day.has-events {
+           position: relative;
+       }
+       
+       .calendar-day.has-events::after {
+           content: '';
+           position: absolute;
+           bottom: 3px;
+           left: 50%;
+           transform: translateX(-50%);
+           width: 4px;
+           height: 4px;
+           border-radius: 50%;
+           background-color: var(--nequi-pink);
+       }
+       
+       /* Estilos para la sección de acciones rápidas */
+       .quick-actions {
+           display: grid;
+           grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+           gap: 1rem;
+           margin-top: 1.5rem;
+       }
+       
+       .quick-action-btn {
+           background-color: var(--nequi-white);
+           border: 1px solid var(--nequi-light-gray);
+           border-radius: 12px;
+           padding: 1.2rem 1rem;
+           text-align: center;
+           transition: all 0.3s ease;
+           cursor: pointer;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           justify-content: center;
+           text-decoration: none;
+           color: var(--nequi-dark-gray);
+       }
+       
+       .quick-action-btn:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+       }
+       
+       .quick-action-btn i {
+           font-size: 1.8rem;
+           margin-bottom: 0.8rem;
+           color: var(--nequi-purple);
+       }
+       
+       .quick-action-btn span {
+           font-weight: 500;
+           font-size: 0.9rem;
+       }
+       
+       /* Estilos para el gráfico */
+       #ventas-chart {
+           width: 100%;
+           height: 300px;
+           margin-top: 1rem;
+       }
+       
+       /* Estilos para la tabla de resumen */
+       .summary-table {
+           width: 100%;
+           border-collapse: collapse;
+           margin-top: 1rem;
+       }
+       
+       .summary-table th, .summary-table td {
+           padding: 0.8rem;
+           text-align: left;
+           border-bottom: 1px solid var(--nequi-light-gray);
+       }
+       
+       .summary-table th {
+           font-weight: 600;
+           color: var(--nequi-dark-gray);
+           background-color: var(--nequi-light-gray);
+       }
+       
+       .summary-table tr:last-child td {
+           border-bottom: none;
+       }
+       
+       .summary-table .badge {
+           padding: 0.3rem 0.6rem;
+           border-radius: 50px;
+           font-size: 0.75rem;
+           font-weight: 600;
+       }
+   </style>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <nav>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <i class="fas fa-cash-register"></i> SistemaVentas
-            </a>
-            <button class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </button>
-            <ul id="menu">
-                <li><a href="index.html" class="activo">Inicio</a></li>
-                <li><a href="pages/ventas.html">Ventas</a></li>
-                <li><a href="pages/venta_directa.html">Nueva Venta</a></li>
-                <li><a href="pages/venta_descuento.html">Venta con Descuento</a></li>
-                <li><a href="pages/abonos.html">Abonos</a></li>
-                <li><a href="pages/inventario.html">Inventario</a></li>
-                <li><a href="pages/ajuste_inventarios.html">Ajuste de Inventario</a></li>
-            </ul>
-        </div>
-    </nav>
-    
-    <div class="hero">
-        <div class="container">
-            <h1>Sistema de Gestión de Ventas</h1>
-            <p>Una solución completa para administrar tu negocio, controlar inventario y gestionar ventas de manera eficiente.</p>
-            <a href="pages/venta_directa.html" class="btn">
-                <i class="fas fa-plus-circle"></i> Nueva Venta
-            </a>
-            <a href="pages/inventario.html" class="btn-secondary">
-                <i class="fas fa-boxes"></i> Ver Inventario
-            </a>
-        </div>
-    </div>
-    
-    <div class="container">
-        <div class="card-grid">
-            <div class="card feature-card">
-                <i class="fas fa-shopping-cart"></i>
-                <h3>Ventas</h3>
-                <p>Registra ventas directas, con descuentos y gestiona abonos de manera sencilla.</p>
-                <a href="pages/ventas.html" class="btn-secondary">Ver Ventas</a>
-            </div>
-            
-            <div class="card feature-card">
-                <i class="fas fa-boxes"></i>
-                <h3>Inventario</h3>
-                <p>Controla tu stock, agrega productos y realiza ajustes de inventario.</p>
-                <a href="pages/inventario.html" class="btn-secondary">Ver Inventario</a>
-            </div>
-            
-            <div class="card feature-card">
-                <i class="fas fa-chart-line"></i>
-                <h3>Estadísticas</h3>
-                <p>Visualiza el rendimiento de tu negocio con estadísticas detalladas.</p>
-                <a href="pages/ventas.html" class="btn-secondary">Ver Estadísticas</a>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h2>Resumen de Actividad</h2>
-            <div class="stats-container">
-                <div class="stat-card">
-                    <h3>Ventas Totales</h3>
-                    <div class="value" id="total-ventas">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Productos en Inventario</h3>
-                    <div class="value" id="total-productos">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Ventas Pendientes</h3>
-                    <div class="value" id="ventas-pendientes">0</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <footer>
-        <div class="container">
-            <div>
-                <h3>Sistema de Gestión</h3>
-                <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
-            </div>
-            <div>
-                <h3>Enlaces Rápidos</h3>
-                <ul>
-                    <li><a href="index.html">Inicio</a></li>
-                    <li><a href="pages/ventas.html">Ventas</a></li>
-                    <li><a href="pages/inventario.html">Inventario</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3>Contacto</h3>
-                <ul>
-                    <li><i class="fas fa-envelope"></i> nicolasmonroy@hotmail.com</li>
-                    <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            <div class="container">
-                <p>&copy; 2025 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
+   <nav>
+       <div class="container">
+           <a href="index.html" class="logo">
+               <i class="fas fa-cash-register"></i> SistemaVentas
+           </a>
+           <button class="mobile-menu-btn">
+               <i class="fas fa-bars"></i>
+           </button>
+           <ul id="menu">
+               <li><a href="index.html" class="activo">Inicio</a></li>
+               <li><a href="pages/ventas.html">Ventas</a></li>
+               <li><a href="pages/venta_directa.html">Nueva Venta</a></li>
+               <li><a href="pages/venta_descuento.html">Venta con Descuento</a></li>
+               <li><a href="pages/abonos.html">Abonos</a></li>
+               <li><a href="pages/inventario.html">Inventario</a></li>
+               <li><a href="pages/ajuste_inventarios.html">Ajuste de Inventario</a></li>
+           </ul>
+       </div>
+   </nav>
+   
+   <div class="container">
+       <h1>Dashboard</h1>
+       
+       <!-- Acciones rápidas -->
+       <div class="quick-actions">
+           <a href="pages/venta_directa.html" class="quick-action-btn">
+               <i class="fas fa-cart-plus"></i>
+               <span>Nueva Venta</span>
+           </a>
+           <a href="pages/inventario.html" class="quick-action-btn">
+               <i class="fas fa-box"></i>
+               <span>Agregar Producto</span>
+           </a>
+           <a href="pages/abonos.html" class="quick-action-btn">
+               <i class="fas fa-money-bill-wave"></i>
+               <span>Registrar Abono</span>
+           </a>
+           <a href="pages/ajuste_inventarios.html" class="quick-action-btn">
+               <i class="fas fa-sync-alt"></i>
+               <span>Ajustar Inventario</span>
+           </a>
+       </div>
+       
+       <!-- Estadísticas principales -->
+       <div class="dashboard-stats">
+           <div class="stat-card">
+               <div class="icon">
+                   <i class="fas fa-chart-line"></i>
+               </div>
+               <h3>Ventas Totales</h3>
+               <div class="value" id="total-ventas">$0</div>
+               <div class="trend up" id="trend-ventas">
+                   <i class="fas fa-arrow-up"></i> <span>0%</span> vs mes anterior
+               </div>
+           </div>
+           
+           <div class="stat-card">
+               <div class="icon">
+                   <i class="fas fa-shopping-bag"></i>
+               </div>
+               <h3>Ventas del Mes</h3>
+               <div class="value" id="ventas-mes">$0</div>
+               <div class="trend" id="trend-ventas-mes">
+                   <i class="fas fa-arrow-up"></i> <span>0%</span> vs mes anterior
+               </div>
+           </div>
+           
+           <div class="stat-card">
+               <div class="icon">
+                   <i class="fas fa-box"></i>
+               </div>
+               <h3>Productos en Inventario</h3>
+               <div class="value" id="total-productos">0</div>
+               <div class="trend" id="trend-productos">
+                   <i class="fas fa-arrow-up"></i> <span>0%</span> vs mes anterior
+               </div>
+           </div>
+           
+           <div class="stat-card">
+               <div class="icon">
+                   <i class="fas fa-clock"></i>
+               </div>
+               <h3>Ventas Pendientes</h3>
+               <div class="value" id="ventas-pendientes">0</div>
+               <div class="trend" id="trend-pendientes">
+                   <i class="fas fa-arrow-down"></i> <span>0%</span> vs mes anterior
+               </div>
+           </div>
+       </div>
+       
+       <div class="row" style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+           <!-- Gráfico de ventas -->
+           <div class="chart-container" style="flex: 2; min-width: 300px;">
+               <div class="chart-header">
+                   <h2>Ventas Recientes</h2>
+                   <div class="chart-filters">
+                       <button class="period-filter active" data-period="7">7 días</button>
+                       <button class="period-filter" data-period="30">30 días</button>
+                       <button class="period-filter" data-period="90">90 días</button>
+                   </div>
+               </div>
+               <canvas id="ventas-chart"></canvas>
+           </div>
+           
+           <!-- Actividad reciente -->
+           <div class="chart-container" style="flex: 1; min-width: 300px;">
+               <h2>Actividad Reciente</h2>
+               <ul class="activity-list" id="actividad-reciente">
+                   <li class="activity-item">
+                       <div class="activity-icon">
+                           <i class="fas fa-spinner fa-spin"></i>
+                       </div>
+                       <div class="activity-details">
+                           <h4>Cargando actividades...</h4>
+                           <p>Por favor espere</p>
+                       </div>
+                   </li>
+               </ul>
+           </div>
+       </div>
+       
+       <div class="row" style="display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
+           <!-- Productos con stock bajo -->
+           <div class="chart-container" style="flex: 1; min-width: 300px;">
+               <h2>Productos con Stock Bajo</h2>
+               <div id="stock-bajo-list">
+                   <div class="stock-alert">
+                       <div class="stock-alert-icon">
+                           <i class="fas fa-spinner fa-spin"></i>
+                       </div>
+                       <div class="stock-alert-details">
+                           <h4>Cargando productos...</h4>
+                           <p>Por favor espere</p>
+                       </div>
+                   </div>
+               </div>
+           </div>
+           
+           <!-- Ventas por categoría -->
+           <div class="chart-container" style="flex: 1; min-width: 300px;">
+               <h2>Ventas por Revista</h2>
+               <table class="summary-table" id="ventas-por-categoria">
+                   <thead>
+                       <tr>
+                           <th>Revista</th>
+                           <th>Ventas</th>
+                           <th>%</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       <tr>
+                           <td colspan="3" style="text-align: center;">Cargando datos...</td>
+                       </tr>
+                   </tbody>
+               </table>
+           </div>
+       </div>
+   </div>
+   
+   <footer>
+       <div class="container">
+           <div>
+               <h3>Sistema de Gestión</h3>
+               <p>Una solución completa para la gestión de ventas e inventario de tu negocio.</p>
+           </div>
+           <div>
+               <h3>Enlaces Rápidos</h3>
+               <ul>
+                   <li><a href="index.html">Inicio</a></li>
+                   <li><a href="pages/ventas.html">Ventas</a></li>
+                   <li><a href="pages/inventario.html">Inventario</a></li>
+               </ul>
+           </div>
+           <div>
+               <h3>Contacto</h3>
+               <ul>
+                   <li><i class="fas fa-envelope"></i> nicolasmonroy@hotmail.com</li>
+                   <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
+               </ul>
+           </div>
+       </div>
+       <div class="copyright">
+           <div class="container">
+               <p>&copy; 2025 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+           </div>
+       </div>
+   </footer>
+   
+   <script type="module">
+       import { 
+    obtenerVentas, 
+    escucharVentas, 
+    obtenerInventario, 
+    escucharInventario,
+    obtenerProductosStockBajo,
+    calcularValorInventario,
+    obtenerMovimientosInventario
+} from './scripts/script.js';
 
-    <!-- Importar scripts -->
-    <script type="module" src="scripts/firebase-config.js"></script>
-    <script type="module" src="scripts/script.js"></script>
+document.addEventListener('DOMContentLoaded', async function() {
+    // Variables para almacenar datos
+    let todasLasVentas = [];
+    let inventarioActual = [];
+    let periodoSeleccionado = 7; // Días por defecto para el gráfico
+    let ventasChart = null;
+    
+    // Inicializar la interfaz
+    await inicializarDashboard();
+    
+    // Configurar escuchadores en tiempo real
+    configurarEscuchadores();
+    
+    // Configurar filtros de período para el gráfico
+    configurarFiltrosPeriodo();
+    
+    // Menú móvil
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    const menu = document.getElementById('menu');
+    
+    menuBtn.addEventListener('click', function() {
+        menu.classList.toggle('show');
+    });
+    
+    // Función para inicializar el dashboard
+    async function inicializarDashboard() {
+        try {
+            // Mostrar indicadores de carga
+            mostrarCargando();
+            
+            // Cargar datos iniciales
+            todasLasVentas = await obtenerVentas();
+            inventarioActual = await obtenerInventario();
+            const productosStockBajo = await obtenerProductosStockBajo(10);
+            const valorInventario = await calcularValorInventario();
+            const movimientos = await obtenerMovimientosInventario();
+            
+            // Actualizar estadísticas
+            actualizarEstadisticas(todasLasVentas, inventarioActual);
+            
+            // Inicializar gráfico de ventas
+            inicializarGraficoVentas(todasLasVentas, periodoSeleccionado);
+            
+            // Mostrar actividad reciente
+            mostrarActividadReciente(todasLasVentas, movimientos);
+            
+            // Mostrar productos con stock bajo
+            mostrarProductosStockBajo(productosStockBajo);
+            
+            // Mostrar ventas por categoría
+            mostrarVentasPorCategoria(todasLasVentas);
+            
+            console.log("Dashboard inicializado correctamente");
+        } catch (error) {
+            console.error("Error al inicializar dashboard:", error);
+            mostrarError("Error al cargar los datos. Por favor, recarga la página.");
+        }
+    }
+    
+    // Configurar escuchadores en tiempo real
+    function configurarEscuchadores() {
+        // Escuchar cambios en ventas
+        const unsubscribeVentas = escucharVentas(async function(ventas) {
+            todasLasVentas = ventas;
+            actualizarEstadisticas(ventas, inventarioActual);
+            actualizarGraficoVentas(ventas, periodoSeleccionado);
+            mostrarActividadReciente(ventas, await obtenerMovimientosInventario());
+            mostrarVentasPorCategoria(ventas);
+            console.log("Datos de ventas actualizados en tiempo real");
+        });
+        
+        // Escuchar cambios en inventario
+        const unsubscribeInventario = escucharInventario(async function(inventario) {
+            inventarioActual = inventario;
+            actualizarEstadisticas(todasLasVentas, inventario);
+            const productosStockBajo = await obtenerProductosStockBajo(10);
+            mostrarProductosStockBajo(productosStockBajo);
+            console.log("Datos de inventario actualizados en tiempo real");
+        });
+        
+        // Guardar referencias para limpiar al desmontar
+        window.unsubscribeVentas = unsubscribeVentas;
+        window.unsubscribeInventario = unsubscribeInventario;
+    }
+    
+    // Configurar filtros de período para el gráfico
+    function configurarFiltrosPeriodo() {
+        const filtros = document.querySelectorAll('.period-filter');
+        filtros.forEach(filtro => {
+            filtro.addEventListener('click', function() {
+                // Quitar clase activa de todos los filtros
+                filtros.forEach(f => f.classList.remove('active'));
+                // Agregar clase activa al filtro seleccionado
+                this.classList.add('active');
+                
+                // Actualizar período seleccionado
+                periodoSeleccionado = parseInt(this.dataset.period);
+                
+                // Actualizar gráfico
+                actualizarGraficoVentas(todasLasVentas, periodoSeleccionado);
+            });
+        });
+    }
+    
+    // Función para mostrar indicadores de carga
+    function mostrarCargando() {
+        document.getElementById('total-ventas').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        document.getElementById('ventas-mes').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        document.getElementById('total-productos').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        document.getElementById('ventas-pendientes').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    // Función para actualizar estadísticas
+    function actualizarEstadisticas(ventas, inventario) {
+        // Calcular estadísticas de ventas
+        const totalVentas = calcularTotalVentas(ventas);
+        const ventasMes = calcularVentasMes(ventas);
+        const ventasMesAnterior = calcularVentasMesAnterior(ventas);
+        const ventasPendientes = ventas.filter(v => v.estado === 'Pendiente').length;
+        const ventasPendientesMesAnterior = calcularVentasPendientesMesAnterior(ventas);
+        
+        // Calcular tendencias
+        const tendenciaVentas = calcularTendencia(totalVentas, calcularTotalVentasAnterior(ventas));
+        const tendenciaVentasMes = calcularTendencia(ventasMes, ventasMesAnterior);
+        const tendenciaProductos = calcularTendencia(inventario.length, inventario.length); // No tenemos datos históricos
+        const tendenciaPendientes = calcularTendencia(ventasPendientes, ventasPendientesMesAnterior);
+        
+        // Actualizar valores en la interfaz
+        document.getElementById('total-ventas').textContent = `$${totalVentas.toLocaleString()}`;
+        document.getElementById('ventas-mes').textContent = `$${ventasMes.toLocaleString()}`;
+        document.getElementById('total-productos').textContent = inventario.length;
+        document.getElementById('ventas-pendientes').textContent = ventasPendientes;
+        
+        // Actualizar tendencias
+        actualizarTendencia('trend-ventas', tendenciaVentas);
+        actualizarTendencia('trend-ventas-mes', tendenciaVentasMes);
+        actualizarTendencia('trend-productos', tendenciaProductos);
+        actualizarTendencia('trend-pendientes', tendenciaPendientes);
+    }
+    
+    // Función para actualizar indicador de tendencia
+    function actualizarTendencia(elementId, tendencia) {
+        const elemento = document.getElementById(elementId);
+        const icono = elemento.querySelector('i');
+        const valor = elemento.querySelector('span');
+        
+        // Actualizar clase y dirección del icono
+        if (tendencia > 0) {
+            elemento.className = 'trend up';
+            icono.className = 'fas fa-arrow-up';
+        } else if (tendencia < 0) {
+            elemento.className = 'trend down';
+            icono.className = 'fas fa-arrow-down';
+        } else {
+            elemento.className = 'trend';
+            icono.className = 'fas fa-minus';
+        }
+        
+        // Actualizar valor de tendencia
+        valor.textContent = `${Math.abs(tendencia)}%`;
+    }
+    
+    // Función para calcular tendencia (porcentaje de cambio)
+    function calcularTendencia(actual, anterior) {
+        if (anterior === 0) return 0;
+        return Math.round(((actual - anterior) / anterior) * 100);
+    }
+    
+    // Función para calcular total de ventas en valor monetario
+    function calcularTotalVentas(ventas) {
+        return ventas.reduce((total, venta) => {
+            return total + parseFloat(venta.valor || 0);
+        }, 0);
+    }
+    
+    // Función para calcular total de ventas del mes actual
+    function calcularVentasMes(ventas) {
+        const hoy = new Date();
+        const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        
+        return ventas
+            .filter(venta => new Date(venta.fecha) >= inicioMes)
+            .reduce((total, venta) => total + parseFloat(venta.valor || 0), 0);
+    }
+    
+    // Función para calcular total de ventas del mes anterior
+    function calcularVentasMesAnterior(ventas) {
+        const hoy = new Date();
+        const inicioMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        const finMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        
+        return ventas
+            .filter(venta => {
+                const fechaVenta = new Date(venta.fecha);
+                return fechaVenta >= inicioMesAnterior && fechaVenta <= finMesAnterior;
+            })
+            .reduce((total, venta) => total + parseFloat(venta.valor || 0), 0);
+    }
+    
+    // Función para calcular total de ventas del período anterior
+    function calcularTotalVentasAnterior(ventas) {
+        // Simplificado para este ejemplo
+        return calcularTotalVentas(ventas) * 0.9; // Asumimos 10% menos
+    }
+    
+    // Función para calcular ventas pendientes del mes anterior
+    function calcularVentasPendientesMesAnterior(ventas) {
+        const hoy = new Date();
+        const inicioMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        const finMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        
+        return ventas.filter(venta => {
+            const fechaVenta = new Date(venta.fecha);
+            return fechaVenta >= inicioMesAnterior && 
+                   fechaVenta <= finMesAnterior && 
+                   venta.estado === 'Pendiente';
+        }).length;
+    }
+    
+    // Función para inicializar el gráfico de ventas
+    function inicializarGraficoVentas(ventas, periodo) {
+        const ctx = document.getElementById('ventas-chart').getContext('2d');
+        
+        // Destruir gráfico existente si hay uno
+        if (ventasChart) {
+            ventasChart.destroy();
+        }
+        
+        // Preparar datos para el gráfico
+        const { labels, datos } = prepararDatosGrafico(ventas, periodo);
+        
+        // Crear nuevo gráfico
+        ventasChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ventas',
+                    data: datos,
+                    borderColor: 'rgba(33, 0, 73, 0.8)',
+                    backgroundColor: 'rgba(33, 0, 73, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    }
+
+    // Función para preparar datos para el gráfico
+    function prepararDatosGrafico(ventas, periodo) {
+        const hoy = new Date();
+        const inicioPeriodo = new Date(hoy);
+        inicioPeriodo.setDate(hoy.getDate() - periodo);
+
+        const labels = [];
+        const datos = [];
+
+        for (let i = 0; i < periodo; i++) {
+            const fecha = new Date(inicioPeriodo);
+            fecha.setDate(inicioPeriodo.getDate() + i);
+            labels.push(fecha.toLocaleDateString());
+
+            const ventasDia = ventas.filter(venta => {
+                const fechaVenta = new Date(venta.fecha);
+                return fechaVenta.toDateString() === fecha.toDateString();
+            });
+
+            datos.push(ventasDia.reduce((total, venta) => total + parseFloat(venta.valor || 0), 0));
+        }
+
+        return { labels, datos };
+    }
+
+    // Función para actualizar el gráfico de ventas
+    function actualizarGraficoVentas(ventas, periodo) {
+        const { labels, datos } = prepararDatosGrafico(ventas, periodo);
+        ventasChart.data.labels = labels;
+        ventasChart.data.datasets[0].data = datos;
+        ventasChart.update();
+    }
+
+    // Función para mostrar actividad reciente
+    function mostrarActividadReciente(ventas, movimientos) {
+        const actividadReciente = document.getElementById('actividad-reciente');
+        actividadReciente.innerHTML = '';
+
+        const actividades = [...ventas, ...movimientos]
+            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+            .slice(0, 5);
+
+        actividades.forEach(actividad => {
+            const li = document.createElement('li');
+            li.className = 'activity-item';
+
+            const icono = document.createElement('div');
+            icono.className = 'activity-icon';
+            icono.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+
+            const detalles = document.createElement('div');
+            detalles.className = 'activity-details';
+
+            const titulo = document.createElement('h4');
+            titulo.textContent = actividad.tipo === 'venta' ? 'Nueva Venta' : 'Movimiento de Inventario';
+
+            const descripcion = document.createElement('p');
+            descripcion.textContent = actividad.descripcion || 'Descripción no disponible';
+
+            const tiempo = document.createElement('div');
+            tiempo.className = 'activity-time';
+            tiempo.textContent = new Date(actividad.fecha).toLocaleString();
+
+            detalles.appendChild(titulo);
+            detalles.appendChild(descripcion);
+
+            li.appendChild(icono);
+            li.appendChild(detalles);
+            li.appendChild(tiempo);
+
+            actividadReciente.appendChild(li);
+        });
+    }
+
+    // Función para mostrar productos con stock bajo
+    function mostrarProductosStockBajo(productos) {
+        const stockBajoList = document.getElementById('stock-bajo-list');
+        stockBajoList.innerHTML = '';
+
+        productos.forEach(producto => {
+            const div = document.createElement('div');
+            div.className = 'stock-alert';
+
+            const icono = document.createElement('div');
+            icono.className = 'stock-alert-icon';
+            icono.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+
+            const detalles = document.createElement('div');
+            detalles.className = 'stock-alert-details';
+
+            const titulo = document.createElement('h4');
+            titulo.textContent = producto.nombre;
+
+            const descripcion = document.createElement('p');
+            descripcion.innerHTML = `Stock: <span class="stock-count">${producto.stock}</span>`;
+
+            detalles.appendChild(titulo);
+            detalles.appendChild(descripcion);
+
+            div.appendChild(icono);
+            div.appendChild(detalles);
+
+            stockBajoList.appendChild(div);
+        });
+    }
+
+    // Función para mostrar ventas por categoría
+    function mostrarVentasPorCategoria(ventas) {
+        const tabla = document.getElementById('ventas-por-categoria').querySelector('tbody');
+        tabla.innerHTML = '';
+
+        const ventasPorCategoria = {};
+        ventas.forEach(venta => {
+            if (ventasPorCategoria[venta.categoria]) {
+                ventasPorCategoria[venta.categoria].total += parseFloat(venta.valor || 0);
+                ventasPorCategoria[venta.categoria].cantidad++;
+            } else {
+                ventasPorCategoria[venta.categoria] = { total: parseFloat(venta.valor || 0), cantidad: 1 };
+            }
+        });
+
+        for (const [categoria, { total, cantidad }] of Object.entries(ventasPorCategoria)) {
+            const tr = document.createElement('tr');
+
+            const tdCategoria = document.createElement('td');
+            tdCategoria.textContent = categoria;
+
+            const tdVentas = document.createElement('td');
+            tdVentas.textContent = `$${total.toLocaleString()}`;
+
+            const tdPorcentaje = document.createElement('td');
+            tdPorcentaje.textContent = `${((total / calcularTotalVentas(ventas)) * 100).toFixed(2)}%`;
+
+            tr.appendChild(tdCategoria);
+            tr.appendChild(tdVentas);
+            tr.appendChild(tdPorcentaje);
+
+            tabla.appendChild(tr);
+        }
+    }
+
+    // Función para mostrar mensaje de error
+    function mostrarError(mensaje) {
+        alert(mensaje);
+    }
+
+    // Función para limpiar escuchadores al desmontar
+    window.addEventListener('beforeunload', function() {
+        if (window.unsubscribeVentas) {
+            window.unsubscribeVentas();
+        }
+        if (window.unsubscribeInventario) {
+            window.unsubscribeInventario();
+        }
+    });
+});
+</script>
 </body>
 </html>
