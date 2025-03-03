@@ -492,4 +492,3 @@ export {
     registrarMovimientoInventario,
     obtenerMovimientosInventario
 };
-

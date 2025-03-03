@@ -7,6 +7,208 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
+    <style>
+        /* Estilos adicionales para la página de venta con descuento */
+        .price-adjustment-container {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .price-adjustment-title {
+            font-weight: 600;
+            color: var(--nequi-purple);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .price-adjustment-title i {
+            color: var(--nequi-pink);
+        }
+        
+        .price-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .price-option {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .price-slider {
+            width: 100%;
+            margin: 1rem 0;
+        }
+        
+        .price-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .price-result {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .price-result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .price-result-label {
+            font-weight: 500;
+            color: var(--nequi-dark-gray);
+        }
+        
+        .price-result-value {
+            font-weight: 600;
+        }
+        
+        .price-result-value.profit {
+            color: #28a745;
+        }
+        
+        .price-result-value.loss {
+            color: #dc3545;
+        }
+        
+        .price-tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+        
+        .price-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .price-tab.active {
+            background-color: var(--nequi-purple);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .badge-profit {
+            background-color: #28a745;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        
+        .badge-loss {
+            background-color: #dc3545;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        
+        /* Estilos para el historial de ventas */
+        .historial-filtros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .historial-filtros .form-group {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 0;
+        }
+        
+        /* Estilos para el flujo de venta */
+        .workflow-container {
+            margin-bottom: 2rem;
+        }
+        
+        .workflow-step {
+            display: none;
+        }
+        
+        .workflow-step.active {
+            display: block;
+        }
+        
+        .workflow-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .step.active {
+            background-color: var(--nequi-purple);
+            color: white;
+        }
+        
+        .step.completed {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .step-line {
+            flex: 1;
+            height: 3px;
+            background-color: #e9ecef;
+            align-self: center;
+        }
+        
+        .step-line.active {
+            background-color: var(--nequi-purple);
+        }
+    </style>
 </head>
 <body>
     <nav>
@@ -32,157 +234,342 @@
     <div class="container">
         <h1>Venta con Descuento</h1>
         
-        <div class="card">
-            <h2>Datos del Cliente</h2>
-            <form id="formulario-venta">
-                <div class="form-group">
-                    <label for="cliente">Nombre del Cliente:</label>
-                    <input type="text" id="cliente" name="cliente" placeholder="Nombre completo del cliente" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="contacto">Número de Contacto:</label>
-                    <input type="text" id="contacto" name="contacto" placeholder="Número de teléfono" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="vendedor">Vendedor:</label>
-                    <select id="vendedor" name="vendedor" required>
-                        <option value="">Seleccione un vendedor</option>
-                        <option value="Gladys">Gladys</option>
-                        <option value="David">David</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="revista">Revista:</label>
-                    <select id="revista" name="revista" required>
-                        <option value="">Seleccione una revista</option>
-                        <option value="Esika">Esika</option>
-                        <option value="Carmel">Carmel</option>
-                        <option value="Leonisa">Leonisa</option>
-                        <option value="Cyzone">Cyzone</option>
-                        <option value="Pacifika">Pacifika</option>
-                        <option value="Yanbal">Yanbal</option>
-                        <option value="L'ebel">L'ebel</option>
-                        <option value="Novaventa">Novaventa</option>
-                        <option value="Natura">Natura</option>
-                        <option value="Login">Login</option>
-                        <option value="Avon">Avon</option>
-                    </select>
-                </div>
-            </form>
-        </div>
-        
         <div id="mensaje" class="mensaje"></div>
         
-        <div class="card" id="productos-container">
-            <h2>Productos Disponibles</h2>
-            <div class="form-group">
-                <input type="text" id="buscar-producto" placeholder="Buscar producto...">
-                <button id="btn-buscar" style="margin-top: 1rem;">
-                    <i class="fas fa-search"></i> Buscar
-                </button>
-            </div>
-            
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Categoría</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productos-body">
-                        <!-- Aquí se cargarán los productos -->
-                    </tbody>
-                </table>
-            </div>
+        <!-- Indicador de pasos -->
+        <div class="step-indicator">
+            <div class="step active" id="step-1">1</div>
+            <div class="step-line" id="line-1-2"></div>
+            <div class="step" id="step-2">2</div>
+            <div class="step-line" id="line-2-3"></div>
+            <div class="step" id="step-3">3</div>
         </div>
         
-        <div class="card" id="producto-seleccionado" style="display: none;">
-            <h2>Aplicar Descuento</h2>
-            <div class="form-group">
-                <label for="nombre-producto">Producto:</label>
-                <input type="text" id="nombre-producto" readonly>
+        <!-- Flujo de trabajo por pasos -->
+        <div class="workflow-container">
+            <!-- Paso 1: Buscar y seleccionar producto -->
+            <div class="workflow-step active" id="step-1-content">
+                <div class="card">
+                    <h2>Buscar Producto</h2>
+                    <div class="form-group">
+                        <label for="revista-busqueda">Revista:</label>
+                        <select id="revista-busqueda" name="revista-busqueda">
+                            <option value="">Todas las revistas</option>
+                            <option value="Esika">Esika</option>
+                            <option value="Carmel">Carmel</option>
+                            <option value="Leonisa">Leonisa</option>
+                            <option value="Cyzone">Cyzone</option>
+                            <option value="Pacifika">Pacifika</option>
+                            <option value="Yanbal">Yanbal</option>
+                            <option value="L'ebel">L'ebel</option>
+                            <option value="Novaventa">Novaventa</option>
+                            <option value="Natura">Natura</option>
+                            <option value="Login">Login</option>
+                            <option value="Avon">Avon</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="buscar-producto">Nombre del producto:</label>
+                        <input type="text" id="buscar-producto" placeholder="Ingrese el nombre del producto...">
+                    </div>
+                    
+                    <button id="btn-buscar">
+                        <i class="fas fa-search"></i> Buscar Producto
+                    </button>
+                </div>
+                
+                <div class="card" id="productos-container" style="display: none;">
+                    <h2>Productos Disponibles</h2>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Precio</th>
+                                    <th>Stock</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productos-body">
+                                <!-- Aquí se cargarán los productos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="workflow-navigation">
+                    <div></div> <!-- Espacio vacío para alinear a la derecha -->
+                    <button id="btn-siguiente-paso-1" class="btn" disabled>
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="precio-original">Precio Original:</label>
-                <input type="text" id="precio-original" readonly>
+            <!-- Paso 2: Ajustar precio -->
+            <div class="workflow-step" id="step-2-content">
+                <div class="card" id="producto-seleccionado">
+                    <h2>Ajuste de Precio</h2>
+                    
+                    <div class="form-group">
+                        <label for="nombre-producto">Producto:</label>
+                        <input type="text" id="nombre-producto" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="precio-original">Precio Original:</label>
+                        <input type="text" id="precio-original" readonly>
+                    </div>
+                    
+                    <!-- Pestañas para elegir tipo de ajuste -->
+                    <div class="price-tabs">
+                        <div class="price-tab active" data-tab="descuento">
+                            <i class="fas fa-percentage"></i> Aplicar Descuento
+                        </div>
+                        <div class="price-tab" data-tab="incremento">
+                            <i class="fas fa-arrow-up"></i> Incrementar Precio
+                        </div>
+                        <div class="price-tab" data-tab="ganancia">
+                            <i class="fas fa-chart-line"></i> Ajustar Ganancia
+                        </div>
+                    </div>
+                    
+                    <!-- Contenido de la pestaña Descuento -->
+                    <div id="descuento-tab" class="tab-content active">
+                        <div class="price-adjustment-container">
+                            <div class="price-adjustment-title">
+                                <i class="fas fa-percentage"></i> Porcentaje de Descuento
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="range" id="porcentaje-descuento" class="price-slider" min="0" max="100" value="0" step="1">
+                                <div class="price-info">
+                                    <span>0%</span>
+                                    <span id="valor-descuento">0%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="price-result">
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Precio Original:</span>
+                                    <span class="price-result-value" id="descuento-precio-original">$0</span>
+                                </div>
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Descuento:</span>
+                                    <span class="price-result-value" id="descuento-valor">$0</span>
+                                </div>
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Precio Final:</span>
+                                    <span class="price-result-value" id="descuento-precio-final">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenido de la pestaña Incremento -->
+                    <div id="incremento-tab" class="tab-content">
+                        <div class="price-adjustment-container">
+                            <div class="price-adjustment-title">
+                                <i class="fas fa-arrow-up"></i> Porcentaje de Incremento
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="range" id="porcentaje-incremento" class="price-slider" min="0" max="100" value="0" step="1">
+                                <div class="price-info">
+                                    <span>0%</span>
+                                    <span id="valor-incremento">0%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="price-result">
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Precio Original:</span>
+                                    <span class="price-result-value" id="incremento-precio-original">$0</span>
+                                </div>
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Incremento:</span>
+                                    <span class="price-result-value" id="incremento-valor">$0</span>
+                                </div>
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Precio Final:</span>
+                                    <span class="price-result-value" id="incremento-precio-final">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenido de la pestaña Ganancia -->
+                    <div id="ganancia-tab" class="tab-content">
+                        <div class="price-adjustment-container">
+                            <div class="price-adjustment-title">
+                                <i class="fas fa-chart-line"></i> Porcentaje de Ganancia
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="range" id="porcentaje-ganancia" class="price-slider" min="-50" max="100" value="20" step="1">
+                                <div class="price-info">
+                                    <span>-50%</span>
+                                    <span id="valor-ganancia">20%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="price-result">
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Precio Original:</span>
+                                    <span class="price-result-value" id="ganancia-precio-original">$0</span>
+                                </div>
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Ganancia:</span>
+                                    <span class="price-result-value" id="ganancia-valor">$0</span>
+                                </div>
+                                <div class="price-result-row">
+                                    <span class="price-result-label">Precio Final:</span>
+                                    <span class="price-result-value" id="ganancia-precio-final">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="precio-final">Precio Final:</label>
+                        <input type="text" id="precio-final" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad:</label>
+                        <input type="number" id="cantidad" min="1" value="1" step="1">
+                    </div>
+                    
+                    <div class="workflow-navigation">
+                        <button id="btn-anterior-paso-2" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Anterior
+                        </button>
+                        <button id="btn-siguiente-paso-2" class="btn">
+                            Siguiente <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="porcentaje-descuento">Porcentaje de Descuento (%):</label>
-                <input type="number" id="porcentaje-descuento" min="0" max="100" value="0" step="1">
-            </div>
-            
-            <div class="form-group">
-                <label for="precio-final">Precio con Descuento:</label>
-                <input type="text" id="precio-final" readonly>
-            </div>
-            
-            <div class="form-group">
-                <label for="cantidad">Cantidad:</label>
-                <input type="number" id="cantidad" min="1" value="1" step="1">
-            </div>
-            
-            <div class="form-group">
-                <label for="estado-venta">Estado de la Venta:</label>
-                <select id="estado-venta">
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Completado">Completado</option>
-                    <option value="Cancelado">Cancelado</option>
-                </select>
-            </div>
-            
-            <div style="margin-top: 1.5rem; text-align: right;">
-                <button id="btn-agregar-carrito" class="btn">
-                    <i class="fas fa-cart-plus"></i> Agregar al Carrito
-                </button>
-            </div>
-        </div>
-        
-        <div class="card" id="carrito-container" style="display: none;">
-            <h2>Productos Seleccionados</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Precio Original</th>
-                            <th>Descuento</th>
-                            <th>Precio Final</th>
-                            <th>Cantidad</th>
-                            <th>Subtotal</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="carrito-body">
-                        <!-- Aquí se cargarán los productos seleccionados -->
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="5" style="text-align: right;"><strong>Total:</strong></td>
-                            <td id="total-venta">$0</td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-            
-            <div style="margin-top: 1.5rem; text-align: right;">
-                <button id="btn-completar-venta" class="btn">
-                    <i class="fas fa-check-circle"></i> Completar Venta
-                </button>
+            <!-- Paso 3: Datos del cliente y finalizar venta -->
+            <div class="workflow-step" id="step-3-content">
+                <div class="card">
+                    <h2>Datos del Cliente</h2>
+                    <form id="formulario-venta">
+                        <div class="form-group sugerencias-container">
+                            <label for="cliente">Nombre del Cliente:</label>
+                            <input type="text" id="cliente" name="cliente" placeholder="Nombre completo del cliente" required>
+                            <div class="sugerencias-lista" id="sugerencias-cliente"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contacto">Número de Contacto:</label>
+                            <input type="text" id="contacto" name="contacto" placeholder="Número de teléfono" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="vendedor">Vendedor:</label>
+                            <select id="vendedor" name="vendedor" required>
+                                <option value="">Seleccione un vendedor</option>
+                                <option value="Gladys">Gladys</option>
+                                <option value="David">David</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="revista">Revista:</label>
+                            <select id="revista" name="revista" required>
+                                <option value="">Seleccione una revista</option>
+                                <option value="Esika">Esika</option>
+                                <option value="Carmel">Carmel</option>
+                                <option value="Leonisa">Leonisa</option>
+                                <option value="Cyzone">Cyzone</option>
+                                <option value="Pacifika">Pacifika</option>
+                                <option value="Yanbal">Yanbal</option>
+                                <option value="L'ebel">L'ebel</option>
+                                <option value="Novaventa">Novaventa</option>
+                                <option value="Natura">Natura</option>
+                                <option value="Login">Login</option>
+                                <option value="Avon">Avon</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="estado-venta">Estado de la Venta:</label>
+                            <select id="estado-venta">
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Completado">Completado</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card" id="carrito-container">
+                    <h2>Resumen de la Venta</h2>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Precio Original</th>
+                                    <th>Ajuste</th>
+                                    <th>Precio Final</th>
+                                    <th>Cantidad</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="carrito-body">
+                                <!-- Aquí se cargará el producto seleccionado -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5" style="text-align: right;"><strong>Total:</strong></td>
+                                    <td id="total-venta">$0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <div class="workflow-navigation">
+                        <button id="btn-anterior-paso-3" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Anterior
+                        </button>
+                        <button id="btn-completar-venta" class="btn">
+                            <i class="fas fa-check-circle"></i> Completar Venta
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         
         <div class="card">
             <h2>Historial de Ventas con Descuento</h2>
+            
+            <div class="historial-filtros">
+                <div class="form-group">
+                    <label for="filtro-fecha-inicio">Desde:</label>
+                    <input type="date" id="filtro-fecha-inicio">
+                </div>
+                <div class="form-group">
+                    <label for="filtro-fecha-fin">Hasta:</label>
+                    <input type="date" id="filtro-fecha-fin">
+                </div>
+                <div class="form-group">
+                    <label for="filtro-cliente">Cliente:</label>
+                    <input type="text" id="filtro-cliente" placeholder="Nombre del cliente...">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button id="btn-filtrar-historial">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+            
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -192,8 +579,9 @@
                             <th>Vendedor</th>
                             <th>Revista</th>
                             <th>Valor</th>
-                            <th>Descuento</th>
+                            <th>Ajuste</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="historial-body">
@@ -242,47 +630,92 @@
             actualizarStock,
             guardarVenta,
             escucharVentas,
-            buscarProductoPorNombre
+            buscarProductoPorNombre,
+            buscarClientesPorNombre,
+            eliminarVenta,
+            filtrarVentasPorFecha
         } from '../scripts/script.js';
         
         document.addEventListener('DOMContentLoaded', function() {
+            // Referencias a elementos del DOM
             const mensaje = document.getElementById('mensaje');
-            const revistaSelect = document.getElementById('revista');
-            const productosContainer = document.getElementById('productos-container');
-            const productoSeleccionado = document.getElementById('producto-seleccionado');
-            const carritoContainer = document.getElementById('carrito-container');
+            const revistaBusqueda = document.getElementById('revista-busqueda');
             const buscarInput = document.getElementById('buscar-producto');
             const btnBuscar = document.getElementById('btn-buscar');
-            const btnAgregarCarrito = document.getElementById('btn-agregar-carrito');
-            const btnCompletarVenta = document.getElementById('btn-completar-venta');
+            const productosContainer = document.getElementById('productos-container');
+            const productosBody = document.getElementById('productos-body');
+            const clienteInput = document.getElementById('cliente');
+            const contactoInput = document.getElementById('contacto');
+            const sugerenciasLista = document.getElementById('sugerencias-cliente');
+            const revistaSelect = document.getElementById('revista');
             
             // Elementos del producto seleccionado
             const nombreProducto = document.getElementById('nombre-producto');
             const precioOriginal = document.getElementById('precio-original');
-            const porcentajeDescuento = document.getElementById('porcentaje-descuento');
             const precioFinal = document.getElementById('precio-final');
             const cantidad = document.getElementById('cantidad');
             const estadoVenta = document.getElementById('estado-venta');
             
-            // Carrito de compras
-            let carrito = [];
+            // Elementos de ajuste de precio
+            const porcentajeDescuento = document.getElementById('porcentaje-descuento');
+            const valorDescuento = document.getElementById('valor-descuento');
+            const descuentoPrecioOriginal = document.getElementById('descuento-precio-original');
+            const descuentoValor = document.getElementById('descuento-valor');
+            const descuentoPrecioFinal = document.getElementById('descuento-precio-final');
             
-            // Producto actualmente seleccionado
+            const porcentajeIncremento = document.getElementById('porcentaje-incremento');
+            const valorIncremento = document.getElementById('valor-incremento');
+            const incrementoPrecioOriginal = document.getElementById('incremento-precio-original');
+            const incrementoValor = document.getElementById('incremento-valor');
+            const incrementoPrecioFinal = document.getElementById('incremento-precio-final');
+            
+            const porcentajeGanancia = document.getElementById('porcentaje-ganancia');
+            const valorGanancia = document.getElementById('valor-ganancia');
+            const gananciaPrecioOriginal = document.getElementById('ganancia-precio-original');
+            const gananciaValor = document.getElementById('ganancia-valor');
+            const gananciaPrecioFinal = document.getElementById('ganancia-precio-final');
+            
+            // Pestañas de ajuste de precio
+            const priceTabs = document.querySelectorAll('.price-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Elementos de navegación entre pasos
+            const btnSiguientePaso1 = document.getElementById('btn-siguiente-paso-1');
+            const btnAnteriorPaso2 = document.getElementById('btn-anterior-paso-2');
+            const btnSiguientePaso2 = document.getElementById('btn-siguiente-paso-2');
+            const btnAnteriorPaso3 = document.getElementById('btn-anterior-paso-3');
+            const btnCompletarVenta = document.getElementById('btn-completar-venta');
+            
+            // Elementos de los pasos
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
+            const step3 = document.getElementById('step-3');
+            const line12 = document.getElementById('line-1-2');
+            const line23 = document.getElementById('line-2-3');
+            const step1Content = document.getElementById('step-1-content');
+            const step2Content = document.getElementById('step-2-content');
+            const step3Content = document.getElementById('step-3-content');
+            
+            // Elementos del historial
+            const btnFiltrarHistorial = document.getElementById('btn-filtrar-historial');
+            
+            // Variables globales
             let productoActual = null;
+            let tipoAjusteActual = 'descuento';
+            let inventarioCompleto = [];
             
-            // Ocultar inicialmente el contenedor de productos
-            productosContainer.style.display = 'none';
+            // Establecer fecha actual en filtros
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('filtro-fecha-fin').value = hoy;
             
-            // Cargar inventario inicial
-            cargarInventarioCompleto();
+            // Hace un mes
+            const unMesAtras = new Date();
+            unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+            document.getElementById('filtro-fecha-inicio').value = unMesAtras.toISOString().split('T')[0];
             
             // Escuchar cambios en inventario en tiempo real
             const unsubscribeInventario = escucharInventario(function(inventario) {
-                if (revistaSelect.value) {
-                    mostrarProductosPorRevista(revistaSelect.value, inventario);
-                } else {
-                    mostrarProductos(inventario);
-                }
+                inventarioCompleto = inventario;
             });
             
             // Escuchar cambios en ventas para actualizar historial
@@ -291,372 +724,581 @@
                 const ventasConDescuento = ventas.filter(venta => venta.tipoVenta === 'descuento');
                 mostrarHistorial(ventasConDescuento);
             });
-            
-            // Cuando se selecciona una revista
-            revistaSelect.addEventListener('change', async function() {
-                const revistaSeleccionada = this.value;
-                
-                if (revistaSeleccionada) {
-                    productosContainer.style.display = 'block';
-                    const inventario = await obtenerInventario();
-                    mostrarProductosPorRevista(revistaSeleccionada, inventario);
-                } else {
-                    // Si no hay revista seleccionada, mostrar todo el inventario
-                    const inventario = await obtenerInventario();
-                    mostrarProductos(inventario);
-                    productosContainer.style.display = 'block';
-                }
-            });
-            
-            // Buscar productos
-            btnBuscar.addEventListener('click', async function() {
-                const termino = buscarInput.value.trim();
-                
-                if (termino) {
-                    const resultados = await buscarProductoPorNombre(termino);
-                    mostrarProductos(resultados);
-                } else {
-                    // Si no hay término de búsqueda, mostrar productos según la revista seleccionada
-                    const inventario = await obtenerInventario();
-                    if (revistaSelect.value) {
-                        mostrarProductosPorRevista(revistaSelect.value, inventario);
-                    } else {
-                        mostrarProductos(inventario);
-                    }
-                }
-            });
-            
-            // Calcular precio con descuento cuando cambia el porcentaje
-            porcentajeDescuento.addEventListener('input', function() {
-                if (!productoActual) return;
-                
-                const descuento = parseFloat(this.value) || 0;
-                const precio = parseFloat(productoActual.precio);
-                const descuentoAplicado = precio * (descuento / 100);
-                const precioConDescuento = precio - descuentoAplicado;
-                
-                precioFinal.value = `$${precioConDescuento.toLocaleString()}`;
-            });
-            
-            // Agregar al carrito
-            btnAgregarCarrito.addEventListener('click', function() {
-                if (!productoActual) {
-                    mostrarMensaje('No hay producto seleccionado', 'error');
-                    return;
-                }
-                
-                const cantidadSeleccionada = parseInt(cantidad.value) || 1;
-                const descuento = parseFloat(porcentajeDescuento.value) || 0;
-                const precioOriginalValue = parseFloat(productoActual.precio);
-                const descuentoAplicado = precioOriginalValue * (descuento / 100);
-                const precioConDescuento = precioOriginalValue - descuentoAplicado;
-                
-                // Verificar si hay suficiente stock
-                if (cantidadSeleccionada > parseInt(productoActual.cantidad)) {
-                    mostrarMensaje('No hay suficiente stock disponible', 'error');
-                    return;
-                }
-                
-                // Agregar al carrito
-                carrito.push({
-                    id: productoActual.id,
-                    nombre: productoActual.nombre,
-                    precioOriginal: precioOriginalValue,
-                    descuento: descuento,
-                    precioFinal: precioConDescuento,
-                    cantidad: cantidadSeleccionada,
-                    subtotal: precioConDescuento * cantidadSeleccionada,
-                    estado: estadoVenta.value
-                });
-                
-                actualizarCarrito();
-                mostrarMensaje('Producto agregado al carrito', 'exito');
-                
-                // Ocultar panel de producto seleccionado
-                productoSeleccionado.style.display = 'none';
-            });
-            
-            // Completar venta
-            btnCompletarVenta.addEventListener('click', async function() {
-                if (carrito.length === 0) {
-                    mostrarMensaje('No hay productos en el carrito', 'error');
-                    return;
-                }
-                
-                const cliente = document.getElementById('cliente').value;
-                const contacto = document.getElementById('contacto').value;
-                const vendedor = document.getElementById('vendedor').value;
-                const revista = document.getElementById('revista').value;
-                
-                if (!cliente || !contacto || !vendedor) {
-                    mostrarMensaje('Complete todos los datos del cliente', 'error');
-                    return;
-                }
-                
-                // Calcular total y descuento total
-                let total = 0;
-                let totalOriginal = 0;
-                let descuentoTotal = 0;
-                
-                carrito.forEach(item => {
-                    total += item.subtotal;
-                    totalOriginal += (item.precioOriginal * item.cantidad);
-                });
-                
-                descuentoTotal = totalOriginal - total;
-                
-                // Crear objeto de venta
-                const venta = {
-                    cliente,
-                    contacto,
-                    vendedor,
-                    revista,
-                    fecha: new Date().toISOString().split('T')[0],
-                    valor: total,
-                    valorOriginal: totalOriginal,
-                    descuento: descuentoTotal,
-                    estado: estadoVenta.value,
-                    tipoVenta: 'descuento',
-                    productos: carrito.map(item => ({
-                        id: item.id,
-                        nombre: item.nombre,
-                        precioOriginal: item.precioOriginal,
-                        descuento: item.descuento,
-                        precioFinal: item.precioFinal,
-                        cantidad: item.cantidad
-                    }))
-                };
-                
-                try {
-                    // Guardar venta
-                    const resultado = await guardarVenta(venta);
-                    
-                    if (resultado) {
-                        // Actualizar stock solo si la venta está completada
-                        if (estadoVenta.value === 'Completado') {
-                            for (const item of carrito) {
-                                await actualizarStock(item.id, -item.cantidad);
-                            }
-                        }
-                        
-                        mostrarMensaje('Venta con descuento registrada con éxito', 'exito');
-                        
-                        // Limpiar formulario y carrito
-                        document.getElementById('formulario-venta').reset();
-                        carrito = [];
-                        actualizarCarrito();
-                        productoSeleccionado.style.display = 'none';
-                        
-                        // Recargar inventario
-                        cargarInventarioCompleto();
-                    } else {
-                        mostrarMensaje('Error al registrar la venta', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error al procesar la venta:', error);
-                    mostrarMensaje('Error al procesar la venta', 'error');
-                }
-            });
-            
-            // Menú móvil
-            const menuBtn = document.querySelector('.mobile-menu-btn');
-            const menu = document.getElementById('menu');
-            
-            menuBtn.addEventListener('click', function() {
-                menu.classList.toggle('show');
-            });
-            
-            // Función para cargar todo el inventario
-            async function cargarInventarioCompleto() {
-                try {
-                    const inventario = await obtenerInventario();
-                    mostrarProductos(inventario);
-                } catch (error) {
-                    console.error('Error al cargar inventario:', error);
-                    mostrarMensaje('Error al cargar el inventario', 'error');
-                }
+            // Buscar productos al hacer clic en el botón
+btnBuscar.addEventListener('click', function() {
+    const nombreProducto = buscarInput.value.trim();
+    const revista = revistaBusqueda.value;
+    
+    if (nombreProducto === '') {
+        mostrarMensaje('Por favor ingrese un nombre de producto para buscar', 'error');
+        return;
+    }
+    
+    buscarProductoPorNombre(nombreProducto)
+        .then(productos => {
+            // Si se especificó una revista, filtrar por ella
+            if (revista) {
+                productos = productos.filter(p => p.categoria === revista || p.revista === revista);
             }
             
-                        // Función para mostrar productos por revista
-            async function mostrarProductosPorRevista(revista, inventario) {
-                if (!inventario) {
-                    inventario = await obtenerInventario();
-                }
-                
-                const productosFiltrados = inventario.filter(producto => 
-                    producto.categoria === revista && parseInt(producto.cantidad) > 0
-                );
-                
-                mostrarProductos(productosFiltrados);
+            productosContainer.style.display = 'block';
+            
+            if (productos.length === 0) {
+                productosBody.innerHTML = '<tr><td colspan="5">No se encontraron productos</td></tr>';
+                mostrarMensaje('No se encontraron productos con ese nombre', 'error');
+            } else {
+                mostrarProductos(productos);
+                mostrarMensaje(`Se encontraron ${productos.length} productos`, 'exito');
             }
-            
-            // Función para mostrar productos en la tabla
-            function mostrarProductos(productos) {
-                const productosBody = document.getElementById('productos-body');
-                
-                productosBody.innerHTML = '';
-                
-                if (productos.length === 0) {
-                    productosBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay productos disponibles en esta revista</td></tr>';
-                    return;
-                }
-                
-                productos.forEach(producto => {
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${producto.nombre}</td>
-                        <td>${producto.categoria}</td>
-                        <td>$${parseFloat(producto.precio).toLocaleString()}</td>
-                        <td>${producto.cantidad}</td>
-                        <td>
-                            <button class="btn-icon" onclick="seleccionarProducto('${producto.id}', '${producto.nombre}', ${producto.precio}, ${producto.cantidad})">
-                                <i class="fas fa-plus-circle"></i>
-                            </button>
-                        </td>
-                    `;
-                    productosBody.appendChild(fila);
-                });
-            }
-            
-            // Función para mostrar historial de ventas con descuento
-            function mostrarHistorial(ventas) {
-                const historialBody = document.getElementById('historial-body');
-                
-                // Ordenar ventas por fecha (más recientes primero)
-                ventas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-                
-                // Mostrar solo las últimas 10 ventas
-                const ventasRecientes = ventas.slice(0, 10);
-                
-                historialBody.innerHTML = '';
-                
-                if (ventasRecientes.length === 0) {
-                    historialBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay ventas con descuento registradas</td></tr>';
-                    return;
-                }
-                
-                ventasRecientes.forEach(venta => {
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
-                        <td>${venta.cliente}</td>
-                        <td>${venta.vendedor}</td>
-                        <td>${venta.revista || '-'}</td>
-                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
-                        <td>$${parseFloat(venta.descuento || 0).toLocaleString()}</td>
-                        <td><span class="badge ${venta.estado === 'Completado' ? 'badge-success' : venta.estado === 'Cancelado' ? 'badge-danger' : 'badge-warning'}">${venta.estado}</span></td>
-                    `;
-                    historialBody.appendChild(fila);
-                });
-            }
-            
-            // Función para actualizar el carrito
-            function actualizarCarrito() {
-                const carritoBody = document.getElementById('carrito-body');
-                const totalVenta = document.getElementById('total-venta');
-                
-                if (carrito.length > 0) {
-                    carritoContainer.style.display = 'block';
-                } else {
-                    carritoContainer.style.display = 'none';
-                }
-                
-                carritoBody.innerHTML = '';
-                
-                let total = 0;
-                
-                carrito.forEach((item, index) => {
-                    const subtotal = item.precioFinal * item.cantidad;
-                    total += subtotal;
-                    
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${item.nombre}</td>
-                        <td>$${parseFloat(item.precioOriginal).toLocaleString()}</td>
-                        <td>${item.descuento}%</td>
-                        <td>$${parseFloat(item.precioFinal).toLocaleString()}</td>
-                        <td>
-                            <button class="btn-icon" onclick="decrementarCantidad(${index})">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            ${item.cantidad}
-                            <button class="btn-icon" onclick="incrementarCantidad(${index})">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </td>
-                        <td>$${parseFloat(subtotal).toLocaleString()}</td>
-                        <td>
-                            <button class="btn-icon" onclick="eliminarDelCarrito(${index})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    carritoBody.appendChild(fila);
-                });
-                
-                totalVenta.textContent = `$${parseFloat(total).toLocaleString()}`;
-            }
-            
-            // Función para mostrar mensajes
-            function mostrarMensaje(texto, tipo) {
-                mensaje.innerHTML = `<div class="mensaje ${tipo}"><i class="fas fa-${tipo === 'exito' ? 'check' : 'exclamation'}-circle"></i> ${texto}</div>`;
-                
-                setTimeout(() => {
-                    mensaje.innerHTML = '';
-                }, 3000);
-            }
-            
-            // Funciones para manipular el carrito (disponibles globalmente)
-            window.seleccionarProducto = function(id, nombre, precio, stockDisponible) {
-                // Buscar el producto completo en el inventario
-                obtenerInventario().then(inventario => {
-                    const producto = inventario.find(p => p.id === id);
-                    if (producto) {
-                        productoActual = producto;
-                        
-                        // Mostrar panel de descuento
-                        nombreProducto.value = nombre;
-                        precioOriginal.value = `$${parseFloat(precio).toLocaleString()}`;
-                        porcentajeDescuento.value = 0;
-                        precioFinal.value = `$${parseFloat(precio).toLocaleString()}`;
-                        cantidad.value = 1;
-                        cantidad.max = stockDisponible;
-                        
-                        productoSeleccionado.style.display = 'block';
-                    }
-                });
-            };
-            
-            window.eliminarDelCarrito = function(index) {
-                carrito.splice(index, 1);
-                actualizarCarrito();
-            };
-            
-            window.incrementarCantidad = function(index) {
-                const item = carrito[index];
-                // Verificar stock disponible
-                obtenerInventario().then(inventario => {
-                    const producto = inventario.find(p => p.id === item.id);
-                    if (producto && item.cantidad < parseInt(producto.cantidad)) {
-                        item.cantidad++;
-                        item.subtotal = item.precioFinal * item.cantidad;
-                        actualizarCarrito();
-                    } else {
-                        mostrarMensaje('No hay suficiente stock disponible', 'error');
-                    }
-                });
-            };
-            
-            window.decrementarCantidad = function(index) {
-                if (carrito[index].cantidad > 1) {
-                    carrito[index].cantidad--;
-                    carrito[index].subtotal = carrito[index].precioFinal * carrito[index].cantidad;
-                } else {
-                    carrito.splice(index, 1);
-                }
-                actualizarCarrito();
-            };
+        })
+        .catch(error => {
+            mostrarMensaje('Error al buscar productos: ' + error.message, 'error');
         });
-    </script>
+});
+
+// Mostrar productos en la tabla
+function mostrarProductos(productos) {
+    productosBody.innerHTML = '';
+    
+    productos.forEach(producto => {
+        const tr = document.createElement('tr');
+        
+        tr.innerHTML = `
+            <td>${producto.nombre}</td>
+            <td>${producto.categoria || producto.revista || 'Sin categoría'}</td>
+            <td>$${parseFloat(producto.precio).toLocaleString()}</td>
+            <td>${producto.stock || producto.cantidad}</td>
+            <td>
+                <button class="btn-small btn-seleccionar" data-id="${producto.id}">
+                    <i class="fas fa-check"></i> Seleccionar
+                </button>
+            </td>
+        `;
+        
+        productosBody.appendChild(tr);
+    });
+    
+    // Agregar event listeners a los botones de seleccionar
+    document.querySelectorAll('.btn-seleccionar').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productoId = this.getAttribute('data-id');
+            seleccionarProducto(productoId);
+        });
+    });
+}
+
+// Seleccionar un producto y pasar al siguiente paso
+function seleccionarProducto(productoId) {
+    productoActual = inventarioCompleto.find(p => p.id === productoId);
+    
+    if (!productoActual) {
+        mostrarMensaje('Producto no encontrado', 'error');
+        return;
+    }
+    
+    // Mostrar información del producto en el paso 2
+    nombreProducto.value = productoActual.nombre;
+    precioOriginal.value = `$${parseFloat(productoActual.precio).toLocaleString()}`;
+    
+    // Actualizar todos los campos de ajuste de precio
+    actualizarCamposAjustePrecio();
+    
+    // Habilitar el botón para avanzar al paso 2
+    btnSiguientePaso1.disabled = false;
+}
+
+// Actualizar todos los campos de ajuste de precio según el tipo actual
+function actualizarCamposAjustePrecio() {
+    if (!productoActual) return;
+    
+    const precio = parseFloat(productoActual.precio);
+    
+    // Actualizar campos según el tipo de ajuste seleccionado
+    if (tipoAjusteActual === 'descuento') {
+        const porcentaje = parseInt(porcentajeDescuento.value);
+        const descuento = (precio * porcentaje / 100);
+        const final = precio - descuento;
+        
+        valorDescuento.textContent = `${porcentaje}%`;
+        descuentoPrecioOriginal.textContent = `$${precio.toLocaleString()}`;
+        descuentoValor.textContent = `$${descuento.toLocaleString()}`;
+        descuentoPrecioFinal.textContent = `$${final.toLocaleString()}`;
+        precioFinal.value = `$${final.toLocaleString()}`;
+        
+    } else if (tipoAjusteActual === 'incremento') {
+        const porcentaje = parseInt(porcentajeIncremento.value);
+        const incremento = (precio * porcentaje / 100);
+        const final = precio + incremento;
+        
+        valorIncremento.textContent = `${porcentaje}%`;
+        incrementoPrecioOriginal.textContent = `$${precio.toLocaleString()}`;
+        incrementoValor.textContent = `$${incremento.toLocaleString()}`;
+        incrementoPrecioFinal.textContent = `$${final.toLocaleString()}`;
+        precioFinal.value = `$${final.toLocaleString()}`;
+        
+    } else if (tipoAjusteActual === 'ganancia') {
+        const porcentaje = parseInt(porcentajeGanancia.value);
+        const ganancia = (precio * porcentaje / 100);
+        const final = precio + ganancia;
+        
+        valorGanancia.textContent = `${porcentaje}%`;
+        gananciaPrecioOriginal.textContent = `$${precio.toLocaleString()}`;
+        gananciaValor.textContent = `$${ganancia.toLocaleString()}`;
+        gananciaPrecioFinal.textContent = `$${final.toLocaleString()}`;
+        precioFinal.value = `$${final.toLocaleString()}`;
+        
+        // Cambiar color según si es ganancia o pérdida
+        if (porcentaje >= 0) {
+            gananciaValor.className = 'price-result-value profit';
+        } else {
+            gananciaValor.className = 'price-result-value loss';
+        }
+    }
+}
+
+// Cambiar entre pestañas de ajuste de precio
+priceTabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+        // Desactivar todas las pestañas y contenidos
+        priceTabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        // Activar la pestaña seleccionada
+        this.classList.add('active');
+        tipoAjusteActual = this.getAttribute('data-tab');
+        document.getElementById(`${tipoAjusteActual}-tab`).classList.add('active');
+        
+        // Actualizar campos
+        actualizarCamposAjustePrecio();
+    });
+});
+
+// Event listeners para los sliders de ajuste
+porcentajeDescuento.addEventListener('input', function() {
+    actualizarCamposAjustePrecio();
+});
+
+porcentajeIncremento.addEventListener('input', function() {
+    actualizarCamposAjustePrecio();
+});
+
+porcentajeGanancia.addEventListener('input', function() {
+    actualizarCamposAjustePrecio();
+});
+
+// Event listener para cambio de cantidad
+cantidad.addEventListener('change', function() {
+    if (parseInt(this.value) < 1) {
+        this.value = 1;
+    }
+    
+    if (productoActual && parseInt(this.value) > productoActual.stock) {
+        mostrarMensaje(`Solo hay ${productoActual.stock} unidades disponibles`, 'advertencia');
+        this.value = productoActual.stock;
+    }
+});
+
+// Autocompletado para cliente
+clienteInput.addEventListener('input', function() {
+    const nombre = this.value.trim();
+    
+    if (nombre.length < 2) {
+        sugerenciasLista.innerHTML = '';
+        sugerenciasLista.style.display = 'none';
+        return;
+    }
+    
+    buscarClientesPorNombre(nombre)
+        .then(clientes => {
+            if (clientes.length > 0) {
+                sugerenciasLista.innerHTML = '';
+                sugerenciasLista.style.display = 'block';
+                
+                clientes.forEach(cliente => {
+                    const div = document.createElement('div');
+                    div.className = 'sugerencia-item';
+                    div.textContent = cliente.nombre;
+                    div.addEventListener('click', function() {
+                        clienteInput.value = cliente.nombre;
+                        contactoInput.value = cliente.contacto || '';
+                        sugerenciasLista.style.display = 'none';
+                    });
+                    
+                    sugerenciasLista.appendChild(div);
+                });
+            } else {
+                sugerenciasLista.innerHTML = '';
+                sugerenciasLista.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error al buscar clientes:', error);
+        });
+});
+
+// Ocultar sugerencias cuando se hace clic fuera del input
+document.addEventListener('click', function(e) {
+    if (e.target !== clienteInput && !sugerenciasLista.contains(e.target)) {
+        sugerenciasLista.style.display = 'none';
+    }
+});
+
+// Navegar entre pasos
+btnSiguientePaso1.addEventListener('click', function() {
+    if (!productoActual) {
+        mostrarMensaje('Por favor seleccione un producto', 'error');
+        return;
+    }
+    
+    // Cambiar al paso 2
+    step1Content.classList.remove('active');
+    step2Content.classList.add('active');
+    
+    // Actualizar indicador de pasos
+    step1.classList.add('completed');
+    step2.classList.add('active');
+    line12.classList.add('active');
+});
+
+btnAnteriorPaso2.addEventListener('click', function() {
+    // Volver al paso 1
+    step2Content.classList.remove('active');
+    step1Content.classList.add('active');
+    
+    // Actualizar indicador de pasos
+    step2.classList.remove('active');
+    line12.classList.remove('active');
+});
+
+btnSiguientePaso2.addEventListener('click', function() {
+    // Cambiar al paso 3
+    step2Content.classList.remove('active');
+    step3Content.classList.add('active');
+    
+    // Actualizar indicador de pasos
+    step2.classList.add('completed');
+    step3.classList.add('active');
+    line23.classList.add('active');
+    
+    // Actualizar resumen de venta
+    actualizarResumenVenta();
+    
+    // Si hay una revista seleccionada en el paso 1, usarla en el paso 3
+    if (revistaBusqueda.value) {
+        revistaSelect.value = revistaBusqueda.value;
+    }
+});
+
+btnAnteriorPaso3.addEventListener('click', function() {
+    // Volver al paso 2
+    step3Content.classList.remove('active');
+    step2Content.classList.add('active');
+    
+    // Actualizar indicador de pasos
+    step3.classList.remove('active');
+    line23.classList.remove('active');
+});
+
+// Actualizar el resumen de la venta en el paso 3
+function actualizarResumenVenta() {
+    if (!productoActual) return;
+    
+    const carritoBody = document.getElementById('carrito-body');
+    const totalVenta = document.getElementById('total-venta');
+    
+    carritoBody.innerHTML = '';
+    
+    // Obtener precio final según el tipo de ajuste
+    let precioFinalValor = 0;
+    let ajusteTexto = '';
+    
+    if (tipoAjusteActual === 'descuento') {
+        const porcentaje = parseInt(porcentajeDescuento.value);
+        precioFinalValor = parseFloat(productoActual.precio) - (parseFloat(productoActual.precio) * porcentaje / 100);
+        ajusteTexto = `Descuento ${porcentaje}% <span class="badge-loss">-$${(parseFloat(productoActual.precio) * porcentaje / 100).toLocaleString()}</span>`;
+    } else if (tipoAjusteActual === 'incremento') {
+        const porcentaje = parseInt(porcentajeIncremento.value);
+        precioFinalValor = parseFloat(productoActual.precio) + (parseFloat(productoActual.precio) * porcentaje / 100);
+        ajusteTexto = `Incremento ${porcentaje}% <span class="badge-profit">+$${(parseFloat(productoActual.precio) * porcentaje / 100).toLocaleString()}</span>`;
+    } else if (tipoAjusteActual === 'ganancia') {
+        const porcentaje = parseInt(porcentajeGanancia.value);
+        precioFinalValor = parseFloat(productoActual.precio) + (parseFloat(productoActual.precio) * porcentaje / 100);
+        
+        if (porcentaje >= 0) {
+            ajusteTexto = `Ganancia ${porcentaje}% <span class="badge-profit">+$${(parseFloat(productoActual.precio) * porcentaje / 100).toLocaleString()}</span>`;
+        } else {
+            ajusteTexto = `Pérdida ${Math.abs(porcentaje)}% <span class="badge-loss">-$${Math.abs(parseFloat(productoActual.precio) * porcentaje / 100).toLocaleString()}</span>`;
+        }
+    }
+    
+    const cantidadValor = parseInt(cantidad.value);
+    const subtotal = precioFinalValor * cantidadValor;
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${productoActual.nombre}</td>
+        <td>$${parseFloat(productoActual.precio).toLocaleString()}</td>
+        <td>${ajusteTexto}</td>
+        <td>$${precioFinalValor.toLocaleString()}</td>
+        <td>${cantidadValor}</td>
+        <td>$${subtotal.toLocaleString()}</td>
+    `;
+    
+    carritoBody.appendChild(tr);
+    totalVenta.textContent = `$${subtotal.toLocaleString()}`;
+}
+
+// Completar venta
+btnCompletarVenta.addEventListener('click', function() {
+    // Validar formulario
+    const cliente = clienteInput.value.trim();
+    const contacto = contactoInput.value.trim();
+    const vendedor = document.getElementById('vendedor').value;
+    const revista = revistaSelect.value;
+    const estado = estadoVenta.value;
+    
+    if (!cliente || !contacto || !vendedor || !revista) {
+        mostrarMensaje('Por favor complete todos los campos', 'error');
+        return;
+    }
+    
+    if (!productoActual) {
+        mostrarMensaje('Error: No hay producto seleccionado', 'error');
+        return;
+    }
+    
+    // Obtener precio final según el tipo de ajuste
+    let precioFinalValor = 0;
+    let ajustePorcentaje = 0;
+    
+    if (tipoAjusteActual === 'descuento') {
+        ajustePorcentaje = parseInt(porcentajeDescuento.value);
+        precioFinalValor = parseFloat(productoActual.precio) - (parseFloat(productoActual.precio) * ajustePorcentaje / 100);
+    } else if (tipoAjusteActual === 'incremento') {
+        ajustePorcentaje = parseInt(porcentajeIncremento.value);
+        precioFinalValor = parseFloat(productoActual.precio) + (parseFloat(productoActual.precio) * ajustePorcentaje / 100);
+    } else if (tipoAjusteActual === 'ganancia') {
+        ajustePorcentaje = parseInt(porcentajeGanancia.value);
+        precioFinalValor = parseFloat(productoActual.precio) + (parseFloat(productoActual.precio) * ajustePorcentaje / 100);
+    }
+    
+    const cantidadValor = parseInt(cantidad.value);
+    const totalVenta = precioFinalValor * cantidadValor;
+    
+    // Crear objeto de venta
+    const venta = {
+        cliente: cliente,
+        contacto: contacto,
+        vendedor: vendedor,
+        revista: revista,
+        estado: estado,
+        fecha: new Date().toISOString(),
+        valor: totalVenta,
+        productos: [{
+            id: productoActual.id,
+            nombre: productoActual.nombre,
+            precioOriginal: parseFloat(productoActual.precio),
+            precioFinal: precioFinalValor,
+            cantidad: cantidadValor,
+            subtotal: totalVenta,
+            tipoAjuste: tipoAjusteActual,
+            ajustePorcentaje: ajustePorcentaje
+        }],
+        total: totalVenta,
+        tipoVenta: 'descuento'
+    };
+    
+    // Guardar venta en Firebase
+    guardarVenta(venta)
+        .then(() => {
+            // Actualizar stock
+            return actualizarStock(productoActual.id, -cantidadValor);
+        })
+        .then(() => {
+            mostrarMensaje('Venta registrada correctamente', 'exito');
+            
+            // Resetear formulario y volver al paso 1
+            resetearFormulario();
+        })
+        .catch(error => {
+            mostrarMensaje('Error al registrar la venta: ' + error.message, 'error');
+        });
+});
+
+// Resetear formulario
+function resetearFormulario() {
+    // Limpiar campos
+    buscarInput.value = '';
+    revistaBusqueda.value = '';
+    clienteInput.value = '';
+    contactoInput.value = '';
+    document.getElementById('vendedor').value = '';
+    revistaSelect.value = '';
+    estadoVenta.value = 'Pendiente';
+    
+    // Ocultar resultados de búsqueda
+    productosContainer.style.display = 'none';
+    
+    // Resetear variables
+    productoActual = null;
+    
+    // Resetear sliders
+    porcentajeDescuento.value = 0;
+    porcentajeIncremento.value = 0;
+    porcentajeGanancia.value = 20;
+    
+    // Volver al paso 1
+    step1Content.classList.add('active');
+    step2Content.classList.remove('active');
+    step3Content.classList.remove('active');
+    
+    // Resetear indicadores de pasos
+    step1.classList.remove('completed');
+    step2.classList.remove('active', 'completed');
+    step3.classList.remove('active');
+    line12.classList.remove('active');
+    line23.classList.remove('active');
+    
+    // Deshabilitar botón siguiente
+    btnSiguientePaso1.disabled = true;
+}
+
+// Mostrar historial de ventas con descuento
+function mostrarHistorial(ventas) {
+    const historialBody = document.getElementById('historial-body');
+    
+    if (ventas.length === 0) {
+        historialBody.innerHTML = '<tr><td colspan="8">No hay ventas registradas</td></tr>';
+        return;
+    }
+    
+    // Ordenar ventas por fecha (más recientes primero)
+    ventas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    
+    historialBody.innerHTML = '';
+    
+    ventas.forEach(venta => {
+        // Formatear fecha
+        const fecha = new Date(venta.fecha);
+        const fechaFormateada = `${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()}`;
+        
+        // Determinar el tipo de ajuste y el mensaje
+        let ajusteTexto = '';
+        if (venta.productos && venta.productos.length > 0) {
+            const producto = venta.productos[0];
+            
+            if (producto.tipoAjuste === 'descuento') {
+                ajusteTexto = `Descuento ${producto.ajustePorcentaje}%`;
+            } else if (producto.tipoAjuste === 'incremento') {
+                ajusteTexto = `Incremento ${producto.ajustePorcentaje}%`;
+            } else if (producto.tipoAjuste === 'ganancia') {
+                if (producto.ajustePorcentaje >= 0) {
+                    ajusteTexto = `Ganancia ${producto.ajustePorcentaje}%`;
+                } else {
+                    ajusteTexto = `Pérdida ${Math.abs(producto.ajustePorcentaje)}%`;
+                }
+            }
+        }
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${fechaFormateada}</td>
+            <td>${venta.cliente}</td>
+            <td>${venta.vendedor}</td>
+            <td>${venta.revista}</td>
+            <td>$${venta.total ? venta.total.toLocaleString() : venta.valor.toLocaleString()}</td>
+            <td>${ajusteTexto}</td>
+            <td>
+                <span class="estado-${venta.estado.toLowerCase()}">${venta.estado}</span>
+            </td>
+            <td>
+                <button class="btn-small btn-eliminar" data-id="${venta.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        
+        historialBody.appendChild(tr);
+    });
+    
+    // Agregar event listeners a los botones de eliminar
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const ventaId = this.getAttribute('data-id');
+            
+            if (confirm('¿Está seguro que desea eliminar esta venta?')) {
+                eliminarVenta(ventaId)
+                    .then(() => {
+                        mostrarMensaje('Venta eliminada correctamente', 'exito');
+                    })
+                    .catch(error => {
+                        mostrarMensaje('Error al eliminar la venta: ' + error.message, 'error');
+                    });
+            }
+        });
+    });
+}
+
+// Filtrar historial por fecha y cliente
+btnFiltrarHistorial.addEventListener('click', function() {
+    const fechaInicio = document.getElementById('filtro-fecha-inicio').value;
+    const fechaFin = document.getElementById('filtro-fecha-fin').value;
+    const clienteFiltro = document.getElementById('filtro-cliente').value.trim();
+    
+    if (!fechaInicio || !fechaFin) {
+        mostrarMensaje('Por favor seleccione un rango de fechas', 'advertencia');
+        return;
+    }
+    
+    // Convertir fechas a objetos Date para comparación
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+    fin.setHours(23, 59, 59); // Hasta el final del día
+    
+    filtrarVentasPorFecha(inicio, fin)
+        .then(ventas => {
+            // Filtrar solo ventas con descuento
+            let ventasFiltradas = ventas.filter(venta => venta.tipoVenta === 'descuento');
+            
+            // Filtrar por cliente si se especificó
+            if (clienteFiltro) {
+                ventasFiltradas = ventasFiltradas.filter(venta => 
+                    venta.cliente.toLowerCase().includes(clienteFiltro.toLowerCase())
+                );
+            }
+            
+            mostrarHistorial(ventasFiltradas);
+            
+            if (ventasFiltradas.length === 0) {
+                mostrarMensaje('No se encontraron ventas con los filtros aplicados', 'advertencia');
+            } else {
+                mostrarMensaje(`Se encontraron ${ventasFiltradas.length} ventas`, 'exito');
+            }
+        })
+        .catch(error => {
+            mostrarMensaje('Error al filtrar ventas: ' + error.message, 'error');
+        });
+});
+
+// Mostrar mensaje en la interfaz
+function mostrarMensaje(texto, tipo) {
+    mensaje.textContent = texto;
+    mensaje.className = `mensaje ${tipo}`;
+    
+    mensaje.style.display = 'block';
+    
+    // Ocultar mensaje después de 4 segundos
+    setTimeout(() => {
+        mensaje.style.display = 'none';
+    }, 4000);
+}
+
+// Limpieza cuando se desmonta la página
+window.addEventListener('beforeunload', function() {
+    unsubscribeInventario && unsubscribeInventario();
+    unsubscribeVentas && unsubscribeVentas();
+});
+});
+</script>
 </body>
 </html>

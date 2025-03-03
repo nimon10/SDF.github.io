@@ -7,6 +7,231 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
+    <style>
+        /* Estilos adicionales para la página de inventario */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-box {
+            background-color: var(--nequi-white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-box h3 {
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            color: var(--nequi-dark-gray);
+            font-weight: 600;
+        }
+        
+        .stat-box .valor {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--nequi-purple);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-box .icono {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background-color: rgba(33, 0, 73, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--nequi-purple);
+        }
+        
+        .stat-box.warning .icono {
+            background-color: rgba(255, 182, 18, 0.1);
+            color: var(--nequi-yellow);
+        }
+        
+        .stat-box.warning .valor {
+            color: var(--nequi-yellow);
+        }
+        
+        .filtros-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filtros-container .form-group {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 0;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: var(--nequi-white);
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .close-modal {
+            color: var(--nequi-dark-gray);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: var(--nequi-pink);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eaeaea;
+            background-color: var(--nequi-white);
+        }
+        
+        .tab-item {
+            flex: 1;
+            padding: 1rem 1.2rem;
+            text-align: center;
+            background-color: var(--nequi-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: none;
+            color: var(--nequi-dark-gray);
+            position: relative;
+            overflow: hidden;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .tab-item i {
+            font-size: 1rem;
+        }
+        
+        .tab-item.active {
+            background-color: var(--nequi-purple);
+            color: var(--nequi-white);
+        }
+        
+        .tab-item:not(:last-child) {
+            border-right: 1px solid #eaeaea;
+        }
+        
+        .tab-item:hover:not(.active) {
+            background-color: #f8f8f8;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--nequi-purple);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-icon:hover {
+            color: var(--nequi-pink);
+            transform: scale(1.2);
+        }
+        
+        .btn-icon.delete {
+            color: #dc3545;
+        }
+        
+        .btn-icon.edit {
+            color: var(--nequi-yellow);
+        }
+        
+        .stock-warning {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .stock-ok {
+            color: #28a745;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 5px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            background-color: var(--nequi-purple);
+        }
+        
+        .progress-bar.warning {
+            background-color: var(--nequi-yellow);
+        }
+        
+        .progress-bar.danger {
+            background-color: #dc3545;
+        }
+    </style>
 </head>
 <body>
     <nav>
@@ -18,12 +243,12 @@
                 <i class="fas fa-bars"></i>
             </button>
             <ul id="menu">
-                <li><a href="../index.html" class="activo">Inicio</a></li>
+                <li><a href="../index.html">Inicio</a></li>
                 <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="venta_directa.html">Nueva Venta</a></li>
                 <li><a href="venta_descuento.html">Venta con Descuento</a></li>
                 <li><a href="abonos.html">Abonos</a></li>
-                <li><a href="inventario.html">Inventario</a></li>
+                <li><a href="inventario.html" class="activo">Inventario</a></li>
                 <li><a href="ajuste_inventarios.html">Ajuste de Inventario</a></li>
             </ul>
         </div>
@@ -32,99 +257,355 @@
     <div class="container">
         <h1>Gestión de Inventario</h1>
         
-        <div class="card">
-            <h2>Agregar Nuevo Producto</h2>
-            <form id="formulario-producto">
-                <div class="form-group">
-                    <label for="nombre">Nombre del Producto:</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Nombre del producto" required>
+        <!-- Dashboard de estadísticas mejorado -->
+        <div class="dashboard-stats">
+            <div class="stat-box">
+                <div class="icono">
+                    <i class="fas fa-box"></i>
+                </div>
+                <h3>Total de Productos</h3>
+                <div class="valor" id="total-productos">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="icono">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <h3>Valor del Inventario</h3>
+                <div class="valor" id="valor-inventario">$0</div>
+            </div>
+            <div class="stat-box warning">
+                <div class="icono">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>Stock Bajo</h3>
+                <div class="valor" id="stock-bajo">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="icono">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <h3>Movimientos</h3>
+                <div class="valor" id="total-movimientos">0</div>
+            </div>
+        </div>
+        
+        <!-- Tabs para organizar el contenido -->
+        <div class="tabs">
+            <button class="tab-item active" data-tab="productos">
+                <i class="fas fa-boxes"></i> Productos
+            </button>
+            <button class="tab-item" data-tab="agregar">
+                <i class="fas fa-plus-circle"></i> Agregar Producto
+            </button>
+            <button class="tab-item" data-tab="movimientos">
+                <i class="fas fa-exchange-alt"></i> Movimientos
+            </button>
+            <button class="tab-item" data-tab="stock-bajo">
+                <i class="fas fa-exclamation-triangle"></i> Stock Bajo
+            </button>
+        </div>
+        
+        <!-- Contenido de la pestaña Productos -->
+        <div id="productos-tab" class="tab-content active">
+            <div class="card">
+                <h2>Listado de Productos</h2>
+                
+                <div class="filtros-container">
+                    <div class="form-group">
+                        <label for="buscar-producto">Buscar por nombre:</label>
+                        <input type="text" id="buscar-producto" placeholder="Nombre del producto...">
+                    </div>
+                    <div class="form-group">
+                        <label for="filtro-categoria">Filtrar por Categoría:</label>
+                        <select id="filtro-categoria">
+                            <option value="">Todas las categorías</option>
+                            <option value="Esika">Esika</option>
+                            <option value="Carmel">Carmel</option>
+                            <option value="Leonisa">Leonisa</option>
+                            <option value="Cyzone">Cyzone</option>
+                            <option value="Pacifika">Pacifika</option>
+                            <option value="Yanbal">Yanbal</option>
+                            <option value="L'ebel">L'ebel</option>
+                            <option value="Novaventa">Novaventa</option>
+                            <option value="Natura">Natura</option>
+                            <option value="Login">Login</option>
+                            <option value="Avon">Avon</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button id="btn-buscar">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Descripción del producto"></textarea>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productos-body">
+                            <!-- Aquí se cargarán los productos -->
+                        </tbody>
+                    </table>
                 </div>
                 
-                <div class="form-group">
-                    <label for="categoria">Categoría:</label>
-                    <select id="categoria" name="categoria" required>
-                        <option value="">Seleccione una revista</option>
-                        <option value="Esika">Esika</option>
-                        <option value="Carmel">Carmel</option>
-                        <option value="Leonisa">Leonisa</option>
-                        <option value="Cyzone">Cyzone</option>
-                        <option value="Pacifika">Pacifika</option>
-                        <option value="Yanbal">Yanbal</option>
-                        <option value="L'ebel">L'ebel</option>
-                        <option value="Novaventa">Novaventa</option>
-                        <option value="Natura">Natura</option>
-                        <option value="Login">Login</option>
-                        <option value="Avon">Avon</option>
-                    </select>
+                <div style="margin-top: 1.5rem; text-align: right;">
+                    <button id="btn-exportar-csv" class="btn-secondary">
+                        <i class="fas fa-file-csv"></i> Exportar a CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenido de la pestaña Agregar Producto -->
+        <div id="agregar-tab" class="tab-content">
+            <div class="card">
+                <h2>Agregar Nuevo Producto</h2>
+                <form id="formulario-producto">
+                    <div class="form-group">
+                        <label for="nombre">Nombre del Producto:</label>
+                        <input type="text" id="nombre" name="nombre" placeholder="Nombre del producto" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion">Descripción:</label>
+                        <textarea id="descripcion" name="descripcion" placeholder="Descripción del producto"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="categoria">Categoría:</label>
+                        <select id="categoria" name="categoria" required>
+                            <option value="">Seleccione una revista</option>
+                            <option value="Esika">Esika</option>
+                            <option value="Carmel">Carmel</option>
+                            <option value="Leonisa">Leonisa</option>
+                            <option value="Cyzone">Cyzone</option>
+                            <option value="Pacifika">Pacifika</option>
+                            <option value="Yanbal">Yanbal</option>
+                            <option value="L'ebel">L'ebel</option>
+                            <option value="Novaventa">Novaventa</option>
+                            <option value="Natura">Natura</option>
+                            <option value="Login">Login</option>
+                            <option value="Avon">Avon</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="precio">Precio:</label>
+                        <input type="number" id="precio" name="precio" min="0" step="0.01" placeholder="Precio del producto" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad en Stock:</label>
+                        <input type="number" id="cantidad" name="cantidad" min="0" step="1" placeholder="Cantidad disponible" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="stock-minimo">Stock Mínimo:</label>
+                        <input type="number" id="stock-minimo" name="stock-minimo" min="0" step="1" placeholder="Cantidad mínima recomendada" value="10">
+                    </div>
+                    
+                    <button type="submit">
+                        <i class="fas fa-plus-circle"></i> Agregar Producto
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Contenido de la pestaña Movimientos -->
+        <div id="movimientos-tab" class="tab-content">
+            <div class="card">
+                <h2>Historial de Movimientos</h2>
+                
+                <div class="filtros-container">
+                    <div class="form-group">
+                        <label for="filtro-tipo-movimiento">Tipo de Movimiento:</label>
+                        <select id="filtro-tipo-movimiento">
+                            <option value="">Todos</option>
+                            <option value="entrada">Entradas</option>
+                            <option value="salida">Salidas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filtro-fecha-inicio">Fecha Inicio:</label>
+                        <input type="date" id="filtro-fecha-inicio">
+                    </div>
+                    <div class="form-group">
+                        <label for="filtro-fecha-fin">Fecha Fin:</label>
+                        <input type="date" id="filtro-fecha-fin">
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button id="btn-filtrar-movimientos">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="precio">Precio:</label>
-                    <input type="number" id="precio" name="precio" min="0" step="0.01" placeholder="Precio del producto" required>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Motivo</th>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody id="movimientos-body">
+                            <!-- Aquí se cargarán los movimientos -->
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+            
+            <div class="card">
+                <h2>Registrar Nuevo Movimiento</h2>
+                <form id="formulario-movimiento">
+                    <div class="form-group">
+                        <label for="producto-movimiento">Producto:</label>
+                        <select id="producto-movimiento" required>
+                            <option value="">Seleccione un producto</option>
+                            <!-- Opciones cargadas dinámicamente -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tipo-movimiento">Tipo de Movimiento:</label>
+                        <select id="tipo-movimiento" required>
+                            <option value="entrada">Entrada</option>
+                            <option value="salida">Salida</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cantidad-movimiento">Cantidad:</label>
+                        <input type="number" id="cantidad-movimiento" min="1" step="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="motivo-movimiento">Motivo:</label>
+                        <textarea id="motivo-movimiento" placeholder="Razón del movimiento" required></textarea>
+                    </div>
+                    
+                    <button type="submit">
+                        <i class="fas fa-save"></i> Registrar Movimiento
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Contenido de la pestaña Stock Bajo -->
+        <div id="stock-bajo-tab" class="tab-content">
+            <div class="card">
+                <h2>Productos con Stock Bajo</h2>
                 
                 <div class="form-group">
-                    <label for="cantidad">Cantidad en Stock:</label>
-                    <input type="number" id="cantidad" name="cantidad" min="0" step="1" placeholder="Cantidad disponible" required>
+                    <label for="limite-stock">Mostrar productos con stock menor a:</label>
+                    <input type="number" id="limite-stock" min="1" value="10" style="max-width: 200px;">
+                    <button id="btn-aplicar-limite" style="margin-left: 10px;">
+                        <i class="fas fa-check"></i> Aplicar
+                    </button>
                 </div>
                 
-                <button type="submit">
-                    <i class="fas fa-plus-circle"></i> Agregar Producto
-                </button>
-            </form>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-bajo-body">
+                            <!-- Aquí se cargarán los productos con stock bajo -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         
         <div id="mensaje" class="mensaje"></div>
         
-        <div class="card">
-            <h2>Buscar Productos</h2>
-            <div class="form-group">
-                <input type="text" id="buscar-producto" placeholder="Buscar por nombre de producto...">
-                <button id="btn-buscar" style="margin-top: 1rem;">
-                    <i class="fas fa-search"></i> Buscar
-                </button>
+        <!-- Modal para editar producto -->
+        <div id="modal-editar" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Editar Producto</h2>
+                <form id="formulario-editar">
+                    <input type="hidden" id="editar-id">
+                    
+                    <div class="form-group">
+                        <label for="editar-nombre">Nombre del Producto:</label>
+                        <input type="text" id="editar-nombre" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editar-descripcion">Descripción:</label>
+                        <textarea id="editar-descripcion"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editar-categoria">Categoría:</label>
+                        <select id="editar-categoria" required>
+                            <option value="">Seleccione una revista</option>
+                            <option value="Esika">Esika</option>
+                            <option value="Carmel">Carmel</option>
+                            <option value="Leonisa">Leonisa</option>
+                            <option value="Cyzone">Cyzone</option>
+                            <option value="Pacifika">Pacifika</option>
+                            <option value="Yanbal">Yanbal</option>
+                            <option value="L'ebel">L'ebel</option>
+                            <option value="Novaventa">Novaventa</option>
+                            <option value="Natura">Natura</option>
+                            <option value="Login">Login</option>
+                            <option value="Avon">Avon</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editar-precio">Precio:</label>
+                        <input type="number" id="editar-precio" min="0" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editar-cantidad">Cantidad en Stock:</label>
+                        <input type="number" id="editar-cantidad" min="0" step="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editar-stock-minimo">Stock Mínimo:</label>
+                        <input type="number" id="editar-stock-minimo" min="0" step="1" value="10">
+                    </div>
+                    
+                    <button type="submit">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </form>
             </div>
         </div>
         
-        <div class="card">
-            <h2>Listado de Productos</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Categoría</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productos-body">
-                        <!-- Aquí se cargarán los productos -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h2>Estadísticas de Inventario</h2>
-            <div class="stats-container">
-                <div class="stat-card">
-                    <h3>Total de Productos</h3>
-                    <div class="value" id="total-productos">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Valor del Inventario</h3>
-                    <div class="value" id="valor-inventario">$0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Productos con Stock Bajo</h3>
-                    <div class="value" id="stock-bajo">0</div>
+        <!-- Modal para confirmar eliminación -->
+        <div id="modal-confirmar" class="modal">
+            <div class="modal-content" style="max-width: 400px;">
+                <span class="close-modal">&times;</span>
+                <h2>Confirmar Eliminación</h2>
+                <p>¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.</p>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button id="btn-cancelar" class="btn-secondary">Cancelar</button>
+                    <button id="btn-confirmar-eliminar">Eliminar</button>
                 </div>
             </div>
         </div>
@@ -167,22 +648,80 @@
             buscarProductoPorNombre, 
             obtenerProductosStockBajo, 
             calcularValorInventario,
-            eliminarProducto
+            eliminarProducto,
+            registrarMovimientoInventario,
+            obtenerMovimientosInventario,
+            actualizarStock
         } from '../scripts/script.js';
         
         document.addEventListener('DOMContentLoaded', function() {
-            const formulario = document.getElementById('formulario-producto');
+            // Referencias a elementos del DOM
             const mensaje = document.getElementById('mensaje');
+            const formularioProducto = document.getElementById('formulario-producto');
+            const formularioMovimiento = document.getElementById('formulario-movimiento');
             const buscarInput = document.getElementById('buscar-producto');
             const btnBuscar = document.getElementById('btn-buscar');
+            const filtroCategoria = document.getElementById('filtro-categoria');
+            const btnExportarCSV = document.getElementById('btn-exportar-csv');
+            const tabItems = document.querySelectorAll('.tab-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const modalEditar = document.getElementById('modal-editar');
+            const modalConfirmar = document.getElementById('modal-confirmar');
+            const formularioEditar = document.getElementById('formulario-editar');
+            const btnCancelar = document.getElementById('btn-cancelar');
+            const btnConfirmarEliminar = document.getElementById('btn-confirmar-eliminar');
+            const limiteStock = document.getElementById('limite-stock');
+            const btnAplicarLimite = document.getElementById('btn-aplicar-limite');
+            const filtroTipoMovimiento = document.getElementById('filtro-tipo-movimiento');
+            const filtroFechaInicio = document.getElementById('filtro-fecha-inicio');
+            const filtroFechaFin = document.getElementById('filtro-fecha-fin');
+            const btnFiltrarMovimientos = document.getElementById('btn-filtrar-movimientos');
+            
+            // Variables globales
+            let inventarioActual = [];
+            let productoIdAEliminar = null;
+            let stockBajoLimite = 10;
+            
+            // Inicializar fecha actual en filtros
+            const hoy = new Date().toISOString().split('T')[0];
+            filtroFechaFin.value = hoy;
+            
+            // Hace un mes
+            const unMesAtras = new Date();
+            unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+            filtroFechaInicio.value = unMesAtras.toISOString().split('T')[0];
             
             // Escuchar cambios en inventario en tiempo real
             const unsubscribe = escucharInventario(function(inventario) {
+                inventarioActual = inventario;
                 mostrarProductos(inventario);
                 actualizarEstadisticas(inventario);
+                cargarProductosEnSelect(inventario);
+                mostrarProductosStockBajo(inventario);
             });
             
-            formulario.addEventListener('submit', async function(e) {
+            // Cambiar entre pestañas
+            tabItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remover clase active de todas las pestañas
+                    tabItems.forEach(tab => tab.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Agregar clase active a la pestaña seleccionada
+                    this.classList.add('active');
+                    document.getElementById(`${this.dataset.tab}-tab`).classList.add('active');
+                    
+                    // Cargar datos específicos de la pestaña
+                    if (this.dataset.tab === 'movimientos') {
+                        cargarMovimientos();
+                    } else if (this.dataset.tab === 'stock-bajo') {
+                        mostrarProductosStockBajo(inventarioActual);
+                    }
+                });
+            });
+            
+            // Agregar nuevo producto
+            formularioProducto.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 const producto = {
@@ -190,109 +729,494 @@
                     descripcion: document.getElementById('descripcion').value,
                     categoria: document.getElementById('categoria').value,
                     precio: document.getElementById('precio').value,
-                    cantidad: document.getElementById('cantidad').value
+                    cantidad: document.getElementById('cantidad').value,
+                    stockMinimo: document.getElementById('stock-minimo').value || 10
                 };
                 
                 try {
                     const resultado = await guardarProducto(producto);
                     
                     if (resultado) {
-                        mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Producto agregado correctamente</div>';
-                        formulario.reset();
+                        mostrarMensaje('Producto agregado correctamente', 'exito');
+                        formularioProducto.reset();
                         
-                        // Limpiar mensaje después de 3 segundos
-                        setTimeout(() => {
-                            mensaje.innerHTML = '';
-                        }, 3000);
+                        // Registrar movimiento de entrada inicial
+                        await registrarMovimientoInventario(
+                            resultado, // ID del producto recién creado
+                            'entrada',
+                            producto.cantidad,
+                            'Stock inicial'
+                        );
                     } else {
-                        mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al agregar el producto</div>';
+                        mostrarMensaje('Error al agregar el producto', 'error');
                     }
                 } catch (error) {
-                    console.error("Error al guardar producto:", error);
-                    mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al agregar el producto</div>';
+                    console.error("Error al guardar el producto:", error);
+                    mostrarMensaje('Error al agregar el producto: ' + error.message, 'error');
                 }
             });
             
-            btnBuscar.addEventListener('click', async function() {
-                const termino = buscarInput.value.trim();
-                if (termino) {
-                    const resultados = await buscarProductoPorNombre(termino);
-                    mostrarProductos(resultados);
-                } else {
-                    const inventario = await obtenerInventario();
-                    mostrarProductos(inventario);
+            // Registrar nuevo movimiento de inventario
+            formularioMovimiento.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const productoId = document.getElementById('producto-movimiento').value;
+                const tipo = document.getElementById('tipo-movimiento').value;
+                const cantidad = document.getElementById('cantidad-movimiento').value;
+                const motivo = document.getElementById('motivo-movimiento').value;
+                
+                try {
+                    await registrarMovimientoInventario(productoId, tipo, cantidad, motivo);
+                    // Actualizar stock del producto
+                    await actualizarStock(productoId, tipo, cantidad);
+                    
+                    mostrarMensaje('Movimiento registrado correctamente', 'exito');
+                    formularioMovimiento.reset();
+                    cargarMovimientos();
+                } catch (error) {
+                    console.error("Error al registrar movimiento:", error);
+                    mostrarMensaje('Error al registrar movimiento: ' + error.message, 'error');
                 }
             });
             
-            // Menú móvil
-            const menuBtn = document.querySelector('.mobile-menu-btn');
-            const menu = document.getElementById('menu');
-            
-            menuBtn.addEventListener('click', function() {
-                menu.classList.toggle('show');
+            // Buscar productos
+            btnBuscar.addEventListener('click', function() {
+                buscarProductos();
             });
             
-            // Hacer disponible la función eliminarProducto para los botones de la tabla
-            window.eliminarProductoUI = async function(id) {
-                if (confirm('¿Estás seguro de eliminar este producto?')) {
+            buscarInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    buscarProductos();
+                }
+            });
+            
+            filtroCategoria.addEventListener('change', function() {
+                buscarProductos();
+            });
+            
+            // Función para buscar productos
+            function buscarProductos() {
+                const textoBusqueda = buscarInput.value.trim().toLowerCase();
+                const categoria = filtroCategoria.value;
+                
+                let productosFiltrados = [...inventarioActual];
+                
+                if (textoBusqueda) {
+                    productosFiltrados = productosFiltrados.filter(p => 
+                        p.nombre.toLowerCase().includes(textoBusqueda)
+                    );
+                }
+                
+                if (categoria) {
+                    productosFiltrados = productosFiltrados.filter(p => 
+                        p.categoria === categoria
+                    );
+                }
+                
+                mostrarProductos(productosFiltrados);
+            }
+            
+            // Filtrar productos con stock bajo
+            btnAplicarLimite.addEventListener('click', function() {
+                stockBajoLimite = parseInt(limiteStock.value) || 10;
+                mostrarProductosStockBajo(inventarioActual);
+            });
+            
+            // Filtrar movimientos
+            btnFiltrarMovimientos.addEventListener('click', function() {
+                cargarMovimientos();
+            });
+            
+            // Exportar a CSV
+            btnExportarCSV.addEventListener('click', function() {
+                exportarInventarioCSV(inventarioActual);
+            });
+            
+            // Manejo de modales
+            const closeBtns = document.querySelectorAll('.close-modal');
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modalEditar.style.display = 'none';
+                    modalConfirmar.style.display = 'none';
+                });
+            });
+            
+            btnCancelar.addEventListener('click', function() {
+                modalConfirmar.style.display = 'none';
+            });
+            
+            btnConfirmarEliminar.addEventListener('click', async function() {
+                if (productoIdAEliminar) {
                     try {
-                        const resultado = await eliminarProducto(id);
-                        if (resultado) {
-                            mensaje.innerHTML = '<div class="mensaje exito"><i class="fas fa-check-circle"></i> Producto eliminado correctamente</div>';
-                            setTimeout(() => {
-                                mensaje.innerHTML = '';
-                            }, 3000);
-                        } else {
-                            mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al eliminar el producto</div>';
-                        }
+                        await eliminarProducto(productoIdAEliminar);
+                        mostrarMensaje('Producto eliminado correctamente', 'exito');
+                        modalConfirmar.style.display = 'none';
                     } catch (error) {
-                        console.error("Error al eliminar producto:", error);
-                        mensaje.innerHTML = '<div class="mensaje error"><i class="fas fa-exclamation-circle"></i> Error al eliminar el producto</div>';
+                        console.error("Error al eliminar:", error);
+                        mostrarMensaje('Error al eliminar el producto', 'error');
                     }
                 }
-            };
-        });
-        
-        function mostrarProductos(productos) {
-            const productosBody = document.getElementById('productos-body');
-            
-            productosBody.innerHTML = '';
-            
-            if (productos.length === 0) {
-                productosBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay productos en el inventario</td></tr>';
-                return;
-            }
-            
-            productos.forEach(producto => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td>${producto.nombre}</td>
-                    <td>${producto.categoria}</td>
-                    <td>$${parseFloat(producto.precio).toLocaleString()}</td>
-                    <td>${producto.cantidad}</td>
-                    <td>
-                        <button class="btn-icon" onclick="eliminarProductoUI('${producto.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                productosBody.appendChild(fila);
             });
-        }
-        
-        async function actualizarEstadisticas(inventario) {
-            if (!inventario) {
-                inventario = await obtenerInventario();
+            
+            // Editar producto
+            formularioEditar.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const id = document.getElementById('editar-id').value;
+                const productoActualizado = {
+                    nombre: document.getElementById('editar-nombre').value,
+                    descripcion: document.getElementById('editar-descripcion').value,
+                    categoria: document.getElementById('editar-categoria').value,
+                    precio: document.getElementById('editar-precio').value,
+                    cantidad: document.getElementById('editar-cantidad').value,
+                    stockMinimo: document.getElementById('editar-stock-minimo').value
+                };
+                
+                try {
+                    // Buscar el producto original para comparar el stock
+                    const productoOriginal = inventarioActual.find(p => p.id === id);
+                    
+                    // Actualizar producto en la base de datos
+                    await actualizarProducto(id, productoActualizado);
+                    
+                    // Si cambió la cantidad, registrar un movimiento
+                    if (productoOriginal && parseInt(productoActualizado.cantidad) !== parseInt(productoOriginal.cantidad)) {
+                        const diferencia = parseInt(productoActualizado.cantidad) - parseInt(productoOriginal.cantidad);
+                        const tipo = diferencia > 0 ? 'entrada' : 'salida';
+                        await registrarMovimientoInventario(
+                            id,
+                            tipo,
+                            Math.abs(diferencia),
+                            'Ajuste manual desde edición'
+                        );
+                    }
+                    
+                    mostrarMensaje('Producto actualizado correctamente', 'exito');
+                    modalEditar.style.display = 'none';
+                } catch (error) {
+                    console.error("Error al actualizar:", error);
+                    mostrarMensaje('Error al actualizar el producto', 'error');
+                }
+            });
+            
+            // Función para actualizar producto en la base de datos
+            async function actualizarProducto(id, producto) {
+                // Implementar la actualización del producto en la base de datos
+                try {
+                    // Actualización con Firebase o tu sistema de almacenamiento
+                    const productoRef = ref(database, `inventario/${id}`);
+                    await update(productoRef, producto);
+                    return true;
+                } catch (error) {
+                    console.error("Error al actualizar producto:", error);
+                    throw error;
+                }
             }
             
-            const totalProductos = inventario.length;
-            const valorInventario = await calcularValorInventario();
-            const stockBajo = (await obtenerProductosStockBajo(10)).length;
+            // Función para mostrar productos en la tabla
+            function mostrarProductos(productos) {
+                const tbody = document.getElementById('productos-body');
+                tbody.innerHTML = '';
+                
+                if (productos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay productos disponibles</td></tr>';
+                    return;
+                }
+                
+                productos.forEach(producto => {
+                    const stockStatus = producto.cantidad <= producto.stockMinimo ? 
+                        `<span class="stock-warning">Bajo (${producto.cantidad})</span>` : 
+                        `<span class="stock-ok">${producto.cantidad}</span>`;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${producto.nombre}</td>
+                        <td>${producto.categoria}</td>
+                        <td>$${Number(producto.precio).toLocaleString()}</td>
+                        <td>${stockStatus}</td>
+                        <td>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar ${getProgressBarClass(producto)}" 
+                                     style="width: ${calcularPorcentajeStock(producto)}%"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn-icon edit" data-id="${producto.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon delete" data-id="${producto.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+                
+                // Agregar eventos a los botones de acción
+                agregarEventosBotones();
+            }
             
-            document.getElementById('total-productos').textContent = totalProductos;
-            document.getElementById('valor-inventario').textContent = '$' + valorInventario.toLocaleString();
-            document.getElementById('stock-bajo').textContent = stockBajo;
-        }
+            // Función para mostrar productos con stock bajo
+            function mostrarProductosStockBajo(productos) {
+                const tbody = document.getElementById('stock-bajo-body');
+                tbody.innerHTML = '';
+                
+                const productosBajoStock = productos.filter(p => parseInt(p.cantidad) <= parseInt(p.stockMinimo || stockBajoLimite));
+                
+                if (productosBajoStock.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay productos con stock bajo</td></tr>';
+                    return;
+                }
+                
+                productosBajoStock.forEach(producto => {
+                    const porcentaje = calcularPorcentajeStock(producto);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${producto.nombre}</td>
+                        <td>${producto.categoria}</td>
+                        <td>${producto.cantidad}</td>
+                        <td>${producto.stockMinimo || stockBajoLimite}</td>
+                        <td>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar ${getProgressBarClass(producto)}" 
+                                     style="width: ${porcentaje}%"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn-icon reponer" data-id="${producto.id}">
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+                
+                // Agregar eventos a los botones de reponer
+                document.querySelectorAll('.btn-icon.reponer').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const productoId = this.getAttribute('data-id');
+                        abrirModalMovimiento(productoId, 'entrada');
+                    });
+                });
+            }
+            
+            // Función para abrir el modal de movimiento rápido
+            function abrirModalMovimiento(productoId, tipo) {
+                // Cambiar a la pestaña de movimientos
+                tabItems.forEach(tab => tab.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                document.querySelector('.tab-item[data-tab="movimientos"]').classList.add('active');
+                document.getElementById('movimientos-tab').classList.add('active');
+                
+                // Establecer valores en el formulario
+                document.getElementById('producto-movimiento').value = productoId;
+                document.getElementById('tipo-movimiento').value = tipo;
+                document.getElementById('cantidad-movimiento').focus();
+                
+                // Hacer scroll al formulario
+                document.getElementById('formulario-movimiento').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+            
+            // Función para cargar movimientos
+            async function cargarMovimientos() {
+                try {
+                    const tipoFiltro = filtroTipoMovimiento.value;
+                    const fechaInicio = filtroFechaInicio.value;
+                    const fechaFin = filtroFechaFin.value;
+                    
+                    const movimientos = await obtenerMovimientosInventario(tipoFiltro, fechaInicio, fechaFin);
+                    mostrarMovimientos(movimientos);
+                } catch (error) {
+                    console.error("Error al cargar movimientos:", error);
+                    mostrarMensaje('Error al cargar los movimientos', 'error');
+                }
+            }
+            
+            // Función para mostrar movimientos en la tabla
+            function mostrarMovimientos(movimientos) {
+                const tbody = document.getElementById('movimientos-body');
+                tbody.innerHTML = '';
+                
+                if (movimientos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay movimientos registrados</td></tr>';
+                    return;
+                }
+                
+                // Ordenar movimientos por fecha (más recientes primero)
+                movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                
+                movimientos.forEach(movimiento => {
+                    const producto = inventarioActual.find(p => p.id === movimiento.productoId) || { nombre: 'Producto no disponible' };
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${producto.nombre}</td>
+                        <td>${movimiento.tipo === 'entrada' ? 
+                            '<span class="badge success">Entrada</span>' : 
+                            '<span class="badge danger">Salida</span>'}</td>
+                        <td>${movimiento.cantidad}</td>
+                        <td>${movimiento.motivo}</td>
+                        <td>${formatearFecha(movimiento.fecha)}</td>
+                        <td>${movimiento.usuario || 'Sistema'}</td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+            }
+            
+            // Función para cargar productos en el select
+            function cargarProductosEnSelect(productos) {
+                const select = document.getElementById('producto-movimiento');
+                select.innerHTML = '<option value="">Seleccione un producto</option>';
+                
+                productos.forEach(producto => {
+                    const option = document.createElement('option');
+                    option.value = producto.id;
+                    option.textContent = `${producto.nombre} (Stock: ${producto.cantidad})`;
+                    select.appendChild(option);
+                });
+            }
+            
+            // Función para agregar eventos a los botones de acción
+            function agregarEventosBotones() {
+                // Botones de editar
+                document.querySelectorAll('.btn-icon.edit').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        const producto = inventarioActual.find(p => p.id === id);
+                        
+                        if (producto) {
+                            document.getElementById('editar-id').value = id;
+                            document.getElementById('editar-nombre').value = producto.nombre;
+                            document.getElementById('editar-descripcion').value = producto.descripcion || '';
+                            document.getElementById('editar-categoria').value = producto.categoria;
+                            document.getElementById('editar-precio').value = producto.precio;
+                            document.getElementById('editar-cantidad').value = producto.cantidad;
+                            document.getElementById('editar-stock-minimo').value = producto.stockMinimo || 10;
+                            
+                            modalEditar.style.display = 'block';
+                        }
+                    });
+                });
+                
+                // Botones de eliminar
+                document.querySelectorAll('.btn-icon.delete').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        productoIdAEliminar = this.getAttribute('data-id');
+                        modalConfirmar.style.display = 'block';
+                    });
+                });
+            }
+            
+            // Función para actualizar estadísticas
+            function actualizarEstadisticas(inventario) {
+                document.getElementById('total-productos').textContent = inventario.length;
+                
+                const totalBajoStock = inventario.filter(p => parseInt(p.cantidad) <= parseInt(p.stockMinimo || stockBajoLimite)).length;
+                document.getElementById('stock-bajo').textContent = totalBajoStock;
+                
+                calcularValorInventario(inventario).then(valor => {
+                    document.getElementById('valor-inventario').textContent = '$' + valor.toLocaleString();
+                });
+                
+                obtenerTotalMovimientos().then(total => {
+                    document.getElementById('total-movimientos').textContent = total;
+                });
+            }
+            
+            // Función para obtener el total de movimientos
+            async function obtenerTotalMovimientos() {
+                try {
+                    const movimientos = await obtenerMovimientosInventario();
+                    return movimientos.length;
+                } catch (error) {
+                    console.error("Error al obtener total de movimientos:", error);
+                    return 0;
+                }
+            }
+            
+            // Función para exportar a CSV
+            function exportarInventarioCSV(inventario) {
+                let csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Encabezados
+                csvContent += "Nombre,Categoría,Precio,Stock,Stock Mínimo,Descripción\n";
+                
+                // Datos
+                inventario.forEach(item => {
+                    const row = [
+                        `"${item.nombre.replace(/"/g, '""')}"`,
+                        `"${item.categoria}"`,
+                        item.precio,
+                        item.cantidad,
+                        item.stockMinimo || 10,
+                        `"${(item.descripcion || '').replace(/"/g, '""')}"`
+                    ].join(',');
+                    csvContent += row + "\n";
+                });
+                
+                // Crear enlace de descarga
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `inventario_${formatearFechaArchivo(new Date())}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Funciones auxiliares
+            function formatearFecha(fecha) {
+                if (!fecha) return '';
+                const f = new Date(fecha);
+                return f.toLocaleDateString() + ' ' + f.toLocaleTimeString();
+            }
+            
+            function formatearFechaArchivo(fecha) {
+                const f = fecha;
+                return `${f.getFullYear()}-${(f.getMonth()+1).toString().padStart(2, '0')}-${f.getDate().toString().padStart(2, '0')}`;
+            }
+            
+            function calcularPorcentajeStock(producto) {
+                const porcentaje = (producto.cantidad / (producto.stockMinimo * 2)) * 100;
+                return Math.min(porcentaje, 100); // Máximo 100%
+            }
+            
+            function getProgressBarClass(producto) {
+                const porcentaje = (producto.cantidad / producto.stockMinimo) * 100;
+                if (porcentaje <= 50) return 'danger';
+                if (porcentaje <= 100) return 'warning';
+                return '';
+            }
+            
+            function mostrarMensaje(texto, tipo) {
+                mensaje.textContent = texto;
+                mensaje.className = `mensaje ${tipo}`;
+                mensaje.style.display = 'block';
+                
+                setTimeout(() => {
+                    mensaje.style.opacity = '0';
+                    setTimeout(() => {
+                        mensaje.style.display = 'none';
+                        mensaje.style.opacity = '1';
+                    }, 500);
+                }, 3000);
+            }
+            
+            // Inicialización
+            cargarMovimientos();
+            
+            // Botón menú móvil
+            document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+                document.getElementById('menu').classList.toggle('active');
+            });
+        });
     </script>
 </body>
 </html>
