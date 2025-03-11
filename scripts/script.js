@@ -72,20 +72,31 @@ function escucharVentas(callback) {
 // ✅ Buscar ventas por cliente
 async function buscarVentasPorCliente(nombreCliente) {
     try {
+        if (!nombreCliente || nombreCliente.trim() === '') {
+            console.warn("Se intentó buscar con un nombre de cliente vacío");
+            return { error: "Debe proporcionar un nombre de cliente para la búsqueda", ventas: [] };
+        }
+        
+        nombreCliente = nombreCliente.trim().toLowerCase();
+        
         const q = query(
             collection(db, "ventas"), 
             where("cliente", ">=", nombreCliente),
             where("cliente", "<=", nombreCliente + '\uf8ff')
         );
+        
         const querySnapshot = await getDocs(q);
         const ventas = [];
+        
         querySnapshot.forEach((doc) => {
             ventas.push({ id: doc.id, ...doc.data() });
         });
-        return ventas;
+        
+        console.log(`Se encontraron ${ventas.length} ventas para el cliente: ${nombreCliente}`);
+        return { ventas, error: null };
     } catch (error) {
         console.error("Error al buscar ventas: ", error);
-        return [];
+        return { error: "Error al buscar ventas en la base de datos", ventas: [] };
     }
 }
 
