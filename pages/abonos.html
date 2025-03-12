@@ -3,18 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de gestión de abonos y pagos pendientes">
     <title>Abonos | Sistema de Gestión</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../style.css">
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--nequi-light-gray);
+            border-top: 5px solid var(--nequi-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .dashboard-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card .icon {
+            font-size: 2rem;
+            color: var(--nequi-purple);
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--nequi-purple);
+            color: var(--nequi-purple);
+        }
+
+        .btn-outline:hover {
+            background: var(--nequi-purple);
+            color: #fff;
+        }
+        
+        .abono-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .mensaje {
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .mensaje-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .mensaje-exito {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .mensaje-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
 </head>
 <body>
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
     <nav>
         <div class="container">
             <a href="../index.html" class="logo">
                 <i class="fas fa-cash-register"></i> SistemaVentas
             </a>
-            <button class="mobile-menu-btn">
+            <button class="mobile-menu-btn" aria-label="Abrir menú">
                 <i class="fas fa-bars"></i>
             </button>
             <ul id="menu">
@@ -28,23 +153,47 @@
             </ul>
         </div>
     </nav>
-    
+
     <div class="container">
         <h1>Gestión de Abonos</h1>
-        
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Ventas Pendientes</h3>
+                <div class="value" id="total-pendientes">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <h3>Total por Cobrar</h3>
+                <div class="value" id="total-por-cobrar">$0</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Abonos del Día</h3>
+                <div class="value" id="abonos-hoy">$0</div>
+            </div>
+        </div>
+
         <div class="card">
             <h2>Buscar Ventas Pendientes</h2>
             <div class="form-group">
                 <label for="buscar-cliente">Buscar por Cliente:</label>
-                <input type="text" id="buscar-cliente" placeholder="Nombre del cliente...">
-                <button id="btn-buscar" style="margin-top: 1rem;">
+                <input type="text" id="buscar-cliente" placeholder="Nombre del cliente..." aria-label="Buscar por cliente">
+                <button id="btn-buscar" style="margin-top: 1rem;" aria-label="Buscar">
                     <i class="fas fa-search"></i> Buscar
                 </button>
             </div>
         </div>
-        
-        <div id="mensaje" class="mensaje"></div>
-        
+
+        <div id="mensaje" class="mensaje" aria-live="polite"></div>
+
         <div class="card">
             <h2>Ventas Pendientes</h2>
             <div class="table-responsive">
@@ -66,41 +215,65 @@
                 </table>
             </div>
         </div>
-        
+
         <div class="card" id="detalle-venta" style="display: none;">
             <h2>Detalle de Venta</h2>
             <div id="info-venta">
                 <!-- Aquí se cargará la información de la venta seleccionada -->
             </div>
-            
+
             <h3>Registrar Nuevo Abono</h3>
             <form id="form-abono">
                 <div class="form-group">
                     <label for="monto-abono">Monto del Abono:</label>
-                    <input type="number" id="monto-abono" min="0" step="0.01" placeholder="Ingrese el monto a abonar" required>
+                    <input type="number" id="monto-abono" min="0" step="0.01" required>
+                    <small>Saldo pendiente: $<span id="saldo-actual">0</span></small>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="fecha-abono">Fecha del Abono:</label>
                     <input type="date" id="fecha-abono" required>
                 </div>
-                
-                <button type="submit" id="btn-registrar-abono">
-                    <i class="fas fa-plus-circle"></i> Registrar Abono
-                </button>
-                
-                <button type="button" id="btn-pagar-total" class="btn-secondary">
-                    <i class="fas fa-check-circle"></i> Pagar Total
-                </button>
+
+                <div class="form-group">
+                    <label for="metodo-pago">Método de Pago:</label>
+                    <select id="metodo-pago" required>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="tarjeta">Tarjeta</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="comprobante">Número de Comprobante:</label>
+                    <input type="text" id="comprobante" placeholder="Opcional">
+                </div>
+
+                <div class="form-group">
+                    <label for="notas">Notas:</label>
+                    <textarea id="notas" rows="2" placeholder="Observaciones adicionales"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" id="btn-registrar-abono" class="btn-primary">
+                        <i class="fas fa-plus-circle"></i> Registrar Abono
+                    </button>
+                    <button type="button" id="btn-pagar-total" class="btn-secondary">
+                        <i class="fas fa-check-circle"></i> Pagar Total
+                    </button>
+                    <button type="button" id="btn-imprimir" class="btn-outline">
+                        <i class="fas fa-print"></i> Imprimir Recibo
+                    </button>
+                </div>
             </form>
-            
+
             <h3>Historial de Abonos</h3>
             <div id="historial-abonos">
                 <!-- Aquí se cargará el historial de abonos -->
             </div>
         </div>
     </div>
-    
+
     <footer>
         <div class="container">
             <div>
@@ -129,17 +302,17 @@
             </div>
         </div>
     </footer>
-    
+
     <script type="module">
-        import { 
-            obtenerVentas, 
-            escucharVentas, 
-            buscarVentasPorCliente, 
+        import {
+            obtenerVentas,
+            escucharVentas,
+            buscarVentasPorCliente,
             buscarVenta,
             agregarAbono,
             marcarComoPagado
         } from '../scripts/script.js';
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             const mensaje = document.getElementById('mensaje');
             const buscarClienteInput = document.getElementById('buscar-cliente');
@@ -147,218 +320,400 @@
             const detalleVenta = document.getElementById('detalle-venta');
             const formAbono = document.getElementById('form-abono');
             const btnPagarTotal = document.getElementById('btn-pagar-total');
-            
+            const btnImprimir = document.getElementById('btn-imprimir');
+            const loadingOverlay = document.querySelector('.loading-overlay');
+
+            // Función para mostrar/ocultar el indicador de carga
+            function mostrarCargando(mostrar = true) {
+                loadingOverlay.style.display = mostrar ? 'flex' : 'none';
+            }
+
             // Establecer la fecha actual por defecto
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('fecha-abono').value = hoy;
-            
+
             // Variable para almacenar la venta seleccionada actualmente
             let ventaSeleccionada = null;
-            
+
             // Escuchar cambios en ventas para actualizar la lista
-            const unsubscribe = escucharVentas(function(ventas) {
-                // Filtrar solo ventas pendientes
-                const ventasPendientes = ventas.filter(venta => 
-                    venta.estado === 'Pendiente' && venta.saldo > 0
+            const unsubscribe = escucharVentas(async function(ventas) {
+                console.log("Ventas recibidas:", ventas);
+                actualizarEstadisticas(ventas);
+                const ventasPendientes = ventas.filter(venta =>
+                    venta.estado === 'Pendiente' && parseFloat(venta.saldo) > 0
                 );
+                console.log("Ventas pendientes:", ventasPendientes);
                 mostrarVentasPendientes(ventasPendientes);
-                
-                // Si hay una venta seleccionada, actualizar su información
+
                 if (ventaSeleccionada) {
                     const ventaActualizada = ventas.find(v => v.id === ventaSeleccionada.id);
                     if (ventaActualizada) {
                         ventaSeleccionada = ventaActualizada;
                         mostrarDetalleVenta(ventaActualizada);
                     } else {
-                        // Si la venta ya no existe (fue eliminada o pagada completamente)
                         detalleVenta.style.display = 'none';
                         ventaSeleccionada = null;
                     }
                 }
             });
-            
+
             // Buscar ventas pendientes por cliente
             btnBuscar.addEventListener('click', async function() {
                 const nombreCliente = buscarClienteInput.value.trim();
-                
-                if (nombreCliente) {
-                    try {
-                        const ventas = await buscarVentasPorCliente(nombreCliente);
-                        const ventasPendientes = ventas.filter(venta => 
-                            venta.estado === 'Pendiente' && venta.saldo > 0
-                        );
-                        
-                        mostrarVentasPendientes(ventasPendientes);
-                        
-                        if (ventasPendientes.length === 0) {
-                            mostrarMensaje(`No se encontraron ventas pendientes para "${nombreCliente}"`, 'info');
+                mostrarMensaje('Buscando ventas...', 'info');
+                mostrarCargando(true);
+
+                try {
+                    let resultado;
+                    if (nombreCliente) {
+                        resultado = await buscarVentasPorCliente(nombreCliente);
+                        if (resultado.error) {
+                            throw new Error(resultado.error);
                         }
-                    } catch (error) {
-                        console.error('Error al buscar ventas:', error);
-                        mostrarMensaje('Error al buscar ventas pendientes', 'error');
+                        var ventas = resultado.ventas || [];
+                    } else {
+                        ventas = await obtenerVentas();
                     }
-                } else {
-                    // Si no hay término de búsqueda, mostrar todas las ventas pendientes
-                    const ventas = await obtenerVentas();
-                    const ventasPendientes = ventas.filter(venta => 
-                        venta.estado === 'Pendiente' && venta.saldo > 0
+
+                    const ventasPendientes = ventas.filter(venta =>
+                        venta.estado === 'Pendiente' && parseFloat(venta.saldo) > 0
                     );
+
                     mostrarVentasPendientes(ventasPendientes);
+
+                    if (ventasPendientes.length === 0) {
+                        mostrarMensaje(`No se encontraron ventas pendientes para "${nombreCliente || 'ningún cliente'}"`, 'info');
+                    }
+                } catch (error) {
+                    console.error('Error al buscar ventas:', error);
+                    mostrarMensaje('Error al buscar ventas pendientes: ' + error.message, 'error');
+                } finally {
+                    mostrarCargando(false);
                 }
             });
-            
+
             // Registrar abono
             formAbono.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+                mostrarCargando(true);
+
                 if (!ventaSeleccionada) {
                     mostrarMensaje('No hay venta seleccionada', 'error');
+                    mostrarCargando(false);
                     return;
                 }
-                
+
                 const montoAbono = parseFloat(document.getElementById('monto-abono').value);
-                
+
                 if (isNaN(montoAbono) || montoAbono <= 0) {
                     mostrarMensaje('Ingrese un monto válido', 'error');
+                    mostrarCargando(false);
                     return;
                 }
-                
-                if (montoAbono > ventaSeleccionada.saldo) {
+
+                if (montoAbono > parseFloat(ventaSeleccionada.saldo)) {
                     mostrarMensaje('El abono no puede ser mayor que el saldo pendiente', 'error');
+                    mostrarCargando(false);
                     return;
                 }
-                
+
                 try {
+                    // Crear objeto de abono con todos los datos
+                    const nuevoAbono = {
+                        monto: montoAbono,
+                        fecha: document.getElementById('fecha-abono').value,
+                        metodoPago: document.getElementById('metodo-pago').value,
+                        comprobante: document.getElementById('comprobante').value,
+                        notas: document.getElementById('notas').value
+                    };
+                    
+                    // Modificar la función agregarAbono para que acepte el objeto completo
                     const resultado = await agregarAbono(ventaSeleccionada.id, montoAbono);
                     
+                    mostrarMensaje(resultado ? 'Abono registrado con éxito' : 'Error al registrar el abono', resultado ? 'exito' : 'error');
+                    
                     if (resultado) {
-                        mostrarMensaje('Abono registrado con éxito', 'exito');
                         document.getElementById('monto-abono').value = '';
-                    } else {
-                        mostrarMensaje('Error al registrar el abono', 'error');
+                        document.getElementById('comprobante').value = '';
+                        document.getElementById('notas').value = '';
+                        imprimirRecibo(ventaSeleccionada, montoAbono);
                     }
                 } catch (error) {
                     console.error('Error al registrar abono:', error);
-                    mostrarMensaje('Error al registrar el abono', 'error');
+                    mostrarMensaje('Error al registrar el abono: ' + error.message, 'error');
+                } finally {
+                    mostrarCargando(false);
                 }
             });
-            
+
             // Pagar total
             btnPagarTotal.addEventListener('click', async function() {
                 if (!ventaSeleccionada) {
                     mostrarMensaje('No hay venta seleccionada', 'error');
                     return;
                 }
-                
+
                 if (confirm(`¿Está seguro de marcar como pagada la venta de ${ventaSeleccionada.cliente}?`)) {
+                    mostrarCargando(true);
                     try {
                         const resultado = await marcarComoPagado(ventaSeleccionada.id);
-                        
+                        mostrarMensaje(resultado ? 'Venta marcada como pagada con éxito' : 'Error al marcar la venta como pagada', resultado ? 'exito' : 'error');
                         if (resultado) {
-                            mostrarMensaje('Venta marcada como pagada con éxito', 'exito');
                             detalleVenta.style.display = 'none';
                             ventaSeleccionada = null;
-                        } else {
-                            mostrarMensaje('Error al marcar la venta como pagada', 'error');
                         }
                     } catch (error) {
                         console.error('Error al marcar como pagado:', error);
-                        mostrarMensaje('Error al marcar la venta como pagada', 'error');
+                        mostrarMensaje('Error al marcar la venta como pagada: ' + error.message, 'error');
+                    } finally {
+                        mostrarCargando(false);
                     }
                 }
             });
-            
+
+            // Imprimir recibo
+            btnImprimir.addEventListener('click', () => {
+                const montoAbonoInput = document.getElementById('monto-abono').value;
+                if (ventaSeleccionada && montoAbonoInput) {
+                    imprimirRecibo(ventaSeleccionada, parseFloat(montoAbonoInput));
+                } else {
+                    mostrarMensaje('Complete los datos del abono primero', 'error');
+                }
+            });
+
             // Menú móvil
             const menuBtn = document.querySelector('.mobile-menu-btn');
             const menu = document.getElementById('menu');
-            
+
             menuBtn.addEventListener('click', function() {
                 menu.classList.toggle('show');
             });
-            
+
             // Función para mostrar ventas pendientes
             function mostrarVentasPendientes(ventas) {
                 const ventasPendientesBody = document.getElementById('ventas-pendientes-body');
                 
-                ventasPendientesBody.innerHTML = '';
-                
-                if (ventas.length === 0) {
+                if (!ventas || ventas.length === 0) {
                     ventasPendientesBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay ventas pendientes</td></tr>';
                     return;
                 }
                 
-                ventas.forEach(venta => {
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${venta.cliente}</td>
-                        <td>${venta.contacto}</td>
-                        <td>${new Date(venta.fecha).toLocaleDateString()}</td>
-                        <td>$${parseFloat(venta.valor).toLocaleString()}</td>
-                        <td class="saldo-pendiente">$${parseFloat(venta.saldo).toLocaleString()}</td>
-                        <td><span class="badge badge-warning">${venta.estado}</span></td>
-                        <td>
-                            <button class="btn-icon" onclick="verDetalleVenta('${venta.id}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
+                ventasPendientesBody.innerHTML = ventas.map(venta => {
+                    // Asegurarse de que los valores numéricos sean números
+                    const valor = parseFloat(venta.valor) || 0;
+                    const saldo = parseFloat(venta.saldo) || 0;
+                    
+                    return `
+                        <tr>
+                            <td>${venta.cliente || 'Sin nombre'}</td>
+                            <td>${venta.contacto || 'Sin contacto'}</td>
+                            <td>${venta.fecha ? new Date(venta.fecha).toLocaleDateString() : 'Fecha no disponible'}</td>
+                            <td>$${valor.toLocaleString()}</td>
+                            <td class="saldo-pendiente">$${saldo.toLocaleString()}</td>
+                            <td><span class="badge badge-warning">${venta.estado || 'Pendiente'}</span></td>
+                            <td>
+                                <button class="btn-icon" onclick="verDetalleVenta('${venta.id}')" aria-label="Ver detalle de venta">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
                     `;
-                    ventasPendientesBody.appendChild(fila);
-                });
+                }).join('');
             }
-            
+
             // Función para mostrar detalle de venta
             async function mostrarDetalleVenta(venta) {
                 const infoVenta = document.getElementById('info-venta');
                 const historialAbonos = document.getElementById('historial-abonos');
-                
+
+                // Asegurarse de que los valores numéricos sean números
+                const valor = parseFloat(venta.valor) || 0;
+                const saldo = parseFloat(venta.saldo) || 0;
+
                 // Mostrar información de la venta
                 infoVenta.innerHTML = `
-                    <p><strong>Cliente:</strong> ${venta.cliente}</p>
-                    <p><strong>Contacto:</strong> ${venta.contacto}</p>
-                    <p><strong>Fecha:</strong> ${new Date(venta.fecha).toLocaleDateString()}</p>
-                    <p><strong>Vendedor:</strong> ${venta.vendedor}</p>
-                    <p><strong>Revista:</strong> ${venta.revista || '-'}</p>
-                    <p><strong>Valor Total:</strong> $${parseFloat(venta.valor).toLocaleString()}</p>
-                    <p><strong>Saldo Pendiente:</strong> <span class="saldo-pendiente">$${parseFloat(venta.saldo).toLocaleString()}</span></p>
+                    <p><strong>Cliente:</strong> ${venta.cliente || 'Sin nombre'}</p>
+                    <p><strong>Contacto:</strong> ${venta.contacto || 'Sin contacto'}</p>
+                    <p><strong>Fecha de venta:</strong> ${venta.fecha ? new Date(venta.fecha).toLocaleDateString() : 'Fecha no disponible'}</p>
+                    <p><strong>Valor total:</strong> $${valor.toLocaleString()}</p>
+                    <p><strong>Saldo pendiente:</strong> $${saldo.toLocaleString()}</p>
                 `;
-                
+
+                document.getElementById('saldo-actual').textContent = saldo.toLocaleString();
+
                 // Mostrar historial de abonos
-                if (venta.abonos && venta.abonos.length > 0) {
-                    let abonosHTML = '<ul class="lista-abonos">';
-                    
-                    venta.abonos.forEach((abono, index) => {
-                        abonosHTML += `
-                            <li>
-                                <strong>Abono ${index + 1}:</strong> $${parseFloat(abono.monto).toLocaleString()} 
-                                <span style="color: #666;">(${new Date(abono.fecha).toLocaleDateString()})</span>
-                            </li>
+                if (venta.abonos && Array.isArray(venta.abonos) && venta.abonos.length > 0) {
+                    const abonosHTML = venta.abonos.map(abono => {
+                        // Asegurarse de que el monto sea un número
+                        const monto = parseFloat(abono.monto) || 0;
+                        
+                        return `
+                            <div class="abono-item">
+                                <p><strong>Fecha:</strong> ${abono.fecha ? new Date(abono.fecha).toLocaleDateString() : 'Fecha no disponible'}</p>
+                                <p><strong>Monto:</strong> $${monto.toLocaleString()}</p>
+                                <p><strong>Método de pago:</strong> ${abono.metodoPago || 'No especificado'}</p>
+                                ${abono.comprobante ? `<p><strong>Comprobante:</strong> ${abono.comprobante}</p>` : ''}
+                                ${abono.notas ? `<p><strong>Notas:</strong> ${abono.notas}</p>` : ''}
+                            </div>
                         `;
-                    });
+                    }).join('<hr>');
                     
-                    abonosHTML += '</ul>';
                     historialAbonos.innerHTML = abonosHTML;
                 } else {
-                    historialAbonos.innerHTML = '<p>No hay abonos registrados</p>';
+                    historialAbonos.innerHTML = '<p>No hay abonos registrados para esta venta.</p>';
                 }
-                
-                // Mostrar el panel de detalle
+
                 detalleVenta.style.display = 'block';
             }
-            
+
+            // Función para actualizar estadísticas
+            function actualizarEstadisticas(ventas) {
+                if (!ventas || !Array.isArray(ventas)) {
+                    console.error("No se recibieron ventas válidas para actualizar estadísticas");
+                    return;
+                }
+                
+                const ventasPendientes = ventas.filter(venta => 
+                    venta.estado === 'Pendiente' && parseFloat(venta.saldo) > 0
+                );
+                
+                const totalPendientes = ventasPendientes.length;
+                const totalPorCobrar = ventasPendientes.reduce((total, venta) => {
+                    const saldo = parseFloat(venta.saldo) || 0;
+                    return total + saldo;
+                }, 0);
+                
+                // Calcular abonos del día
+                const hoy = new Date().toISOString().split('T')[0];
+                let abonosHoy = 0;
+                
+                ventas.forEach(venta => {
+                    if (venta.abonos && Array.isArray(venta.abonos)) {
+                        venta.abonos.forEach(abono => {
+                            if (abono.fecha) {
+                                const fechaAbono = new Date(abono.fecha).toISOString().split('T')[0];
+                                if (fechaAbono === hoy) {
+                                    abonosHoy += parseFloat(abono.monto) || 0;
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                document.getElementById('total-pendientes').textContent = totalPendientes;
+                document.getElementById('total-por-cobrar').textContent = '$' + totalPorCobrar.toLocaleString();
+                document.getElementById('abonos-hoy').textContent = '$' + abonosHoy.toLocaleString();
+                
+                console.log("Estadísticas actualizadas:", {
+                    totalPendientes,
+                    totalPorCobrar,
+                    abonosHoy
+                });
+            }
+
             // Función para mostrar mensajes
             function mostrarMensaje(texto, tipo) {
-                mensaje.innerHTML = `<div class="mensaje ${tipo}"><i class="fas fa-${tipo === 'exito' ? 'check' : tipo === 'info' ? 'info' : 'exclamation'}-circle"></i> ${texto}</div>`;
+                mensaje.textContent = texto;
+                mensaje.className = 'mensaje';
+                mensaje.classList.add(`mensaje-${tipo}`);
+                mensaje.style.display = 'block';
                 
                 setTimeout(() => {
-                    mensaje.innerHTML = '';
-                }, 3000);
+                    mensaje.style.display = 'none';
+                }, 5000);
             }
-            
-            // Función para ver detalle de venta (disponible globalmente)
-            window.verDetalleVenta = async function(id) {
+
+            // Función para imprimir recibo
+            function imprimirRecibo(venta, montoAbono) {
+                const metodoPago = document.getElementById('metodo-pago').value;
+                const comprobante = document.getElementById('comprobante').value;
+                const fechaAbono = document.getElementById('fecha-abono').value;
+                const notas = document.getElementById('notas').value;
+                
+                // Asegurarse de que los valores numéricos sean números
+                const valor = parseFloat(venta.valor) || 0;
+                const saldo = parseFloat(venta.saldo) || 0;
+                montoAbono = parseFloat(montoAbono) || 0;
+                
+                const ventanaImpresion = window.open('', '_blank');
+                ventanaImpresion.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Recibo de Abono</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                margin: 0;
+                                padding: 20px;
+                                font-size: 14px;
+                            }
+                            .recibo {
+                                max-width: 300px;
+                                margin: 0 auto;
+                            }
+                            .header {
+                                text-align: center;
+                                margin-bottom: 20px;
+                            }
+                            .info-item {
+                                margin-bottom: 5px;
+                            }
+                            .total {
+                                margin-top: 15px;
+                                font-weight: bold;
+                                border-top: 1px solid #000;
+                                padding-top: 5px;
+                            }
+                            .footer {
+                                margin-top: 30px;
+                                text-align: center;
+                                font-size: 12px;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="recibo">
+                            <div class="header">
+                                <h2>RECIBO DE ABONO</h2>
+                                <p>Sistema de Gestión de Ventas</p>
+                            </div>
+                            
+                            <div class="info-item"><strong>Fecha:</strong> ${new Date(fechaAbono).toLocaleDateString()}</div>
+                            <div class="info-item"><strong>Cliente:</strong> ${venta.cliente || 'Sin nombre'}</div>
+                            <div class="info-item"><strong>Contacto:</strong> ${venta.contacto || 'Sin contacto'}</div>
+                            <div class="info-item"><strong>Fecha de venta:</strong> ${venta.fecha ? new Date(venta.fecha).toLocaleDateString() : 'Fecha no disponible'}</div>
+                            <div class="info-item"><strong>Valor total de la venta:</strong> $${valor.toLocaleString()}</div>
+                            <div class="info-item"><strong>Saldo anterior:</strong> $${saldo.toLocaleString()}</div>
+                            <div class="info-item"><strong>Monto abonado:</strong> $${montoAbono.toLocaleString()}</div>
+                            <div class="info-item"><strong>Método de pago:</strong> ${metodoPago}</div>
+                            ${comprobante ? `<div class="info-item"><strong>Comprobante:</strong> ${comprobante}</div>` : ''}
+                            <div class="total">Saldo pendiente: $${(saldo - montoAbono).toLocaleString()}</div>
+                            
+                            ${notas ? `<div class="info-item"><strong>Notas:</strong> ${notas}</div>` : ''}
+                            
+                            <div class="footer">
+                                <p>¡Gracias por su pago!</p>
+                                <p>Este documento es un comprobante de pago.</p>
+                            </div>
+                        </div>
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(function() {
+                                    window.close();
+                                }, 500);
+                            }
+
+                `);
+                ventanaImpresion.document.close();
+            }
+
+            // Exponer la función verDetalleVenta globalmente
+            window.verDetalleVenta = async function(ventaId) {
+                mostrarCargando(true);
                 try {
-                    const venta = await buscarVenta(id);
-                    
+                    const venta = await buscarVenta(ventaId);
                     if (venta) {
                         ventaSeleccionada = venta;
                         mostrarDetalleVenta(venta);
@@ -367,26 +722,11 @@
                     }
                 } catch (error) {
                     console.error('Error al obtener detalle de venta:', error);
-                    mostrarMensaje('Error al obtener detalle de venta', 'error');
+                    mostrarMensaje('Error al obtener detalle de venta: ' + error.message, 'error');
+                } finally {
+                    mostrarCargando(false);
                 }
             };
-            
-            // Cargar ventas pendientes al inicio
-            async function cargarVentasPendientes() {
-                try {
-                    const ventas = await obtenerVentas();
-                    const ventasPendientes = ventas.filter(venta => 
-                        venta.estado === 'Pendiente' && venta.saldo > 0
-                    );
-                    mostrarVentasPendientes(ventasPendientes);
-                } catch (error) {
-                    console.error('Error al cargar ventas pendientes:', error);
-                    mostrarMensaje('Error al cargar ventas pendientes', 'error');
-                }
-            }
-            
-            // Cargar ventas pendientes al iniciar
-            cargarVentasPendientes();
         });
     </script>
 </body>
