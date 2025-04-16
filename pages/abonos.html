@@ -21,7 +21,7 @@
             align-items: center;
             z-index: 1000;
         }
-        
+
         .loading-spinner {
             width: 50px;
             height: 50px;
@@ -78,54 +78,93 @@
             background: var(--nequi-purple);
             color: #fff;
         }
-        
+
         .abono-item {
             background-color: #f9f9f9;
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 10px;
         }
-        
+
         .badge {
             padding: 5px 10px;
             border-radius: 15px;
             font-size: 0.8rem;
             font-weight: 500;
         }
-        
+
         .badge-warning {
             background-color: #ffc107;
             color: #212529;
         }
-        
+
         .badge-success {
             background-color: #28a745;
             color: white;
         }
-        
+
         .mensaje {
             padding: 10px 15px;
             margin: 10px 0;
             border-radius: 5px;
             display: none;
         }
-        
+
         .mensaje-error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        
+
         .mensaje-exito {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        
+
         .mensaje-info {
             background-color: #d1ecf1;
             color: #0c5460;
             border: 1px solid #bee5eb;
+        }
+
+        .sugerencias-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .sugerencias {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .sugerencia-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .sugerencia-item:hover, .sugerencia-item.active {
+            background-color: #f9f9f9;
+        }
+
+        .sugerencia-item:last-child {
+            border-bottom: none;
+        }
+        
+        .btn-search {
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -185,8 +224,11 @@
             <h2>Buscar Ventas Pendientes</h2>
             <div class="form-group">
                 <label for="buscar-cliente">Buscar por Cliente:</label>
-                <input type="text" id="buscar-cliente" placeholder="Nombre del cliente..." aria-label="Buscar por cliente">
-                <button id="btn-buscar" style="margin-top: 1rem;" aria-label="Buscar">
+                <div class="sugerencias-container">
+                    <input type="text" id="buscar-cliente" placeholder="Nombre del cliente">
+                    <div id="sugerencias-clientes" class="sugerencias"></div>
+                </div>
+                <button id="btn-buscar" type="button" class="btn-search" aria-label="Buscar">
                     <i class="fas fa-search"></i> Buscar
                 </button>
             </div>
@@ -291,14 +333,14 @@
             <div>
                 <h3>Contacto</h3>
                 <ul>
-                    <li><i class="fas fa-envelope"></i> info@sistemaventas.com</li>
+                    <li><i class="fas fa-envelope"></i> nicolasmonroy3004@hotmail.com</li>
                     <li><i class="fas fa-phone"></i> +57 314 272 8525</li>
                 </ul>
             </div>
         </div>
         <div class="copyright">
             <div class="container">
-                <p>&copy; 2023 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
+                <p>&copy; 2025 Sistema de Gestión de Ventas. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
@@ -308,6 +350,7 @@
             obtenerVentas,
             escucharVentas,
             buscarVentasPorCliente,
+            buscarClientesPorNombre,
             buscarVenta,
             agregarAbono,
             marcarComoPagado
@@ -316,6 +359,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const mensaje = document.getElementById('mensaje');
             const buscarClienteInput = document.getElementById('buscar-cliente');
+            const sugerenciasClientes = document.getElementById('sugerencias-clientes');
             const btnBuscar = document.getElementById('btn-buscar');
             const detalleVenta = document.getElementById('detalle-venta');
             const formAbono = document.getElementById('form-abono');
@@ -335,6 +379,9 @@
             // Variable para almacenar la venta seleccionada actualmente
             let ventaSeleccionada = null;
 
+            // Lista de clientes pendientes
+            let clientesPendientes = [];
+
             // Escuchar cambios en ventas para actualizar la lista
             const unsubscribe = escucharVentas(async function(ventas) {
                 console.log("Ventas recibidas:", ventas);
@@ -343,6 +390,15 @@
                     venta.estado === 'Pendiente' && parseFloat(venta.saldo) > 0
                 );
                 console.log("Ventas pendientes:", ventasPendientes);
+
+                // Actualizar lista de clientes pendientes para sugerencias
+                clientesPendientes = ventasPendientes
+                    .map(venta => venta.cliente)
+                    .filter((cliente, index, self) =>
+                        cliente && // Asegurar que no sea null o undefined
+                        self.indexOf(cliente) === index // Eliminar duplicados
+                    );
+
                 mostrarVentasPendientes(ventasPendientes);
 
                 if (ventaSeleccionada) {
@@ -357,39 +413,237 @@
                 }
             });
 
-            // Buscar ventas pendientes por cliente
-            btnBuscar.addEventListener('click', async function() {
-                const nombreCliente = buscarClienteInput.value.trim();
+            // Función para realizar la búsqueda
+            async function realizarBusqueda(nombreCliente) {
                 mostrarMensaje('Buscando ventas...', 'info');
                 mostrarCargando(true);
 
                 try {
-                    let resultado;
-                    if (nombreCliente) {
-                        resultado = await buscarVentasPorCliente(nombreCliente);
-                        if (resultado.error) {
-                            throw new Error(resultado.error);
+                    console.log("Iniciando búsqueda para:", nombreCliente);
+                    let ventas = [];
+                    
+                    // Obtener todas las ventas primero (para tener un respaldo si la búsqueda específica falla)
+                    const todasLasVentas = await obtenerVentas();
+                    console.log("Total de ventas en sistema:", todasLasVentas.length);
+                    
+                    // Si hay un nombre de cliente, intentamos la búsqueda específica
+                    if (nombreCliente && nombreCliente.trim() !== '') {
+                        try {
+                            console.log("Realizando búsqueda específica para:", nombreCliente);
+                            const resultado = await buscarVentasPorCliente(nombreCliente);
+                            
+                            if (resultado && !resultado.error && resultado.ventas && resultado.ventas.length > 0) {
+                                ventas = resultado.ventas;
+                                console.log("Ventas encontradas por API:", ventas.length);
+                            } else {
+                                console.warn("La API de búsqueda no devolvió resultados, usando búsqueda local");
+                                // Si la API no devuelve resultados, hacemos búsqueda local
+                                ventas = todasLasVentas.filter(venta => 
+                                    venta.cliente && 
+                                    venta.cliente.toLowerCase().includes(nombreCliente.toLowerCase())
+                                );
+                                console.log("Ventas encontradas por filtrado local:", ventas.length);
+                            }
+                        } catch (error) {
+                            console.error("Error en búsqueda específica:", error);
+                            // En caso de error, usamos búsqueda local
+                            ventas = todasLasVentas.filter(venta => 
+                                venta.cliente && 
+                                venta.cliente.toLowerCase().includes(nombreCliente.toLowerCase())
+                            );
+                            console.log("Ventas encontradas por filtrado local tras error:", ventas.length);
                         }
-                        var ventas = resultado.ventas || [];
                     } else {
-                        ventas = await obtenerVentas();
+                        // Si no hay nombre, usamos todas las ventas
+                        ventas = todasLasVentas;
+                        console.log("Usando todas las ventas (sin filtro):", ventas.length);
                     }
 
-                    const ventasPendientes = ventas.filter(venta =>
-                        venta.estado === 'Pendiente' && parseFloat(venta.saldo) > 0
-                    );
+                    // Filtrar ventas pendientes con saldo > 0
+                    const ventasPendientes = ventas.filter(venta => {
+                        // Verificar si el cliente coincide con la búsqueda
+                        const clienteCoincide = !nombreCliente || 
+                                              (venta.cliente && 
+                                               venta.cliente.toLowerCase().includes(nombreCliente.toLowerCase()));
+                        // Verificar si la venta está pendiente
+                        const esPendiente = venta.estado === 'Pendiente' || !venta.estado;
+                        // Verificar si tiene saldo pendiente
+                        const tieneSaldo = parseFloat(venta.saldo) > 0;
+                        
+                        return clienteCoincide && esPendiente && tieneSaldo;
+                    });
 
+                    console.log("Ventas pendientes filtradas:", ventasPendientes.length);
+                    
+                    if (ventasPendientes.length > 0) {
+                        console.log("Primera venta encontrada:", ventasPendientes[0]);
+                        
+                        // Calcular el total de saldos pendientes
+                        const totalSaldosPendientes = ventasPendientes.reduce((total, venta) => {
+                            return total + parseFloat(venta.saldo || 0);
+                        }, 0);
+                        
+                        // Mostrar el total en un mensaje
+                        if (nombreCliente && ventasPendientes.length > 0) {
+                            const mensajeTotal = document.getElementById('mensaje');
+                            mensajeTotal.innerHTML = `<strong>Total pendiente por abonar para ${nombreCliente}:</strong> $${totalSaldosPendientes.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                            mensajeTotal.className = 'mensaje mensaje-info';
+                            mensajeTotal.style.display = 'block';
+                        }
+                    }
+                    
+                    // Actualizar la tabla con los resultados
                     mostrarVentasPendientes(ventasPendientes);
 
                     if (ventasPendientes.length === 0) {
                         mostrarMensaje(`No se encontraron ventas pendientes para "${nombreCliente || 'ningún cliente'}"`, 'info');
-                    }
+                    } 
+                    // Eliminamos la parte que oculta el mensaje con el total
+                    // else {
+                    //     // Limpiar mensaje si hay resultados
+                    //     document.getElementById('mensaje').style.display = 'none';
+                    // }
                 } catch (error) {
                     console.error('Error al buscar ventas:', error);
                     mostrarMensaje('Error al buscar ventas pendientes: ' + error.message, 'error');
                 } finally {
                     mostrarCargando(false);
                 }
+            }
+
+            // Funciones para manejar sugerencias
+            async function mostrarSugerencias(filtro) {
+                if (!filtro || filtro.length < 2) {
+                    ocultarSugerencias();
+                    return;
+                }
+
+                filtro = filtro.toLowerCase();
+                mostrarCargando(true);
+                
+                try {
+                    // Buscar clientes en la base de datos que coincidan con el filtro
+                    const clientesEncontrados = await buscarClientesPorNombre(filtro);
+                    
+                    if (clientesEncontrados && clientesEncontrados.length > 0) {
+                        // Extraer solo los nombres de clientes
+                        const nombresClientes = clientesEncontrados.map(c => c.nombre);
+                        // Eliminar duplicados
+                        const clientesUnicos = [...new Set(nombresClientes)];
+                        // Actualizar la lista de clientes pendientes
+                        clientesPendientes = clientesUnicos;
+                    } else if (clientesPendientes.length === 0) {
+                        // Si no hay resultados de la búsqueda y no tenemos clientes en caché
+                        // intentar obtenerlos de todas las ventas como respaldo
+                        const ventas = await obtenerVentas();
+                        clientesPendientes = ventas
+                            .filter(venta => venta.cliente) // Asegurar que hay cliente
+                            .map(venta => venta.cliente)
+                            .filter((cliente, index, self) => self.indexOf(cliente) === index); // Eliminar duplicados
+                    }
+                    
+                    procesarSugerencias(filtro);
+                } catch (error) {
+                    console.error("Error al obtener clientes para sugerencias:", error);
+                } finally {
+                    mostrarCargando(false);
+                }
+            }
+
+            function procesarSugerencias(filtro) {
+                const clientesFiltrados = clientesPendientes
+                    .filter(cliente => cliente && cliente.toLowerCase().includes(filtro))
+                    .slice(0, 10); // Limitar a 10 sugerencias
+
+                if (clientesFiltrados.length === 0) {
+                    ocultarSugerencias();
+                    return;
+                }
+
+                const sugerenciasHTML = clientesFiltrados.map(cliente =>
+                    `<div class="sugerencia-item" data-cliente="${cliente}">${cliente}</div>`
+                ).join('');
+
+                sugerenciasClientes.innerHTML = sugerenciasHTML;
+                sugerenciasClientes.style.display = 'block';
+
+                // Agregar event listeners a los items de sugerencia
+                const items = sugerenciasClientes.querySelectorAll('.sugerencia-item');
+                items.forEach(item => {
+                    item.addEventListener('click', function() {
+                        const nombreCliente = this.dataset.cliente;
+                        buscarClienteInput.value = nombreCliente;
+                        ocultarSugerencias();
+                        realizarBusqueda(nombreCliente);
+                    });
+                });
+            }
+
+            function ocultarSugerencias() {
+                sugerenciasClientes.style.display = 'none';
+            }
+
+            // Event listeners para el input de búsqueda
+            buscarClienteInput.addEventListener('input', function() {
+                const valor = this.value.trim();
+                mostrarSugerencias(valor);
+            });
+
+            buscarClienteInput.addEventListener('focus', function() {
+                const valor = this.value.trim();
+                if (valor.length >= 2) {
+                    mostrarSugerencias(valor);
+                }
+            });
+
+            buscarClienteInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    ocultarSugerencias();
+                } else if (e.key === 'Enter') {
+                    ocultarSugerencias();
+                    realizarBusqueda(this.value.trim());
+                } else if (e.key === 'ArrowDown' && sugerenciasClientes.style.display === 'block') {
+                    // Navegar por las sugerencias con flecha abajo
+                    const items = sugerenciasClientes.querySelectorAll('.sugerencia-item');
+                    const activeItem = sugerenciasClientes.querySelector('.sugerencia-item.active');
+                    if (!activeItem && items.length > 0) {
+                        items[0].classList.add('active');
+                    } else if (activeItem) {
+                        const nextItem = activeItem.nextElementSibling;
+                        if (nextItem) {
+                            activeItem.classList.remove('active');
+                            nextItem.classList.add('active');
+                        }
+                    }
+                    e.preventDefault();
+                } else if (e.key === 'ArrowUp' && sugerenciasClientes.style.display === 'block') {
+                    // Navegar por las sugerencias con flecha arriba
+                    const items = sugerenciasClientes.querySelectorAll('.sugerencia-item');
+                    const activeItem = sugerenciasClientes.querySelector('.sugerencia-item.active');
+
+                    if (activeItem) {
+                        const prevItem = activeItem.previousElementSibling;
+                        if (prevItem) {
+                            activeItem.classList.remove('active');
+                            prevItem.classList.add('active');
+                        }
+                    }
+                    e.preventDefault();
+                }
+            });
+
+            // Cerrar sugerencias cuando se hace clic fuera
+            document.addEventListener('click', function(e) {
+                if (!sugerenciasClientes.contains(e.target) && e.target !== buscarClienteInput) {
+                    ocultarSugerencias();
+                }
+            });
+
+            // Mantener el botón de búsqueda
+            btnBuscar.addEventListener('click', function() {
+                const nombreCliente = buscarClienteInput.value.trim();
+                ocultarSugerencias();
+                realizarBusqueda(nombreCliente);
             });
 
             // Registrar abono
@@ -426,12 +680,12 @@
                         comprobante: document.getElementById('comprobante').value,
                         notas: document.getElementById('notas').value
                     };
-                    
-                    // Modificar la función agregarAbono para que acepte el objeto completo
-                    const resultado = await agregarAbono(ventaSeleccionada.id, montoAbono);
-                    
+
+                    // Pasar el objeto completo de abono a la función
+                    const resultado = await agregarAbono(ventaSeleccionada.id, nuevoAbono);
+
                     mostrarMensaje(resultado ? 'Abono registrado con éxito' : 'Error al registrar el abono', resultado ? 'exito' : 'error');
-                    
+
                     if (resultado) {
                         document.getElementById('monto-abono').value = '';
                         document.getElementById('comprobante').value = '';
@@ -497,12 +751,16 @@
                     ventasPendientesBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay ventas pendientes</td></tr>';
                     return;
                 }
+
+                console.log(`Mostrando ${ventas.length} ventas pendientes`);
                 
-                ventasPendientesBody.innerHTML = ventas.map(venta => {
+                ventasPendientesBody.innerHTML = ventas.map((venta, index) => {
                     // Asegurarse de que los valores numéricos sean números
                     const valor = parseFloat(venta.valor) || 0;
                     const saldo = parseFloat(venta.saldo) || 0;
                     
+                    console.log(`Preparando venta #${index+1}: Cliente=${venta.cliente}, Saldo=${saldo}`);
+
                     return `
                         <tr>
                             <td>${venta.cliente || 'Sin nombre'}</td>
@@ -512,7 +770,7 @@
                             <td class="saldo-pendiente">$${saldo.toLocaleString()}</td>
                             <td><span class="badge badge-warning">${venta.estado || 'Pendiente'}</span></td>
                             <td>
-                                <button class="btn-icon" onclick="verDetalleVenta('${venta.id}')" aria-label="Ver detalle de venta">
+                                <button class="btn-icon btn-ver-detalle" data-venta-id="${venta.id}" aria-label="Ver detalle de venta">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </td>
@@ -538,7 +796,6 @@
                     <p><strong>Valor total:</strong> $${valor.toLocaleString()}</p>
                     <p><strong>Saldo pendiente:</strong> $${saldo.toLocaleString()}</p>
                 `;
-
                 document.getElementById('saldo-actual').textContent = saldo.toLocaleString();
 
                 // Mostrar historial de abonos
@@ -546,7 +803,7 @@
                     const abonosHTML = venta.abonos.map(abono => {
                         // Asegurarse de que el monto sea un número
                         const monto = parseFloat(abono.monto) || 0;
-                        
+
                         return `
                             <div class="abono-item">
                                 <p><strong>Fecha:</strong> ${abono.fecha ? new Date(abono.fecha).toLocaleDateString() : 'Fecha no disponible'}</p>
@@ -557,7 +814,6 @@
                             </div>
                         `;
                     }).join('<hr>');
-                    
                     historialAbonos.innerHTML = abonosHTML;
                 } else {
                     historialAbonos.innerHTML = '<p>No hay abonos registrados para esta venta.</p>';
@@ -572,21 +828,20 @@
                     console.error("No se recibieron ventas válidas para actualizar estadísticas");
                     return;
                 }
-                
-                const ventasPendientes = ventas.filter(venta => 
+
+                const ventasPendientes = ventas.filter(venta =>
                     venta.estado === 'Pendiente' && parseFloat(venta.saldo) > 0
                 );
-                
                 const totalPendientes = ventasPendientes.length;
                 const totalPorCobrar = ventasPendientes.reduce((total, venta) => {
                     const saldo = parseFloat(venta.saldo) || 0;
                     return total + saldo;
                 }, 0);
-                
+
                 // Calcular abonos del día
                 const hoy = new Date().toISOString().split('T')[0];
                 let abonosHoy = 0;
-                
+
                 ventas.forEach(venta => {
                     if (venta.abonos && Array.isArray(venta.abonos)) {
                         venta.abonos.forEach(abono => {
@@ -599,11 +854,11 @@
                         });
                     }
                 });
-                
+
                 document.getElementById('total-pendientes').textContent = totalPendientes;
                 document.getElementById('total-por-cobrar').textContent = '$' + totalPorCobrar.toLocaleString();
                 document.getElementById('abonos-hoy').textContent = '$' + abonosHoy.toLocaleString();
-                
+
                 console.log("Estadísticas actualizadas:", {
                     totalPendientes,
                     totalPorCobrar,
@@ -611,13 +866,13 @@
                 });
             }
 
-            // Función para mostrar mensajes
+            // Función para mostrar mensaje
             function mostrarMensaje(texto, tipo) {
                 mensaje.textContent = texto;
                 mensaje.className = 'mensaje';
                 mensaje.classList.add(`mensaje-${tipo}`);
                 mensaje.style.display = 'block';
-                
+
                 setTimeout(() => {
                     mensaje.style.display = 'none';
                 }, 5000);
@@ -629,12 +884,12 @@
                 const comprobante = document.getElementById('comprobante').value;
                 const fechaAbono = document.getElementById('fecha-abono').value;
                 const notas = document.getElementById('notas').value;
-                
+
                 // Asegurarse de que los valores numéricos sean números
                 const valor = parseFloat(venta.valor) || 0;
                 const saldo = parseFloat(venta.saldo) || 0;
                 montoAbono = parseFloat(montoAbono) || 0;
-                
+
                 const ventanaImpresion = window.open('', '_blank');
                 ventanaImpresion.document.write(`
                     <!DOCTYPE html>
@@ -678,7 +933,6 @@
                                 <h2>RECIBO DE ABONO</h2>
                                 <p>Sistema de Gestión de Ventas</p>
                             </div>
-                            
                             <div class="info-item"><strong>Fecha:</strong> ${new Date(fechaAbono).toLocaleDateString()}</div>
                             <div class="info-item"><strong>Cliente:</strong> ${venta.cliente || 'Sin nombre'}</div>
                             <div class="info-item"><strong>Contacto:</strong> ${venta.contacto || 'Sin contacto'}</div>
@@ -689,9 +943,9 @@
                             <div class="info-item"><strong>Método de pago:</strong> ${metodoPago}</div>
                             ${comprobante ? `<div class="info-item"><strong>Comprobante:</strong> ${comprobante}</div>` : ''}
                             <div class="total">Saldo pendiente: $${(saldo - montoAbono).toLocaleString()}</div>
-                            
+
                             ${notas ? `<div class="info-item"><strong>Notas:</strong> ${notas}</div>` : ''}
-                            
+
                             <div class="footer">
                                 <p>¡Gracias por su pago!</p>
                                 <p>Este documento es un comprobante de pago.</p>
@@ -704,8 +958,9 @@
                                     window.close();
                                 }, 500);
                             }
-
+                        
                 `);
+
                 ventanaImpresion.document.close();
             }
 
@@ -727,6 +982,9 @@
                     mostrarCargando(false);
                 }
             };
+            
+            // Al cargar la página, buscar todas las ventas pendientes
+            realizarBusqueda('');
         });
     </script>
 </body>
