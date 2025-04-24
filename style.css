@@ -582,6 +582,30 @@ nav a.activo::after {
     .hero h1 {
         font-size: 2.5rem;
     }
+    
+    /* Ajustes para cards y grids */
+    .card-grid, .dashboard-stats {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    /* Ajustes para tablas */
+    .table-responsive {
+        margin: 0 -1rem;
+        padding: 0 1rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ajustes para formularios */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    input, select, textarea {
+        padding: 0.8rem;
+        font-size: 16px; /* Evita zoom en iOS */
+    }
 }
 
 @media (max-width: 768px) {
@@ -595,14 +619,26 @@ nav a.activo::after {
         width: 100%;
         text-align: center;
         display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: var(--nequi-white);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 1000;
     }
     
     nav ul.show {
         display: flex;
     }
     
-    nav a {
-        padding: 1rem 0;
+    nav ul li {
+        width: 100%;
+        border-top: 1px solid var(--nequi-light-gray);
+    }
+    
+    nav ul li a {
+        padding: 1rem;
+        text-align: left;
     }
     
     .mobile-menu-btn {
@@ -610,6 +646,10 @@ nav a.activo::after {
         position: absolute;
         right: 1rem;
         top: 1rem;
+    }
+    
+    h1 {
+        font-size: 2rem;
     }
     
     .hero h1 {
@@ -636,5 +676,63 @@ nav a.activo::after {
     
     #montoAbono {
         width: 100%;
+    }
+    
+    /* Ajustes para contenido */
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* Ajustes para botones */
+    button, .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-icon {
+        width: auto;
+    }
+    
+    /* Ajustes para modales */
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Ajustes para móviles pequeños */
+    .stat-card, .resumen-card {
+        padding: 1rem;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .filtros-container {
+        flex-direction: column;
+    }
+    
+    .filtros-container .form-group {
+        width: 100%;
+    }
+    
+    /* Ajustar tamaño de iconos */
+    .stat-card .icon,
+    .resumen-card .icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    /* Ajustar espaciado en tablas */
+    td, th {
+        padding: 0.5rem;
+        font-size: 0.9rem;
     }
 }
