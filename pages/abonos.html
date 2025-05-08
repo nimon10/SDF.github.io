@@ -51,6 +51,49 @@
             text-align: center;
         }
 
+        #detalle-venta {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-width: 90%;
+            width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--nequi-dark-gray);
+            padding: 0.5rem;
+        }
+
         .stat-card .icon {
             font-size: 2rem;
             color: var(--nequi-purple);
@@ -258,7 +301,14 @@
             </div>
         </div>
 
+        <div class="modal-overlay" id="modal-overlay"></div>
         <div class="card" id="detalle-venta" style="display: none;">
+            <div class="modal-header">
+                <h2>Detalle de Venta</h2>
+                <button class="close-modal" id="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <h2>Detalle de Venta</h2>
             <div id="info-venta">
                 <!-- Aquí se cargará la información de la venta seleccionada -->
@@ -357,6 +407,19 @@
         } from '../scripts/script.js';
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Configurar el cierre del modal
+            document.getElementById('close-modal').addEventListener('click', function() {
+                detalleVenta.style.display = 'none';
+                document.getElementById('modal-overlay').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+
+            document.getElementById('modal-overlay').addEventListener('click', function() {
+                detalleVenta.style.display = 'none';
+                this.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+
             const mensaje = document.getElementById('mensaje');
             const buscarClienteInput = document.getElementById('buscar-cliente');
             const sugerenciasClientes = document.getElementById('sugerencias-clientes');
@@ -412,6 +475,28 @@
                     }
                 }
             });
+
+            // Función para ver detalle de venta
+            async function verDetalleVenta(ventaId) {
+                mostrarCargando(true);
+                try {
+                    const venta = await buscarVenta(ventaId);
+                    if (venta) {
+                        ventaSeleccionada = venta;
+                        mostrarDetalleVenta(venta);
+                        detalleVenta.style.display = 'block';
+                        document.getElementById('modal-overlay').style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        mostrarMensaje('No se encontró la venta seleccionada', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error al obtener detalle de venta:', error);
+                    mostrarMensaje('Error al obtener detalle de venta', 'error');
+                } finally {
+                    mostrarCargando(false);
+                }
+            }
 
             // Función para realizar la búsqueda
             async function realizarBusqueda(nombreCliente) {
@@ -770,7 +855,7 @@
                             <td class="saldo-pendiente">$${saldo.toLocaleString()}</td>
                             <td><span class="badge badge-warning">${venta.estado || 'Pendiente'}</span></td>
                             <td>
-                                <button class="btn-icon btn-ver-detalle" data-venta-id="${venta.id}" aria-label="Ver detalle de venta">
+                                <button class="btn-icon btn-ver-detalle" onclick="verDetalleVenta('${venta.id}')" aria-label="Ver detalle de venta">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </td>

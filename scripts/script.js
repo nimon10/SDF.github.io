@@ -154,7 +154,7 @@ async function buscarVenta(idVenta) {
 }
 
 // ✅ Agregar un abono a una venta específica
-async function agregarAbono(idVenta, montoAbono) {
+async function agregarAbono(idVenta, datosAbono) {
     try {
         // Obtener la venta actual
         const docRef = doc(db, "ventas", idVenta);
@@ -168,7 +168,7 @@ async function agregarAbono(idVenta, montoAbono) {
         const venta = docSnap.data();
         
         // Validar que el monto del abono sea válido
-        montoAbono = parseFloat(montoAbono);
+        const montoAbono = parseFloat(datosAbono.monto);
         if (isNaN(montoAbono) || montoAbono <= 0) {
             console.error("Monto de abono inválido");
             return false;
@@ -180,15 +180,18 @@ async function agregarAbono(idVenta, montoAbono) {
             return false;
         }
         
-        // Crear el nuevo abono
+        // Crear el nuevo abono con todos los datos
         const nuevoAbono = {
             monto: montoAbono,
-            fecha: new Date().toISOString().split("T")[0]
+            fecha: datosAbono.fecha || new Date().toISOString().split("T")[0],
+            metodoPago: datosAbono.metodoPago || 'efectivo',
+            comprobante: datosAbono.comprobante || '',
+            notas: datosAbono.notas || ''
         };
         
         // Actualizar los abonos y el saldo
         const abonos = [...(venta.abonos || []), nuevoAbono];
-        const totalAbonado = abonos.reduce((total, abono) => total + abono.monto, 0);
+        const totalAbonado = abonos.reduce((total, abono) => total + parseFloat(abono.monto), 0);
         const saldoRestante = parseFloat(venta.valor) - totalAbonado;
         const estado = saldoRestante <= 0 ? "Pagado" : "Pendiente";
         
@@ -198,6 +201,8 @@ async function agregarAbono(idVenta, montoAbono) {
             saldo: saldoRestante,
             estado: estado
         });
+        
+        return true;
         
         console.log("Abono agregado:", nuevoAbono);
         return true;
